@@ -15,5 +15,5 @@ func main() {
 }
 
 func Hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello team!")
+	fmt.Fprintf(w, "Hello team! Auth service stage")
 }
