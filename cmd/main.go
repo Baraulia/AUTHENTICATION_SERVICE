@@ -2,10 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"log"
+	"net/http"
 )
 
 func main() {
-	fmt.Println("Hello team!")
-	logrus.Info("Hi")
+	http.HandleFunc("/", Hello)
+	err := http.ListenAndServe(":9000", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+}
+
+func Hello(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello team!")
 }
