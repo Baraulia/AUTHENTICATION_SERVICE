@@ -1,0 +1,33 @@
+
+APP_DB_USERNAME: ''
+APP_DB_PASSWORD: ''
+APP_DB_NAME: ''
+APP_DB_HOST: ''
+APP_DB_PORT: '5432'
+
+PORT: '8080'
+
+
+#listen:
+#  type: "port"
+#  port: "8000"
+#  bind_ip: "0.0.0.0"
+#
+#db:
+#  host: "localhost"
+#  port: "5436"
+#  username: "baraulia"
+#  dbname: "baraulia"
+#  password: "qwerty"
+#  sslmode: "disable"
+#
+#mail:
+#  from: "bgmebel.by@yandex.ru"
+#  password: "Bar2240458"
+#  smtpHost: "smtp.yandex.ru"
+#  smtpPort: "587"
+#  subject: "Super Library"
+#
+#profit_book:
+#  profitability: 1.3
+#  max_rental_number: 100
