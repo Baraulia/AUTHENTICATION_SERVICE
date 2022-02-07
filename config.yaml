@@ -1,8 +1,8 @@
 
-APP_DB_USERNAME: ''
-APP_DB_PASSWORD: ''
-APP_DB_NAME: ''
-APP_DB_HOST: ''
+APP_DB_USERNAME: 'postgres'
+APP_DB_PASSWORD: 'secret'
+APP_DB_NAME: 'postgres'
+APP_DB_HOST: 'localhost'
 APP_DB_PORT: '5432'
 
 PORT: '8080'
