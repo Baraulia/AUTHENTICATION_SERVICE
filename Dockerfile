@@ -13,7 +13,7 @@ WORKDIR /root/
 COPY --from=0 /github.com/Baraulia/AUTHENTICATION_SERVICE/.bin/service .
 COPY --from=0 /github.com/Baraulia/AUTHENTICATION_SERVICE/configs configs/
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["./service"]
 
