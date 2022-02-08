@@ -12,7 +12,6 @@ env:
   IMAGE_NAME: "auth-service"
   CONTAINER_NAME: "auth-service-stage"
 
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -83,6 +82,7 @@ jobs:
             export API_SERVER_PORT=${{ secrets.API_SERVER_PORT }}
             
             # Run a new container from a new image
-            docker run -d --restart always \
+            docker run -e AUTH_SERVER_URL -e DB_PORT -e DB_USER -e DB_PASSWORD -e HOST -e DB_DATABASE \
+            -e DB_SSL_MODE -e API_SERVER_PORT -d --restart always \
             --publish 8080:8080 --name $(echo $CONTAINER_NAME) \
             $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
