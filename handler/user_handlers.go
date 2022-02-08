@@ -1,20 +1,11 @@
-package service
+package handler
 
 import (
-	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 )
-
-type UserService struct {
-	repo   repository.Repository
-	logger logging.Logger
-}
-
-func NewUserService(repo repository.Repository, logger logging.Logger) *UserService {
-	return &UserService{repo: repo, logger: logger}
-}
 
 // getUserByID godoc
 // @Summary show master user by id
@@ -29,13 +20,26 @@ func NewUserService(repo repository.Repository, logger logging.Logger) *UserServ
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [get]
-
-func (u *UserService) GetUser(id int) (*model.User, error) {
-	user, err := u.repo.GetUserByID(id)
+func (h *Handler) getUser(c *gin.Context) {
+	var user *model.User
+	paramID := c.Param("id")
+	varID, err := strconv.ParseInt(paramID, 10, 0)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
-	return user, nil
+
+	user, err = h.service.GetUser(int(varID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if (model.User{}) == *user { //Непонятная проверка
+		c.JSON(http.StatusNotFound, user)
+	} else {
+		c.JSON(http.StatusOK, user)
+	}
 }
 
 // getUsers godoc
@@ -50,12 +54,15 @@ func (u *UserService) GetUser(id int) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [get]
-func (u *UserService) GetUsers() ([]model.User, error) {
-	users, err := u.repo.GetUserAll()
+func (h *Handler) getUsers(c *gin.Context) {
+	users, err := h.service.GetUsers()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		return
 	}
-	return users, nil
+
+	c.JSON(http.StatusOK, users)
+
 }
 
 // createUser godoc
@@ -71,12 +78,22 @@ func (u *UserService) GetUsers() ([]model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [post]
-func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
-	resUser, err := u.repo.CreateUser(user)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+func (h *Handler) createUser(c *gin.Context) {
+
+	var user *model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
+		return
 	}
-	return resUser, nil
+
+	user, err := h.service.CreateUser(user)
+	if err != nil {
+		c.JSON(http.StatusConflict, gin.H{"message": err})
+		return
+	}
+
+	c.JSON(http.StatusCreated, user)
 }
 
 // updateUser godoc
@@ -92,12 +109,23 @@ func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [put]
-func (u *UserService) UpdateUser(id int) (*model.User, error) {
-	user, err := u.repo.UpdateUser(id)
-	if err != nil {
-		return nil, err
+func (h *Handler) updateUser(c *gin.Context) { //todo непонятно что делает этот метод
+	var user model.User
+	paramID := c.Param("id")
+	varID, err := strconv.ParseInt(paramID, 10, 0)
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
+		return
 	}
-	return user, nil
+	user.ID = int(varID)
+	//usr, err := repository.UpdateUser(user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		return
+	}
+
+	//c.JSON(http.StatusOK, usr)
 }
 
 // deleteUserByID godoc
@@ -113,11 +141,17 @@ func (u *UserService) UpdateUser(id int) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [delete]
-func (u *UserService) DeleteUserByID(id int) error {
-
-	err := u.repo.DeleteUserByID(id)
+func (h *Handler) deleteUserByID(c *gin.Context) {
+	paramID := c.Param("id")
+	varID, err := strconv.ParseInt(paramID, 10, 0)
 	if err != nil {
-		return err
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
-	return nil
+
+	err = h.service.DeleteUserByID(int(varID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 }

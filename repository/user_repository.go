@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"database/sql"
 	_ "database/sql"
 	"errors"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/database"
+	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/utils"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -13,11 +15,20 @@ import (
 	"time"
 )
 
-// GetUserByID ...
-func GetUserByID(id int64) (model.User, error) {
-	db := database.DB
+type UserPostgres struct {
+	db     *sql.DB
+	logger logging.Logger
+}
 
-	var user model.User
+func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
+	return &UserPostgres{db: db, logger: logger}
+}
+
+// GetUserByID ...
+func (u *UserPostgres) GetUserByID(id int) (*model.User, error) {
+	db := u.db
+
+	var user *model.User
 
 	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
 	if err != nil {
@@ -36,10 +47,9 @@ func GetUserByID(id int64) (model.User, error) {
 	return user, nil
 }
 
-
 // GetUserAll ...
-func GetUserAll() ([]model.User, error) {
-	db := database.DB
+func (u *UserPostgres) GetUserAll() ([]model.User, error) {
+	db := u.db
 
 	var User model.User
 	var Users []model.User
@@ -62,82 +72,95 @@ func GetUserAll() ([]model.User, error) {
 }
 
 // CreateUser ...
-func CreateUser(User model.User) (model.User, error) {
-	db := database.DB
+func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
+	db := u.db
 
-	var err error
-
-	hash, _ := utils.HashPassword(User.Password, bcrypt.DefaultCost)
-	User.Password = hash
+	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	user.Password = hash
 
 	crt, err := db.Prepare("INSERT INTO users (email, password, activated, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, password, activated, created_at, updated_at")
 	if err != nil {
-		log.Panic(err)
-		return User, err
+		u.logger.Errorf("%s", err)
+		return nil, fmt.Errorf("%w", err)
 	}
-	timestamp := time.Now()
-	res, err := crt.Exec(User.Email, User.Password, User.Activated, timestamp, timestamp)
+
+	res, err := crt.Exec(user.Email, user.Password, user.Activated, time.Now(), time.Now())
 	if err != nil {
 		log.Panic(err)
-		return User, err
+		return nil, err
 	}
 
 	userID, err := res.LastInsertId()
 	if err != nil {
 		log.Panic(err)
-		return User, err
+		return nil, err
 	}
-	User.ID = userID
+	user.ID = int(userID)
 
 	// find user by id
-	resval, err := GetUserByID(User.ID)
+	resval, err := u.GetUserByID(user.ID)
 	if err != nil {
 		log.Panic(err)
-		return User, err
+		return nil, err
 	}
 
 	return resval, nil
 }
 
 // UpdateUser ...
-//func UpdateUser(User model.User) (model.User, error) {
-//	db := database.DB
-//
-//	var err error
-//
-//	hash, _ := utils.HashPassword(User.Password, bcrypt.DefaultCost)
-//	User.Password = hash
-//
-//	crt, err := db.Prepare("UPDATE users SET email =$1, password =$2, activated =$3, updated_at =$4 where id=$5")
-//	if err != nil {
-//		return User, err
-//	}
-//	timestamp := time.Now()
-//	_, queryError := crt.Exec(User.ID, User.Email, User.Password, User.Activated, timestamp)
-//	if queryError != nil {
-//		return User, err
-//	}
-//
-//	// find user by id
-//	res, err := GetUserByID(User.ID)
-//	if err != nil {
-//		return User, err
-//	}
-//
-//	return res, nil
-//}
+func (u *UserPostgres) UpdateUser(id int) (*model.User, error) {
+	//db := u.db
+	//
+	//hash, _ := utils.HashPassword(User.Password, bcrypt.DefaultCost)
+	//User.Password = hash
+	//
+	//crt, err := db.Prepare("UPDATE users SET email =$1, password =$2, activated =$3, updated_at =$4 where id=$5")
+	//if err != nil {
+	//	return User, err
+	//}
+	//timestamp := time.Now()
+	//_, queryError := crt.Exec(User.ID, User.Email, User.Password, User.Activated, timestamp)
+	//if queryError != nil {
+	//	return User, err
+	//}
+	//
+	//// find user by id
+	//res, err := GetUserByID(User.ID)
+	//if err != nil {
+	//	return User, err
+	//}
+	db := u.db
+
+	var user *model.User
+
+	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
+	if err != nil {
+		// print stack trace
+		log.Println("Error query user: " + err.Error())
+		return user, err
+	}
+
+	for result.Next() {
+		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			return user, err
+		}
+	}
+
+	return user, nil
+}
 
 // DeleteUserByID ...
-func DeleteUserByID(id int64) error {
-	db := database.DB
+func (u *UserPostgres) DeleteUserByID(id int) error {
+	db := u.db
 
-	res, err := GetUserByID(id)
+	res, err := u.GetUserByID(id)
 	if err != nil {
 		return err
 	}
 
-	s := strconv.FormatInt(res.ID, 10)
-	if (model.User{} == res) {
+	s := strconv.FormatInt(int64(res.ID), 10)
+	if (model.User{} == *res) { //todo непонятная проверка
 		return errors.New("no record value with id: %v" + s)
 	}
 
@@ -153,16 +176,14 @@ func DeleteUserByID(id int64) error {
 	return nil
 }
 
-
-
 // GetUserLogin ...
-func GetUserLogin(email string, password string) (model.User, error) {
+func (u *UserPostgres) GetUserLogin(email string, password string) (model.User, error) {
 
 	var User model.User
 	var err error
 
 	// find by user
-	User, err = GetUserByEmail(email)
+	User, err = u.GetUserByEmail(email)
 	if err != nil {
 		return User, err
 	}
@@ -180,8 +201,8 @@ func GetUserLogin(email string, password string) (model.User, error) {
 }
 
 // GetUserByEmail ...
-func GetUserByEmail(email string) (model.User, error) {
-	db := database.DB
+func (u *UserPostgres) GetUserByEmail(email string) (model.User, error) {
+	db := u.db
 
 	var User model.User
 	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1", email)
