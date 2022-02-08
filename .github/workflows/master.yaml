@@ -74,6 +74,14 @@ jobs:
             docker rm $(echo $CONTAINER_NAME)
             # Set env variables            
             export AUTH_SERVER_URL=${{ secrets.AUTH_SERVER_URL }}
+            export HOST=${{ secrets.HOST }}
+            export DB_PORT=${{ secrets.DB_PORT }}
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export DB_DATABASE=${{ secrets.DB_DATABASE }}
+            export DB_SSL_MODE=${{ secrets.DB_SSL_MODE }}
+            export API_SERVER_PORT=${{ secrets.API_SERVER_PORT }}
+            
             # Run a new container from a new image
             docker run -e AUTH_SERVER_URL -d \
             --restart always \
