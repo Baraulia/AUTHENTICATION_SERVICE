@@ -92,6 +92,7 @@ func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [put]
+
 func (u *UserService) UpdateUser(id int) (*model.User, error) {
 	user, err := u.repo.UpdateUser(id)
 	if err != nil {
