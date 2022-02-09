@@ -8,7 +8,6 @@ type User struct {
 	Password  string    `json:"password" validate:"required" sql:"password"`
 	Activated string    `json:"activated" example:"false" sql:"activated"`
 	CreatedAt time.Time `json:"createdAt" sql:"created_at"`
-	UpdatedAt time.Time `json:"updatedAt" sql:"updated_at"`
 }
 
 // Users array of User type

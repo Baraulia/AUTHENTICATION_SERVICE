@@ -10,7 +10,7 @@ type AppUser interface {
 	GetUser(id int) (*model.User, error)
 	GetUsers() ([]model.User, error)
 	CreateUser(user *model.User) (*model.User, error)
-	UpdateUser(id int) (*model.User, error)
+	UpdateUser(user model.User, id int) (*model.User, error)
 	DeleteUserByID(id int) error
 }
 

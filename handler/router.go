@@ -17,15 +17,14 @@ func NewHandler(logger logging.Logger, service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	forUser := router.Group("/api")
 
-	user := forUser.Group("/user")
-
-	user.GET("/:id", h.getUser)
-	user.GET("/", h.getUsers)
-	user.POST("/", h.createUser)
-	user.PUT("/:id", h.updateUser)
-	user.DELETE("/:id", h.deleteUserByID)
-
+	user := router.Group("/user")
+	{
+		user.GET("/:id", h.getUser)
+		user.GET("/", h.getUsers)
+		user.POST("/", h.createUser)
+		user.PUT("/:id", h.updateUser)
+		user.DELETE("/:id", h.deleteUserByID)
+	}
 	return router
 }

@@ -10,7 +10,8 @@ import (
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"strconv"
+	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -24,26 +25,27 @@ func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
 }
 
 // GetUserByID ...
-func (u *UserPostgres) GetUserByID(id int) (*model.User, error) {
+func (u UserPostgres) GetUserByID(id int) (*model.User, error) {
 	db := u.db
 
-	var user *model.User
+	var user model.User
 
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
+	result, err := db.Query("SELECT id, email, password, activated, created_at FROM users WHERE id = $1", id)
 	if err != nil {
 		// print stack trace
 		log.Println("Error query user: " + err.Error())
-		return user, err
+		return nil, err
 	}
 
 	for result.Next() {
-		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
+		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt)
 		if err != nil {
-			return user, err
+			return nil, err
 		}
 	}
+	fmt.Println(user)
 
-	return user, nil
+	return &user, nil
 }
 
 // GetUserAll ...
@@ -53,15 +55,14 @@ func (u *UserPostgres) GetUserAll() ([]model.User, error) {
 	var User model.User
 	var Users []model.User
 
-	rows, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users")
+	rows, err := db.Query("SELECT id, email, password, activated, created_at FROM users")
 	if err != nil {
 		log.Println("Error query user: " + err.Error())
 		return Users, err
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.Activated,
-			&User.CreatedAt, &User.UpdatedAt); err != nil {
+		if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt); err != nil {
 			return Users, err
 		}
 		Users = append(Users, User)
@@ -69,84 +70,72 @@ func (u *UserPostgres) GetUserAll() ([]model.User, error) {
 
 	return Users, nil
 }
+func GeneratePassword() string {
+	rand.Seed(time.Now().UnixNano())
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
+		"abcdefghijklmnopqrstuvwxyzåäö" +
+		"0123456789")
+	length := 12
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		b.WriteRune(chars[rand.Intn(len(chars))])
+	}
+	return  b.String()
+}
 
 // CreateUser ...
 func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 	db := u.db
 
+	str := GeneratePassword()
+	user.Password = str
+
 	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	user.Password = hash
 
-	crt, err := db.Prepare("INSERT INTO users (email, password, activated, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, password, activated, created_at, updated_at")
-	if err != nil {
-		u.logger.Errorf("%s", err)
-		return nil, fmt.Errorf("%w", err)
-	}
 
-	res, err := crt.Exec(user.Email, user.Password, user.Activated, time.Now(), time.Now())
-	if err != nil {
-		log.Panic(err)
-		return nil, err
+	row := db.QueryRow("INSERT INTO users (email, password, activated, created_at ) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, user.Activated, time.Now())
+	if err := row.Scan(&user.ID); err != nil {
+		log.Printf("Error while scanning for author:%s", err)
+		return nil, fmt.Errorf("createAuthor: error while scanning for author:%w", err)
 	}
+	//email := mail.NewEmail(user.Email, user.Password, "please, return books to the library")
+	//err := mail.SendEmail(email)
+	//if err != nil{
+	//	log.Print(err)
+	//}
 
-	userID, err := res.LastInsertId()
-	if err != nil {
-		log.Panic(err)
-		return nil, err
-	}
-	user.ID = int(userID)
 
 	// find user by id
-	resval, err := u.GetUserByID(user.ID)
+	result, err := u.GetUserByID(user.ID)
 	if err != nil {
 		log.Panic(err)
 		return nil, err
 	}
 
-	return resval, nil
+	return result, nil
 }
 
 // UpdateUser ...
-func (u *UserPostgres) UpdateUser(id int) (*model.User, error) {
-	//db := u.db
-	//
-	//hash, _ := utils.HashPassword(User.Password, bcrypt.DefaultCost)
-	//User.Password = hash
-	//
-	//crt, err := db.Prepare("UPDATE users SET email =$1, password =$2, activated =$3, updated_at =$4 where id=$5")
-	//if err != nil {
-	//	return User, err
-	//}
-	//timestamp := time.Now()
-	//_, queryError := crt.Exec(User.ID, User.Email, User.Password, User.Activated, timestamp)
-	//if queryError != nil {
-	//	return User, err
-	//}
-	//
-	//// find user by id
-	//res, err := GetUserByID(User.ID)
-	//if err != nil {
-	//	return User, err
-	//}
+func (u *UserPostgres) UpdateUser(user model.User, id int) (*model.User, error) {
 	db := u.db
 
-	var user *model.User
+	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	user.Password = hash
 
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
+	row := db.QueryRow("UPDATE users SET email =$1, password =$2, activated =$3 WHERE id=$4 RETURNING id", user.Email, user.Password, user.Activated, id)
+	if err := row.Scan(&user.ID); err != nil {
+		log.Printf("Error while scanning for author:%s", err)
+		return nil, fmt.Errorf("createAuthor: error while scanning for author:%w", err)
+	}
+	// find user by id
+	result, err := u.GetUserByID(user.ID)
 	if err != nil {
-		// print stack trace
-		log.Println("Error query user: " + err.Error())
-		return user, err
+		log.Panic(err)
+		return nil, err
 	}
 
-	for result.Next() {
-		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
-		if err != nil {
-			return user, err
-		}
-	}
-
-	return user, nil
+	return result, nil
 }
 
 // DeleteUserByID ...
@@ -158,9 +147,8 @@ func (u *UserPostgres) DeleteUserByID(id int) error {
 		return err
 	}
 
-	s := strconv.FormatInt(int64(res.ID), 10)
-	if (model.User{} == *res) { //todo непонятная проверка
-		return errors.New("no record value with id: %v" + s)
+	if (model.User{} == *res) {
+		return errors.New("no record value with id: %v" )
 	}
 
 	crt, err := db.Prepare("DELETE FROM users WHERE id=$1")
@@ -204,13 +192,13 @@ func (u *UserPostgres) GetUserByEmail(email string) (model.User, error) {
 	db := u.db
 
 	var User model.User
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1", email)
+	result, err := db.Query("SELECT id, email, password, activated, created_at FROM users WHERE email = $1", email)
 	if err != nil {
 		return User, err
 	}
 
 	for result.Next() {
-		err := result.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt, &User.UpdatedAt)
+		err := result.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt)
 		if err != nil {
 			return User, err
 		}
