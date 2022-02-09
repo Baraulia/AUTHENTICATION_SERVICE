@@ -27,23 +27,24 @@ func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
 func (u *UserPostgres) GetUserByID(id int) (*model.User, error) {
 	db := u.db
 
-	var user *model.User
+	var user model.User
 
 	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
 	if err != nil {
 		// print stack trace
 		log.Println("Error query user: " + err.Error())
-		return user, err
+		return nil, err
 	}
 
 	for result.Next() {
 		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
-			return user, err
+			return nil, err
 		}
 	}
+	fmt.Println(user)
 
-	return user, nil
+	return &user, nil
 }
 
 // GetUserAll ...
@@ -175,46 +176,21 @@ func (u *UserPostgres) DeleteUserByID(id int) error {
 	return nil
 }
 
-// GetUserLogin ...
-func (u *UserPostgres) GetUserLogin(email string, password string) (model.User, error) {
-
-	var User model.User
-	var err error
-
-	// find by user
-	User, err = u.GetUserByEmail(email)
-	if err != nil {
-		return User, err
-	}
-
-	if (model.User{} == User) {
-		return User, errors.New("bad credential")
-	}
-
-	var retVal = utils.CheckPasswordHash(password, User.Password)
-	if retVal == false {
-		return User, errors.New("wrong password")
-	}
-
-	return User, nil
-}
-
 // GetUserByEmail ...
-func (u *UserPostgres) GetUserByEmail(email string) (model.User, error) {
+func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 	db := u.db
-
 	var User model.User
 	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1", email)
 	if err != nil {
-		return User, err
+		return nil, err
 	}
 
 	for result.Next() {
 		err := result.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt, &User.UpdatedAt)
 		if err != nil {
-			return User, err
+			return nil, err
 		}
 	}
 
-	return User, nil
+	return &User, nil
 }

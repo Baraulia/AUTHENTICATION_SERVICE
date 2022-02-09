@@ -34,11 +34,10 @@ func (h *Handler) getUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	if (model.User{}) == *user { //Непонятная проверка
-		c.JSON(http.StatusNotFound, user)
-	} else {
+	if user != nil {
 		c.JSON(http.StatusOK, user)
+	} else {
+		c.JSON(http.StatusNotFound, user)
 	}
 }
 
