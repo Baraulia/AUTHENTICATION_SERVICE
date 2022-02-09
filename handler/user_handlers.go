@@ -35,12 +35,7 @@ func (h *Handler) getUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	if (model.User{}) == *user { //Непонятная проверка
-		c.JSON(http.StatusNotFound, user)
-	} else {
-		c.JSON(http.StatusOK, user)
-	}
+	c.JSON(http.StatusOK, user)
 }
 
 // getUsers godoc
@@ -62,7 +57,6 @@ func (h *Handler) getUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
-
 	c.JSON(http.StatusOK, users)
 
 }
@@ -95,7 +89,6 @@ func (h *Handler) createUser(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"message": err})
 		return
 	}
-
 	c.JSON(http.StatusCreated, user)
 }
 

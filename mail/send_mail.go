@@ -27,14 +27,14 @@ func SendEmail(email *Email) error {
 	auth := smtp.PlainAuth("", USER, PASSWORD, HOST)
 	sendTo := email.to
 	addr := fmt.Sprintf("%s:%s", HOST, PORT)
-	{
-		str := strings.Replace("From: "+USER+"~To: "+sendTo+"~Subject: "+email.subject+"~~", "~", "\r\n", -1) + email.msg
-		err := smtp.SendMail(addr, auth, USER,	[]string{sendTo}, []byte(str))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		{
+			str := strings.Replace("From: "+USER+"~To: "+sendTo+"~Subject: "+email.subject+"~~", "~", "\r\n", -1) + email.msg
+			err := smtp.SendMail(addr, auth, USER,	[]string{sendTo}, []byte(str))
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+		}
+			fmt.Println("Successfully sent mail")
+		return nil
 	}
-		fmt.Println("Successfully sent mail")
-	return nil
-}
 }

@@ -71,6 +71,7 @@ func (u *UserPostgres) GetUserAll() ([]model.User, error) {
 	return Users, nil
 }
 func GeneratePassword() string {
+
 	rand.Seed(time.Now().UnixNano())
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
 		"abcdefghijklmnopqrstuvwxyzåäö" +
@@ -88,11 +89,12 @@ func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 	db := u.db
 
 	str := GeneratePassword()
-	user.Password = str
+	if user.Password == ""{
+		user.Password = str
+	}
 
 	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	user.Password = hash
-
 
 	row := db.QueryRow("INSERT INTO users (email, password, activated, created_at ) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, user.Activated, time.Now())
 	if err := row.Scan(&user.ID); err != nil {

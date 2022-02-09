@@ -119,7 +119,6 @@ func (u *UserService) UpdateUser(i model.User,id int) (*model.User, error) {
 // @Router /user/{id} [delete]
 
 func (u *UserService) DeleteUserByID(id int) error {
-
 	err := u.repo.DeleteUserByID(id)
 	if err != nil {
 		return err

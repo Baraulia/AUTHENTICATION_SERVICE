@@ -18,7 +18,7 @@ func NewHandler(logger logging.Logger, service *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 
-	user := router.Group("/user")
+	user := router.Group("/users")
 	{
 		user.GET("/:id", h.getUser)
 		user.GET("/", h.getUsers)
