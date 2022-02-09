@@ -17,7 +17,7 @@ func (h *Handler) authUser(c *gin.Context) {
 	}
 	id, err := h.service.AppUser.AuthUser(input.Email, input.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "wrong email or password entered"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err})
 	} else {
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"id": id,
