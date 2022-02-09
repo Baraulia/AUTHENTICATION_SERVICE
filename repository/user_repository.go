@@ -178,19 +178,17 @@ func (u *UserPostgres) DeleteUserByID(id int) error {
 
 // GetUserByEmail ...
 func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
-	db := u.db
-	var User model.User
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1", email)
+	transaction, err := u.db.Begin()
 	if err != nil {
-		return nil, err
+		u.logger.Errorf("GetUserByEmail: can not starts transaction:%s", err)
+		return nil, fmt.Errorf("getUserByEmail: can not starts transaction:%w", err)
 	}
-
-	for result.Next() {
-		err := result.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt, &User.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
+	var User model.User
+	query := "SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1"
+	row := transaction.QueryRow(query, email)
+	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt, &User.UpdatedAt); err != nil {
+		u.logger.Errorf("Error while scanning for user:%s", err)
+		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 	}
-
-	return &User, nil
+	return &User, transaction.Commit()
 }
