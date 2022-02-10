@@ -53,15 +53,7 @@ func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	oldHash, err := utils.HashPassword(user.OldPassword, bcrypt.DefaultCost)
-	if err != nil {
-		u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
-		return 0, fmt.Errorf("updateUser: can not generate hash from password:%w", err)
-	}
-	if userDb.Password != oldHash {
-		u.logger.Warn("wrong email or password entered")
-		return 0, fmt.Errorf("wrong email or password entered")
-	} else {
+	if utils.CheckPasswordHash(user.OldPassword, userDb.Password) {
 		newHash, err := utils.HashPassword(user.NewPassword, bcrypt.DefaultCost)
 		if err != nil {
 			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
@@ -73,6 +65,9 @@ func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
 			return 0, err
 		}
 		return userId, nil
+	} else {
+		u.logger.Warn("wrong email or password entered")
+		return 0, fmt.Errorf("wrong email or password entered")
 	}
 }
 
