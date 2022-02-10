@@ -148,7 +148,7 @@ func (h *Handler) updateUser(c *gin.Context) {
 	}
 	id, err := h.service.UpdateUser(&input, varID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, map[string]interface{}{
