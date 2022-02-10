@@ -36,10 +36,9 @@ func (v EmailValidator) Validate(val interface{}) error {
 type PasswordValidator struct {
 }
 
-//should be 8 characters long
 func (v PasswordValidator) Validate(val interface{}) error {
 	if len(val.(string)) != 8 && len(val.(string)) != 0 {
-		return fmt.Errorf("passwordValidator: %d", len(val.(string)))
+		return fmt.Errorf("passwordValidator:should be 8 characters long")
 	}
 	if len(val.(string)) == 0 {
 		return nil
