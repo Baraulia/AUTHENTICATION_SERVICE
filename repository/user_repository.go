@@ -29,7 +29,7 @@ func (u *UserPostgres) GetUserByID(id int) (*model.User, error) {
 
 	var user model.User
 
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
+	result, err := db.Query("SELECT id, email, password, created_at FROM users WHERE id = $1", id)
 	if err != nil {
 		// print stack trace
 		log.Println("Error query user: " + err.Error())
@@ -37,7 +37,7 @@ func (u *UserPostgres) GetUserByID(id int) (*model.User, error) {
 	}
 
 	for result.Next() {
-		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
+		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -54,15 +54,14 @@ func (u *UserPostgres) GetUserAll() ([]model.User, error) {
 	var User model.User
 	var Users []model.User
 
-	rows, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users")
+	rows, err := db.Query("SELECT id, email, password, created_at FROM users")
 	if err != nil {
 		log.Println("Error query user: " + err.Error())
 		return Users, err
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.Activated,
-			&User.CreatedAt, &User.UpdatedAt); err != nil {
+		if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
 			return Users, err
 		}
 		Users = append(Users, User)
@@ -78,13 +77,13 @@ func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	user.Password = hash
 
-	crt, err := db.Prepare("INSERT INTO users (email, password, activated, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, password, activated, created_at, updated_at")
+	crt, err := db.Prepare("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id, email, password, created_at")
 	if err != nil {
 		u.logger.Errorf("%s", err)
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	res, err := crt.Exec(user.Email, user.Password, user.Activated, time.Now(), time.Now())
+	res, err := crt.Exec(user.Email, user.Password, time.Now())
 	if err != nil {
 		log.Panic(err)
 		return nil, err
@@ -133,7 +132,7 @@ func (u *UserPostgres) UpdateUser(id int) (*model.User, error) {
 
 	var user *model.User
 
-	result, err := db.Query("SELECT id, email, password, activated, created_at, updated_at FROM users WHERE id = $1", id)
+	result, err := db.Query("SELECT id, email, password, created_at FROM users WHERE id = $1", id)
 	if err != nil {
 		// print stack trace
 		log.Println("Error query user: " + err.Error())
@@ -141,7 +140,7 @@ func (u *UserPostgres) UpdateUser(id int) (*model.User, error) {
 	}
 
 	for result.Next() {
-		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.Activated, &user.CreatedAt, &user.UpdatedAt)
+		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt)
 		if err != nil {
 			return user, err
 		}
@@ -160,7 +159,7 @@ func (u *UserPostgres) DeleteUserByID(id int) error {
 	}
 
 	s := strconv.FormatInt(int64(res.ID), 10)
-	if (model.User{} == *res) { //todo непонятная проверка
+	if (model.User{} == *res) {
 		return errors.New("no record value with id: %v" + s)
 	}
 
@@ -184,9 +183,9 @@ func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 		return nil, fmt.Errorf("getUserByEmail: can not starts transaction:%w", err)
 	}
 	var User model.User
-	query := "SELECT id, email, password, activated, created_at, updated_at FROM users WHERE email = $1"
+	query := "SELECT id, email, password, created_at FROM users WHERE email = $1"
 	row := transaction.QueryRow(query, email)
-	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.Activated, &User.CreatedAt, &User.UpdatedAt); err != nil {
+	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
 		u.logger.Errorf("Error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 	}
