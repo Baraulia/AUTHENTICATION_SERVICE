@@ -36,7 +36,6 @@ func (h *Handler) getUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
-
 }
 
 // getUsers godoc
@@ -95,7 +94,7 @@ func (h *Handler) createUser(c *gin.Context) {
 
 // updateUser godoc
 // @Summary update master user
-// @Description update by json master user
+// @Description updates by json master user
 // @Tags User
 // @Accept  json
 // @Produce  json
