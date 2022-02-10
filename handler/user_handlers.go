@@ -28,7 +28,7 @@ func (h *Handler) getUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	user, err := h.service.GetUser(varID)
+	user, err := h.service.AppUser.GetUser(varID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -70,7 +70,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 		limit = paramLimit
 	}
 
-	users, err := h.service.GetUsers(page, limit)
+	users, err := h.service.AppUser.GetUsers(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -105,7 +105,7 @@ func (h *Handler) createUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	user, err := h.service.CreateUser(&input)
+	user, err := h.service.AppUser.CreateUser(&input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -146,7 +146,7 @@ func (h *Handler) updateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	id, err := h.service.UpdateUser(&input, varID)
+	id, err := h.service.AppUser.UpdateUser(&input, varID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -177,7 +177,7 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	id, err := h.service.DeleteUserByID(int(varID))
+	id, err := h.service.AppUser.DeleteUserByID(int(varID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

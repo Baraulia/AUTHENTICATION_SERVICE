@@ -22,7 +22,7 @@ func NewUserService(repo repository.Repository, logger logging.Logger) *UserServ
 }
 
 func (u *UserService) GetUser(id int) (*model.User, error) {
-	user, err := u.repo.GetUserByID(id)
+	user, err := u.repo.AppUser.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (u *UserService) GetUser(id int) (*model.User, error) {
 }
 
 func (u *UserService) GetUsers(page int, limit int) ([]model.User, error) {
-	users, err := u.repo.GetUserAll(page, limit)
+	users, err := u.repo.AppUser.GetUserAll(page, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
-	resUser, err := u.repo.CreateUser(user)
+	resUser, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
 			return 0, fmt.Errorf("updateUser: can not generate hash from password:%w", err)
 		}
 		user.NewPassword = newHash
-		userId, err := u.repo.UpdateUser(user, id)
+		userId, err := u.repo.AppUser.UpdateUser(user, id)
 		if err != nil {
 			return 0, err
 		}
@@ -72,7 +72,7 @@ func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
 }
 
 func (u *UserService) DeleteUserByID(id int) (int, error) {
-	userId, err := u.repo.DeleteUserByID(id)
+	userId, err := u.repo.AppUser.DeleteUserByID(id)
 	if err != nil {
 		return 0, err
 	}

@@ -6,6 +6,8 @@ import (
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
 )
 
+//go:generate mockgen -source = service.go -destination = mocks/service_mock.go
+
 type AppUser interface {
 	GetUser(id int) (*model.User, error)
 	GetUsers(page int, limit int) ([]model.User, error)
