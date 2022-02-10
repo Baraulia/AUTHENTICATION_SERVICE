@@ -41,9 +41,7 @@ const USER_SCHEMA = `
 	CREATE TABLE IF NOT EXISTS users (
 		id serial not null primary key ,
 		email varchar(225) NOT NULL UNIQUE,
-		password varchar(225) NOT NULL,
-	    activated  boolean NOT NULL default false,
-		created_at timestamp NOT NULL,
-		updated_at timestamp NOT NULL
+		password varchar(225) NOT NULL,	   
+	    created_at timestamp NOT NULL
 	);
 `

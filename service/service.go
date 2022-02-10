@@ -12,6 +12,7 @@ type AppUser interface {
 	CreateUser(user *model.User) (*model.User, error)
 	UpdateUser(id int) (*model.User, error)
 	DeleteUserByID(id int) error
+	AuthUser(email string, password string) (int, error)
 }
 
 type Service struct {
