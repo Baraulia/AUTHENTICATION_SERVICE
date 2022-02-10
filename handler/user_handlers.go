@@ -55,7 +55,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 		paramPage, err := strconv.Atoi(c.Param("page"))
 		if err != nil || paramPage < 0 {
 			h.logger.Errorf("No url request:%s", err)
-			c.JSON(http.StatusBadRequest, gin.H{"message": err})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 		page = paramPage
@@ -64,7 +64,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 		paramLimit, err := strconv.Atoi(c.Param("limit"))
 		if err != nil || paramLimit < 0 {
 			h.logger.Errorf("No url request:%s", err)
-			c.JSON(http.StatusBadRequest, gin.H{"message": err})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 		limit = paramLimit
@@ -72,7 +72,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 
 	users, err := h.service.GetUsers(page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, users)
@@ -107,7 +107,7 @@ func (h *Handler) createUser(c *gin.Context) {
 	}
 	user, err := h.service.CreateUser(&input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
