@@ -20,25 +20,23 @@ import (
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [get]
+
 func (h *Handler) getUser(c *gin.Context) {
 	var user *model.User
 	paramID := c.Param("id")
-	varID, err := strconv.ParseInt(paramID, 10, 0)
+	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	user, err = h.service.GetUser(int(varID))
+	user, err = h.service.GetUser(varID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if user != nil {
-		c.JSON(http.StatusOK, user)
-	} else {
-		c.JSON(http.StatusNotFound, user)
-	}
+	c.JSON(http.StatusOK, user)
+
 }
 
 // getUsers godoc
@@ -53,13 +51,13 @@ func (h *Handler) getUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [get]
+
 func (h *Handler) getUsers(c *gin.Context) {
 	users, err := h.service.GetUsers()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
-
 	c.JSON(http.StatusOK, users)
 
 }
@@ -77,6 +75,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [post]
+
 func (h *Handler) createUser(c *gin.Context) {
 
 	var user *model.User
@@ -91,7 +90,6 @@ func (h *Handler) createUser(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"message": err})
 		return
 	}
-
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -108,23 +106,24 @@ func (h *Handler) createUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [put]
-func (h *Handler) updateUser(c *gin.Context) { //todo непонятно что делает этот метод
+
+func (h *Handler) updateUser(c *gin.Context) {
 	var user model.User
 	paramID := c.Param("id")
-	varID, err := strconv.ParseInt(paramID, 10, 0)
+	varID, err := strconv.Atoi(paramID)
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
 		return
 	}
-	user.ID = int(varID)
-	//usr, err := repository.UpdateUser(user)
+
+	usr, err := h.service.UpdateUser(user, varID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
-	//c.JSON(http.StatusOK, usr)
+	c.JSON(http.StatusOK, usr)
 }
 
 // deleteUserByID godoc
@@ -152,5 +151,7 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
+	}else {
+		c.JSON(http.StatusOK, gin.H{"message": "successful"})
 	}
 }

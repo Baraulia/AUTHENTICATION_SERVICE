@@ -12,6 +12,7 @@ import (
 func main() {
 	logger := logging.GetLogger()
 
+
 	db, err := database.NewPostgresDB(database.PostgresDB{
 		Host:     os.Getenv("HOST"),
 		Port:     os.Getenv("DB_PORT"),

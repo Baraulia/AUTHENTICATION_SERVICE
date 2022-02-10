@@ -50,6 +50,7 @@ func (u *UserService) GetUser(id int) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [get]
+
 func (u *UserService) GetUsers() ([]model.User, error) {
 	users, err := u.repo.GetUserAll()
 	if err != nil {
@@ -71,6 +72,7 @@ func (u *UserService) GetUsers() ([]model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [post]
+
 func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
 	resUser, err := u.repo.CreateUser(user)
 	if err != nil {
@@ -78,6 +80,7 @@ func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
 	}
 	return resUser, nil
 }
+
 
 // updateUser godoc
 // @Summary update master user
@@ -93,8 +96,8 @@ func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
 // @Security bearerAuth
 // @Router /user/ [put]
 
-func (u *UserService) UpdateUser(id int) (*model.User, error) {
-	user, err := u.repo.UpdateUser(id)
+func (u *UserService) UpdateUser(i model.User,id int) (*model.User, error) {
+	user, err := u.repo.UpdateUser(i,id)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +117,8 @@ func (u *UserService) UpdateUser(id int) (*model.User, error) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [delete]
-func (u *UserService) DeleteUserByID(id int) error {
 
+func (u *UserService) DeleteUserByID(id int) error {
 	err := u.repo.DeleteUserByID(id)
 	if err != nil {
 		return err
