@@ -5,6 +5,7 @@ import (
 	_ "database/sql"
 	"errors"
 	"fmt"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
@@ -90,10 +91,15 @@ func GeneratePassword() string {
 func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 	db := u.db
 
+	userr := model.User{}
+
 	str := GeneratePassword()
 	if user.Password == ""{
 		user.Password = str
 	}
+
+	userr.Password = user.Password
+	userr.Email = user.Email
 
 	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	user.Password = hash
@@ -105,19 +111,15 @@ func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 
 	}
 	// send user password
-	//err := mail.SendEmail(user.Email, user.Password, "Hello, this is your personal account password")
-	//if err != nil{
-	//	log.Print(err)
-	//}
-
-	// find user by id
-	result, err := u.GetUserByID(user.ID)
-	if err != nil {
-		log.Panic(err)
-		return nil, err
+	err := mail.SendEmail(userr.Email, userr.Password, "Hello, this is your personal account password")
+	if err != nil{
+		log.Print(err)
 	}
 
-	return result, nil
+	userr.ID = user.ID
+	userr.CreatedAt = user.CreatedAt
+
+	return &userr, nil
 }
 
 // UpdateUser ...
