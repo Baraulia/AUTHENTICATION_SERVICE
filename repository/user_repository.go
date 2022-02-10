@@ -5,7 +5,6 @@ import (
 	_ "database/sql"
 	"errors"
 	"fmt"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
@@ -111,11 +110,10 @@ func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 
 	}
 	// send user password
-	err := mail.SendEmail(userr.Email, userr.Password, "Hello, this is your personal account password")
-	if err != nil{
-		log.Print(err)
-	}
-
+	//err := mail.SendEmail(userr.Email, userr.Password, "Hello, this is your personal account password")
+	//if err != nil{
+	//	log.Print(err)
+	//}
 	userr.ID = user.ID
 	userr.CreatedAt = user.CreatedAt
 
