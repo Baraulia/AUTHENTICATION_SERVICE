@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,23 +21,20 @@ import (
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [get]
-
 func (h *Handler) getUser(c *gin.Context) {
-	var user *model.User
 	paramID := c.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
+		h.logger.Warnf("Handler getUser (reading param):%s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	user, err = h.service.GetUser(varID)
+	user, err := h.service.GetUser(varID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, user)
-
 }
 
 // getUsers godoc
@@ -51,11 +49,31 @@ func (h *Handler) getUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [get]
-
 func (h *Handler) getUsers(c *gin.Context) {
-	users, err := h.service.GetUsers()
+	var page = 0
+	var limit = 0
+	if c.Param("page") != "" {
+		paramPage, err := strconv.Atoi(c.Param("page"))
+		if err != nil || paramPage < 0 {
+			h.logger.Errorf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": err})
+			return
+		}
+		page = paramPage
+	}
+	if c.Param("limit") != "" {
+		paramLimit, err := strconv.Atoi(c.Param("limit"))
+		if err != nil || paramLimit < 0 {
+			h.logger.Errorf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": err})
+			return
+		}
+		limit = paramLimit
+	}
+
+	users, err := h.service.GetUsers(page, limit)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
 		return
 	}
 	c.JSON(http.StatusOK, users)
@@ -75,19 +93,28 @@ func (h *Handler) getUsers(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [post]
-
 func (h *Handler) createUser(c *gin.Context) {
-
-	var user *model.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
+	var input model.CreateUser
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
 		return
 	}
-
-	user, err := h.service.CreateUser(user)
+	validationErrors := validateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		errors, err := json.Marshal(validationErrors)
+		if err != nil {
+			h.logger.Errorf("createUser: error while marshaling list myErrors:%s", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusBadRequest, errors)
+		return
+	}
+	user, err := h.service.CreateUser(&input)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
@@ -106,24 +133,40 @@ func (h *Handler) createUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [put]
-
 func (h *Handler) updateUser(c *gin.Context) {
-	var user model.User
+	var input model.UpdateUser
 	paramID := c.Param("id")
 	varID, err := strconv.Atoi(paramID)
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
-		return
-	}
-
-	usr, err := h.service.UpdateUser(user, varID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		h.logger.Warnf("Handler updateUser (reading param):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, usr)
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
+		return
+	}
+	validationErrors := validateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		errors, err := json.Marshal(validationErrors)
+		if err != nil {
+			h.logger.Errorf("updateUser: error while marshaling list myErrors:%s", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusBadRequest, errors)
+		return
+	}
+	id, err := h.service.UpdateUser(&input, varID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": id,
+	})
 }
 
 // deleteUserByID godoc
@@ -143,15 +186,17 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 	paramID := c.Param("id")
 	varID, err := strconv.ParseInt(paramID, 10, 0)
 	if err != nil {
+		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	err = h.service.DeleteUserByID(int(varID))
+	id, err := h.service.DeleteUserByID(int(varID))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
-	}else {
-		c.JSON(http.StatusOK, gin.H{"message": "successful"})
+	} else {
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"id": id,
+		})
 	}
 }

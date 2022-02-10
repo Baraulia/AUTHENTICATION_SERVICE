@@ -8,10 +8,10 @@ import (
 
 type AppUser interface {
 	GetUserByID(id int) (*model.User, error)
-	GetUserAll() ([]model.User, error)
-	CreateUser(User *model.User) (*model.User, error)
-	UpdateUser(User model.User, id int) (*model.User, error)
-	DeleteUserByID(id int) error
+	GetUserAll(page int, limit int) ([]model.User, error)
+	CreateUser(User *model.CreateUser) (*model.User, error)
+	UpdateUser(User *model.UpdateUser, id int) (int, error)
+	DeleteUserByID(id int) (int, error)
 	GetUserByEmail(email string) (*model.User, error)
 }
 

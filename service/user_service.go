@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
+	"golang.org/x/crypto/bcrypt"
+	"math/rand"
+	"strings"
+	"time"
 )
 
 type UserService struct {
@@ -16,112 +21,75 @@ func NewUserService(repo repository.Repository, logger logging.Logger) *UserServ
 	return &UserService{repo: repo, logger: logger}
 }
 
-// getUserByID godoc
-// @Summary show master user by id
-// @Description get string by ID
-// @Tags User
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID"
-// @Success 200 {object} model.User
-// @Failure 400 {string} string
-// @Failure 404 {object} model.User
-// @Failure 500 {string} string
-// @Security bearerAuth
-// @Router /user/{id} [get]
-
 func (u *UserService) GetUser(id int) (*model.User, error) {
 	user, err := u.repo.GetUserByID(id)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	return user, nil
-}
-
-// getUsers godoc
-// @Summary show list master user
-// @Description get users
-// @Tags User
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} model.User
-// @Failure 400 {string} string
-// @Failure 404 {object} model.User
-// @Failure 500 {string} string
-// @Security bearerAuth
-// @Router /user/ [get]
-
-func (u *UserService) GetUsers() ([]model.User, error) {
-	users, err := u.repo.GetUserAll()
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	return users, nil
-}
-
-// createUser godoc
-// @Summary create master user
-// @Description add by json master user
-// @Tags User
-// @Accept  json
-// @Produce  json
-// @Param user body model.MUser true "User ID"
-// @Success 200 {object} model.MUser
-// @Failure 400 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Security bearerAuth
-// @Router /user/ [post]
-
-func (u *UserService) CreateUser(user *model.User) (*model.User, error) {
-	resUser, err := u.repo.CreateUser(user)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	return resUser, nil
-}
-
-
-// updateUser godoc
-// @Summary update master user
-// @Description update by json master user
-// @Tags User
-// @Accept  json
-// @Produce  json
-// @Param user body model.MUser true "User ID"
-// @Success 200 {object} model.MUser
-// @Failure 400 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Security bearerAuth
-// @Router /user/ [put]
-
-func (u *UserService) UpdateUser(i model.User,id int) (*model.User, error) {
-	user, err := u.repo.UpdateUser(i,id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-// deleteUserByID godoc
-// @Summary delete a master user by id
-// @Description delete user by ID
-// @Tags User
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID" Format(int64)
-// @Success 200 {object} model.MUser
-// @Failure 400 {string} string
-// @Failure 404 {object} model.MUser
-// @Failure 500 {string} string
-// @Security bearerAuth
-// @Router /user/{id} [delete]
-
-func (u *UserService) DeleteUserByID(id int) error {
-	err := u.repo.DeleteUserByID(id)
+func (u *UserService) GetUsers(page int, limit int) ([]model.User, error) {
+	users, err := u.repo.GetUserAll(page, limit)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return users, nil
+}
+
+func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
+	if user.Password == "" {
+		user.Password = GeneratePassword()
+	}
+	resUser, err := u.repo.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
+	return resUser, nil
+}
+
+func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
+	userDb, err := u.repo.AppUser.GetUserByID(id)
+	if err != nil {
+		return 0, err
+	}
+	oldHash, err := utils.HashPassword(user.OldPassword, bcrypt.DefaultCost)
+	if err != nil {
+		u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
+		return 0, fmt.Errorf("updateUser: can not generate hash from password:%w", err)
+	}
+	if userDb.Password != oldHash {
+		u.logger.Warn("wrong email or password entered")
+		return 0, fmt.Errorf("wrong email or password entered")
+	} else {
+		newHash, err := utils.HashPassword(user.NewPassword, bcrypt.DefaultCost)
+		if err != nil {
+			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
+			return 0, fmt.Errorf("updateUser: can not generate hash from password:%w", err)
+		}
+		user.NewPassword = newHash
+		userId, err := u.repo.UpdateUser(user, id)
+		if err != nil {
+			return 0, err
+		}
+		return userId, nil
+	}
+}
+
+func (u *UserService) DeleteUserByID(id int) (int, error) {
+	userId, err := u.repo.DeleteUserByID(id)
+	if err != nil {
+		return 0, err
+	}
+	return userId, nil
+}
+
+func GeneratePassword() string {
+	rand.Seed(time.Now().UnixNano())
+	length := 8
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		b.WriteRune(model.PasswordComposition[rand.Intn(len(model.PasswordComposition))])
+	}
+	return b.String()
 }
