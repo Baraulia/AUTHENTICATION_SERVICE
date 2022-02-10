@@ -150,5 +150,7 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
+	}else {
+		c.JSON(http.StatusOK, gin.H{"message": "successful"})
 	}
 }

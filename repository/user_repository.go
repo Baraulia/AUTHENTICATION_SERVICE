@@ -5,6 +5,7 @@ import (
 	_ "database/sql"
 	"errors"
 	"fmt"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
@@ -101,12 +102,12 @@ func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
 		log.Printf("Error while scanning for author:%s", err)
 		return nil, fmt.Errorf("createAuthor: error while scanning for author:%w", err)
 	}
-	//email := mail.NewEmail(user.Email, user.Password, "please, return books to the library")
-	//err := mail.SendEmail(email)
-	//if err != nil{
-	//	log.Print(err)
-	//}
-
+	// send user password
+	email := mail.NewEmail(user.Email, user.Password, "Hello, this is your personal account password")
+	err := mail.SendEmail(email)
+	if err != nil{
+		log.Print(err)
+	}
 
 	// find user by id
 	result, err := u.GetUserByID(user.ID)
@@ -136,7 +137,6 @@ func (u *UserPostgres) UpdateUser(user model.User, id int) (*model.User, error) 
 		log.Panic(err)
 		return nil, err
 	}
-
 	return result, nil
 }
 
