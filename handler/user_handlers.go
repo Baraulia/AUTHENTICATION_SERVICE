@@ -103,13 +103,7 @@ func (h *Handler) createUser(c *gin.Context) {
 	validationErrors := validateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
-		errors, err := json.Marshal(validationErrors)
-		if err != nil {
-			h.logger.Errorf("createUser: error while marshaling list myErrors:%s", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-		c.JSON(http.StatusBadRequest, errors)
+		c.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
 	user, err := h.service.CreateUser(&input)
