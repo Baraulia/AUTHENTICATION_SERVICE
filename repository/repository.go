@@ -12,6 +12,7 @@ type AppUser interface {
 	CreateUser(User *model.User) (*model.User, error)
 	UpdateUser(User model.User, id int) (*model.User, error)
 	DeleteUserByID(id int) error
+	GetUserByEmail(email string) (*model.User, error)
 }
 
 type Repository struct {

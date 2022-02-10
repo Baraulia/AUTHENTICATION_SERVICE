@@ -36,6 +36,7 @@ func (h *Handler) getUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+
 }
 
 // getUsers godoc

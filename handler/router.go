@@ -25,6 +25,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user.POST("/", h.createUser)
 		user.PUT("/:id", h.updateUser)
 		user.DELETE("/:id", h.deleteUserByID)
+    user.POST("/login", h.authUser)
 	}
 	return router
 }
