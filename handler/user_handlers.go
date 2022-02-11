@@ -171,7 +171,7 @@ func (h *Handler) updateUser(c *gin.Context) {
 // @Router /user/{id} [delete]
 func (h *Handler) deleteUserByID(c *gin.Context) {
 	paramID := c.Param("id")
-	varID, err := strconv.ParseInt(paramID, 10, 0)
+	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

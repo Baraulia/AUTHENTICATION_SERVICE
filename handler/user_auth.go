@@ -8,8 +8,12 @@ import (
 
 func (h *Handler) authUser(c *gin.Context) {
 	h.logger.Info("Working authUser")
+	if c.Request.Method == "OPTIONS" {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Status(200)
+		return
+	}
 	var input model.AuthUser
-
 	if err := c.BindJSON(&input); err != nil {
 		h.logger.Errorf("authUser: error while decoding request:%s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

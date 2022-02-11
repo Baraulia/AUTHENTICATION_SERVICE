@@ -50,7 +50,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.User, error) {
 	if page == 0 || limit == 0 {
 		query = "SELECT id, email, password, created_at FROM users"
 	} else {
-		query = fmt.Sprintf("SELECT id, email, password, created_at FROM users LIMIT %d OFFSET %d", limit, (page-1)*limit)
+		query = fmt.Sprintf("SELECT id, email, password, created_at FROM users ORDER BY id LIMIT %d OFFSET %d", limit, (page-1)*limit)
 	}
 
 	rows, err := transaction.Query(query)
