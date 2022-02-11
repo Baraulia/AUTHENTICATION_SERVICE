@@ -81,9 +81,13 @@ func (u *UserService) DeleteUserByID(id int) (int, error) {
 
 func GeneratePassword() string {
 	rand.Seed(time.Now().UnixNano())
-	length := 8
+	length := 8 + rand.Intn(7)
 	var b strings.Builder
-	for i := 0; i < length; i++ {
+	b.WriteRune(model.PasswordUpper[rand.Intn(len(model.PasswordUpper))])
+	b.WriteRune(model.PasswordNumber[rand.Intn(len(model.PasswordNumber))])
+	b.WriteRune(model.PasswordLower[rand.Intn(len(model.PasswordLower))])
+	b.WriteRune(model.PasswordSpecial[rand.Intn(len(model.PasswordSpecial))])
+	for i := 0; i < length-4; i++ {
 		b.WriteRune(model.PasswordComposition[rand.Intn(len(model.PasswordComposition))])
 	}
 	return b.String()

@@ -24,6 +24,15 @@ type UpdateUser struct {
 
 type Users []User
 
+var PasswordNumber = []rune("0123456789")
+
+var PasswordUpper = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+var PasswordLower = []rune("abcdefghijklmnopqrstuvwxyz")
+
+var PasswordSpecial = []rune("@#%&!$")
+
 var PasswordComposition = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 	"abcdefghijklmnopqrstuvwxyz" +
-	"0123456789")
+	"0123456789" +
+	"@#%&!$")

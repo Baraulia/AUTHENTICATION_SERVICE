@@ -44,18 +44,69 @@ func (v PasswordValidator) Validate(val interface{}) error {
 		return nil
 	}
 	for _, i := range val.(string) {
+		if string(i) == " " {
+			return fmt.Errorf("passwordValidator: password should not contain any space")
+		}
+	}
+	var num int
+	var upper int
+	var lower int
+	var special int
+	for _, i := range val.(string) {
 		var overlap = false
-		for _, j := range model.PasswordComposition {
+		for _, j := range model.PasswordNumber {
 			if i == j {
 				overlap = true
+				num = num + 1
 				break
 			}
 		}
 		if overlap == false {
-			return fmt.Errorf("passwordValidator: the password must consist of uppercase and lowercase letters and numbers")
+			for _, j := range model.PasswordLower {
+				if i == j {
+					overlap = true
+					lower = lower + 1
+					break
+				}
+			}
+		}
+		if overlap == false {
+			for _, j := range model.PasswordUpper {
+				if i == j {
+					overlap = true
+					upper = upper + 1
+					break
+				}
+			}
+		}
+		if overlap == false {
+			for _, j := range model.PasswordSpecial {
+				if i == j {
+					overlap = true
+					special = special + 1
+					break
+				}
+			}
+		}
+		if overlap == false {
+			return fmt.Errorf("passwordValidator: the password must contain at least one digit(0-9), " +
+				"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,&,!,$)")
 		} else {
 			overlap = false
 		}
+	}
+	if num == 0 || lower == 0 || upper == 0 || special == 0 {
+		num = 0
+		lower = 0
+		upper = 0
+		special = 0
+		return fmt.Errorf("passwordValidator: the password must contain at least one digit(0-9), " +
+			"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,&,!,$)")
+	} else {
+		num = 0
+		lower = 0
+		upper = 0
+		special = 0
 	}
 	return nil
 }
