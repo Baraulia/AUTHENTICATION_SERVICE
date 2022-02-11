@@ -30,6 +30,7 @@ func (h *Handler) authUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "wrong email or password entered"})
 	} else {
+		c.Header("Access-Control-Allow-Origin", "*")
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"id": id,
 		})
