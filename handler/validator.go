@@ -90,7 +90,7 @@ func (v PasswordValidator) Validate(val interface{}) error {
 		}
 		if overlap == false {
 			return fmt.Errorf("passwordValidator: the password must contain at least one digit(0-9), " +
-				"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,&,!,$)")
+				"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%%,&,!,$)")
 		} else {
 			overlap = false
 		}
@@ -101,7 +101,7 @@ func (v PasswordValidator) Validate(val interface{}) error {
 		upper = 0
 		special = 0
 		return fmt.Errorf("passwordValidator: the password must contain at least one digit(0-9), " +
-			"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,&,!,$)")
+			"one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%%,&,!,$)")
 	} else {
 		num = 0
 		lower = 0
