@@ -26,10 +26,10 @@ func TestHandler_authUser(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnuTg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu!98Tg"}`,
 			inputUser: model.AuthUser{
 				Email:    "test@yandex.ru",
-				Password: "HGYKnuTg",
+				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
 				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, nil)
