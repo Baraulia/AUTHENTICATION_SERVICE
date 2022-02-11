@@ -37,8 +37,8 @@ type PasswordValidator struct {
 }
 
 func (v PasswordValidator) Validate(val interface{}) error {
-	if len(val.(string)) != 8 && len(val.(string)) != 0 {
-		return fmt.Errorf("passwordValidator:should be 8 characters long")
+	if (len(val.(string)) < 8 || len(val.(string)) > 15) && len(val.(string)) != 0 {
+		return fmt.Errorf("passwordValidator:the length of the password should be between 8 to 15 characters")
 	}
 	if len(val.(string)) == 0 {
 		return nil
