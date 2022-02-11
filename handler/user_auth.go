@@ -8,6 +8,7 @@ import (
 
 func (h *Handler) authUser(c *gin.Context) {
 	h.logger.Info("Working authUser")
+
 	if c.Request.Method == "OPTIONS" {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Status(200)
