@@ -17,7 +17,7 @@ func (h *Handler) authUser(c *gin.Context) {
 	var input model.AuthUser
 	if err := c.BindJSON(&input); err != nil {
 		h.logger.Errorf("authUser: error while decoding request:%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid input body"})
 		return
 	}
 	validationErrors := validateStruct(input)

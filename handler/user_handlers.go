@@ -25,12 +25,12 @@ func (h *Handler) getUser(c *gin.Context) {
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler getUser (reading param):%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
 		return
 	}
 	user, err := h.service.AppUser.GetUser(varID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, user)

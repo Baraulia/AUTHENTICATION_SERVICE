@@ -10,14 +10,21 @@ type User struct {
 }
 
 type CreateUser struct {
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"password"`
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string `json:"password" binding:"required" validate:"password"`
 }
 
 type UpdateUser struct {
 	Email       string `json:"email" validate:"email"`
-	OldPassword string `json:"old_password" validate:"password"`
-	NewPassword string `json:"new_password" validate:"password"`
+	OldPassword string `json:"old_password" binding:"required" validate:"password"`
+	NewPassword string `json:"new_password" binding:"required" validate:"password"`
+}
+
+type MockUser struct {
+	ID        int    `json:"id"`
+	Email     string `json:"email" `
+	Password  string `json:"password"`
+	CreatedAt string `json:"created_at"`
 }
 
 // Users array of User type
