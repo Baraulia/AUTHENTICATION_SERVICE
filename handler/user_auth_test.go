@@ -16,7 +16,6 @@ import (
 
 func TestHandler_authUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.AuthUser)
-
 	testTable := []struct {
 		name                string         //the name of the test
 		inputBody           string         //the body of the request

@@ -11,7 +11,7 @@ type User struct {
 
 type CreateUser struct {
 	Email    string `json:"email" binding:"required" validate:"email"`
-	Password string `json:"password" binding:"required" validate:"password"`
+	Password string `json:"password" validate:"password"`
 }
 
 type UpdateUser struct {

@@ -51,20 +51,20 @@ func (h *Handler) getUser(c *gin.Context) {
 func (h *Handler) getUsers(c *gin.Context) {
 	var page = 0
 	var limit = 0
-	if c.Param("page") != "" {
-		paramPage, err := strconv.Atoi(c.Param("page"))
+	if c.Query("page") != "" {
+		paramPage, err := strconv.Atoi(c.Query("page"))
 		if err != nil || paramPage < 0 {
-			h.logger.Errorf("No url request:%s", err)
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			h.logger.Warnf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid url query"})
 			return
 		}
 		page = paramPage
 	}
-	if c.Param("limit") != "" {
-		paramLimit, err := strconv.Atoi(c.Param("limit"))
+	if c.Query("limit") != "" {
+		paramLimit, err := strconv.Atoi(c.Query("limit"))
 		if err != nil || paramLimit < 0 {
-			h.logger.Errorf("No url request:%s", err)
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			h.logger.Warnf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid url query"})
 			return
 		}
 		limit = paramLimit
@@ -96,7 +96,7 @@ func (h *Handler) createUser(c *gin.Context) {
 	var input model.CreateUser
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
 		return
 	}
 	validationErrors := validateStruct(input)
@@ -128,16 +128,16 @@ func (h *Handler) createUser(c *gin.Context) {
 // @Router /user/ [put]
 func (h *Handler) updateUser(c *gin.Context) {
 	var input model.UpdateUser
-	paramID := c.Param("id")
+	paramID := c.Query("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler updateUser (reading param):%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid url query"})
 		return
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
 		return
 	}
 	validationErrors := validateStruct(input)
@@ -174,7 +174,7 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id"})
 		return
 	}
 	id, err := h.service.AppUser.DeleteUserByID(int(varID))
