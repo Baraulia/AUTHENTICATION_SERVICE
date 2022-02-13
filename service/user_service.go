@@ -41,6 +41,12 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
+	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	if err != nil {
+		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
+		return nil, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+	}
+	user.Password = hash
 	resUser, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
 		return nil, err

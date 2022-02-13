@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -78,17 +76,11 @@ func (u *UserPostgres) CreateUser(user *model.CreateUser) (*model.User, error) {
 	}
 	var createdUser model.User
 	defer transaction.Rollback()
-	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
-	if err != nil {
-		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return nil, fmt.Errorf("createUser: can not generate hash from password:%w", err)
-	}
-	row := transaction.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id, email, created_at", user.Email, hash, time.Now())
-	if err := row.Scan(&createdUser.ID, &createdUser.Email, &createdUser.CreatedAt); err != nil {
+	row := transaction.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id, email, password, created_at", user.Email, user.Password, time.Now())
+	if err := row.Scan(&createdUser.ID, &createdUser.Email, &createdUser.Password, &createdUser.CreatedAt); err != nil {
 		u.logger.Errorf("CreateUser: error while scanning for user:%s", err)
 		return nil, fmt.Errorf("createUser: error while scanning for user:%w", err)
 	}
-	createdUser.Password = user.Password
 	return &createdUser, transaction.Commit()
 }
 
