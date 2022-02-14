@@ -11,6 +11,7 @@ func (h *Handler) authUser(c *gin.Context) {
 
 	if c.Request.Method == "OPTIONS" {
 		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "Content-type")
 		c.Status(200)
 		return
 	}
@@ -31,6 +32,7 @@ func (h *Handler) authUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "wrong email or password entered"})
 	} else {
 		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "Content-type")
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"id": id,
 		})
