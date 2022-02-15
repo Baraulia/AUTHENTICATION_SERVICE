@@ -18,7 +18,7 @@ func (h *Handler) authUser(c *gin.Context) {
 	validationErrors := validateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
-		c.JSON(http.StatusBadRequest, validationErrors)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "wrong email or password entered"})
 		return
 	}
 	id, err := h.service.AppUser.AuthUser(input.Email, input.Password)
