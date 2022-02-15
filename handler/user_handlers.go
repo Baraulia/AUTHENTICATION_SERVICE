@@ -107,8 +107,13 @@ func (h *Handler) createUser(c *gin.Context) {
 	}
 	user, err := h.service.AppUser.CreateUser(&input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
+		if err.Error() == "createUser: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
 	}
 	c.JSON(http.StatusCreated, user)
 }
