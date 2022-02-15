@@ -43,7 +43,7 @@ func TestHandler_authUser(t *testing.T) {
 			inputUser:           model.AuthUser{},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid input body"}`,
+			expectedRequestBody: `{"message":"Invalid input body"}`,
 		},
 		{
 			name:      "invalid values in email field",
@@ -54,7 +54,7 @@ func TestHandler_authUser(t *testing.T) {
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"Email":"emailValidator: it is not a valid email address"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 		{
 			name:      "invalid values in password field",
@@ -65,7 +65,7 @@ func TestHandler_authUser(t *testing.T) {
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"Password":"passwordValidator: the password must contain at least one digit(0-9), one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,\u0026,!,$)"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 		{
 			name:      "invalid values in both fields",
@@ -76,7 +76,7 @@ func TestHandler_authUser(t *testing.T) {
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"Email":"emailValidator: it is not a valid email address","Password":"passwordValidator: the password must contain at least one digit(0-9), one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,\u0026,!,$)"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 		{
 			name:      "invalid length of the password",
@@ -87,7 +87,7 @@ func TestHandler_authUser(t *testing.T) {
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"Password":"passwordValidator: the length of the password should be between 8 to 15 characters"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 		{
 			name:      "space in the password",
@@ -98,7 +98,7 @@ func TestHandler_authUser(t *testing.T) {
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.AuthUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"Password":"passwordValidator: password should not contain any space"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 		{
 			name:      "Service Failure",
@@ -111,7 +111,7 @@ func TestHandler_authUser(t *testing.T) {
 				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, errors.New("service failure"))
 			},
 			expectedStatusCode:  401,
-			expectedRequestBody: `{"message":"wrong email or password entered"}`,
+			expectedRequestBody: `{"message":"Wrong email or password entered"}`,
 		},
 	}
 
