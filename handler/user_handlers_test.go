@@ -47,7 +47,7 @@ func TestHandler_getUser(t *testing.T) {
 			input:               "a",
 			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid request"}`,
+			expectedRequestBody: `{"message":"Invalid request"}`,
 		},
 		{
 			name:  "non-existent id",
@@ -152,7 +152,7 @@ func TestHandler_getUsers(t *testing.T) {
 			limit:               0,
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid url query"}`,
+			expectedRequestBody: `{"message":"Invalid url query"}`,
 		},
 		{
 			name:                "Invalid value of the limit in url query",
@@ -161,7 +161,7 @@ func TestHandler_getUsers(t *testing.T) {
 			limit:               0,
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid url query"}`,
+			expectedRequestBody: `{"message":"Invalid url query"}`,
 		},
 		{
 			name:       "Server error",
@@ -290,7 +290,7 @@ func TestHandler_createUser(t *testing.T) {
 			inputBody:           `{"password":"HGYKn!u98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid request"}`,
+			expectedRequestBody: `{"message":"Invalid request"}`,
 		},
 	}
 
@@ -357,7 +357,7 @@ func TestHandler_updateUser(t *testing.T) {
 			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid url query"}`,
+			expectedRequestBody: `{"message":"Invalid url query"}`,
 		},
 		{
 			name:                "Empty one field",
@@ -365,7 +365,7 @@ func TestHandler_updateUser(t *testing.T) {
 			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid request"}`,
+			expectedRequestBody: `{"message":"Invalid request"}`,
 		},
 		{
 			name:                "Invalid new password",
@@ -448,7 +448,7 @@ func TestHandler_deleteUser(t *testing.T) {
 			inputId:             "a",
 			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"invalid id"}`,
+			expectedRequestBody: `{"message":"Invalid id"}`,
 		},
 		{
 			name:    "Server Failure",
