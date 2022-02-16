@@ -6,6 +6,7 @@ import (
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/database"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/server"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
 	"net/smtp"
 	"os"
@@ -32,8 +33,11 @@ func main() {
 	// Setup router
 	router := handlers.InitRoutes()
 	port := os.Getenv("API_SERVER_PORT")
+	serv := new(server.Server)
 	go func() {
-		logger.Fatal(router.Run(":" + port))
+		if err := serv.Run(os.Getenv("HOST"), port, router); err != nil {
+			logger.Panicf("Error occured while running http server: %s", err.Error())
+		}
 	}()
 	auth := smtp.PlainAuth("", os.Getenv("POST_FROM"), os.Getenv("POST_PASSWORD"), mail.HOST)
 	go mail.SendEmail(logger, auth)
