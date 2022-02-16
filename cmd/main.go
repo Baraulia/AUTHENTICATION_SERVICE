@@ -32,7 +32,7 @@ func main() {
 	port := os.Getenv("API_SERVER_PORT")
 	serv := new(server.Server)
 
-	if err := serv.Run(os.Getenv("HOST"), port, handlers.InitRoutes()); err != nil {
+	if err := serv.Run(port, handlers.InitRoutes()); err != nil {
 		logger.Panicf("Error occured while running http server: %s", err.Error())
 	}
 
