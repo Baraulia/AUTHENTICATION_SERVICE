@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
@@ -41,6 +42,7 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
+	pas := user.Password
 	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
@@ -50,6 +52,10 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	resUser, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
 		return nil, err
+	}
+	mail.Post <- model.Post{
+		Email:    user.Email,
+		Password: pas,
 	}
 	return resUser, nil
 }

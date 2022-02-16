@@ -2,16 +2,17 @@ package main
 
 import (
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/handler"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/database"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
+	"net/smtp"
 	"os"
 )
 
 func main() {
 	logger := logging.GetLogger()
-
 
 	db, err := database.NewPostgresDB(database.PostgresDB{
 		Host:     os.Getenv("HOST"),
@@ -31,5 +32,9 @@ func main() {
 	// Setup router
 	router := handlers.InitRoutes()
 	port := os.Getenv("API_SERVER_PORT")
-	logger.Fatal(router.Run(":" + port))
+	go func() {
+		logger.Fatal(router.Run(":" + port))
+	}()
+	auth := smtp.PlainAuth("", os.Getenv("POST_FROM"), os.Getenv("POST_PASSWORD"), mail.HOST)
+	go mail.SendEmail(logger, auth)
 }
