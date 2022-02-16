@@ -53,10 +53,10 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	mail.Post <- model.Post{
+	go mail.SendEmail(u.logger, &model.Post{
 		Email:    user.Email,
 		Password: pas,
-	}
+	})
 	return resUser, nil
 }
 

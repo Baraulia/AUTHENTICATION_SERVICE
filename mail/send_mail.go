@@ -15,25 +15,18 @@ const (
 	SUBJECT = "Food Delivery"
 )
 
-var Post = make(chan model.Post, 1)
+func SendEmail(logger logging.Logger, post *model.Post) {
+	auth := smtp.PlainAuth("", os.Getenv("POST_FROM"), os.Getenv("POST_PASSWORD"), HOST)
+	from := os.Getenv("POST_FROM")
+	smtpHost := HOST
+	smtpPort := PORT
 
-func SendEmail(logger logging.Logger, auth smtp.Auth) {
-	for {
-		select {
-		case <-Post:
-			destination := <-Post
-			from := os.Getenv("POST_FROM")
-			smtpHost := HOST
-			smtpPort := PORT
-			msg := fmt.Sprintf(" Уважаемый клиент, Ваш текущий пароль: %s.", destination.Password)
-			message := strings.Replace("From: "+from+"~To: "+destination.Email+"~Subject: "+SUBJECT+"~~", "~", "\r\n", -1) + msg
-			err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{destination.Email}, []byte(message))
-			if err != nil {
-				logger.Errorf("Error while sending email to %s:%s", destination.Email, err)
-				return
-			}
-			logger.Infof("Email for %s Sent Successfully!", destination.Email)
-		}
-
+	msg := fmt.Sprintf("Уважаемый клиент, Ваш текущий пароль: %s.", post.Password)
+	message := strings.Replace("From: "+from+"~To: "+post.Email+"~Subject: "+SUBJECT+"~~", "~", "\r\n", -1) + msg
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{post.Email}, []byte(message))
+	if err != nil {
+		logger.Errorf("Error while sending email to %s:%s", post.Email, err)
+		return
 	}
+	logger.Infof("Email for %s Sent Successfully!", post.Email)
 }
