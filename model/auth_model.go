@@ -1,6 +1,6 @@
 package model
 
 type AuthUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string `json:"password" binding:"required" validate:"password"`
 }

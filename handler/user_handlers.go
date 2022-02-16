@@ -20,23 +20,20 @@ import (
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/{id} [get]
-
 func (h *Handler) getUser(c *gin.Context) {
-	var user *model.User
 	paramID := c.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		h.logger.Warnf("Handler getUser (reading param):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return
 	}
-
-	user, err = h.service.GetUser(varID)
+	user, err := h.service.AppUser.GetUser(varID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, user)
-
 }
 
 // getUsers godoc
@@ -51,11 +48,31 @@ func (h *Handler) getUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [get]
-
 func (h *Handler) getUsers(c *gin.Context) {
-	users, err := h.service.GetUsers()
+	var page = 0
+	var limit = 0
+	if c.Query("page") != "" {
+		paramPage, err := strconv.Atoi(c.Query("page"))
+		if err != nil || paramPage < 0 {
+			h.logger.Warnf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
+			return
+		}
+		page = paramPage
+	}
+	if c.Query("limit") != "" {
+		paramLimit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil || paramLimit < 0 {
+			h.logger.Warnf("No url request:%s", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
+			return
+		}
+		limit = paramLimit
+	}
+
+	users, err := h.service.AppUser.GetUsers(page, limit)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, users)
@@ -75,20 +92,28 @@ func (h *Handler) getUsers(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [post]
-
 func (h *Handler) createUser(c *gin.Context) {
-
-	var user *model.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
+	var input model.CreateUser
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return
 	}
-
-	user, err := h.service.CreateUser(user)
-	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"message": err})
+	validationErrors := validateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		c.JSON(http.StatusBadRequest, validationErrors)
 		return
+	}
+	user, err := h.service.AppUser.CreateUser(&input)
+	if err != nil {
+		if err.Error() == "createUser: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
 	}
 	c.JSON(http.StatusCreated, user)
 }
@@ -106,24 +131,34 @@ func (h *Handler) createUser(c *gin.Context) {
 // @Failure 500 {string} string
 // @Security bearerAuth
 // @Router /user/ [put]
-
 func (h *Handler) updateUser(c *gin.Context) {
-	var user model.User
-	paramID := c.Param("id")
+	var input model.UpdateUser
+	paramID := c.Query("id")
 	varID, err := strconv.Atoi(paramID)
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "invalid json"})
-		return
-	}
-
-	usr, err := h.service.UpdateUser(user, varID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		h.logger.Warnf("Handler updateUser (reading param):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
 		return
 	}
-
-	c.JSON(http.StatusOK, usr)
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+	validationErrors := validateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		c.JSON(http.StatusBadRequest, validationErrors)
+		return
+	}
+	id, err := h.service.AppUser.UpdateUser(&input, varID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": id,
+	})
 }
 
 // deleteUserByID godoc
@@ -141,17 +176,19 @@ func (h *Handler) updateUser(c *gin.Context) {
 // @Router /user/{id} [delete]
 func (h *Handler) deleteUserByID(c *gin.Context) {
 	paramID := c.Param("id")
-	varID, err := strconv.ParseInt(paramID, 10, 0)
+	varID, err := strconv.Atoi(paramID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid id"})
 		return
 	}
-
-	err = h.service.DeleteUserByID(int(varID))
+	id, err := h.service.AppUser.DeleteUserByID(int(varID))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
-	}else {
-		c.JSON(http.StatusOK, gin.H{"message": "successful"})
+	} else {
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"id": id,
+		})
 	}
 }

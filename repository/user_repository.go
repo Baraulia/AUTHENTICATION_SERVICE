@@ -3,15 +3,9 @@ package repository
 import (
 	"database/sql"
 	_ "database/sql"
-	"errors"
 	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
-	"golang.org/x/crypto/bcrypt"
-	"log"
-	"math/rand"
-	"strings"
 	"time"
 )
 
@@ -26,142 +20,102 @@ func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
 
 // GetUserByID ...
 func (u UserPostgres) GetUserByID(id int) (*model.User, error) {
-	db := u.db
-
-	var user model.User
-
-
-	result, err := db.Query("SELECT id, email, password, created_at FROM users WHERE id = $1", id)
-
+	transaction, err := u.db.Begin()
 	if err != nil {
-		// print stack trace
-		log.Println("Error query user: " + err.Error())
-		return nil, err
+		u.logger.Errorf("GetUserByID: can not starts transaction:%s", err)
+		return nil, fmt.Errorf("getUserByID: can not starts transaction:%w", err)
+	}
+	var user model.User
+	result := transaction.QueryRow("SELECT id, email, password, created_at FROM users WHERE id = $1", id)
+	if err := result.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt); err != nil {
+		u.logger.Errorf("GetUserByID: error while scanning for user:%s", err)
+		return nil, fmt.Errorf("getUserByID: repository error:%w", err)
 	}
 
-	for result.Next() {
-
-		err := result.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &user, nil
+	return &user, transaction.Commit()
 }
 
 // GetUserAll ...
-func (u *UserPostgres) GetUserAll() ([]model.User, error) {
-	db := u.db
-
+func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.User, error) {
+	transaction, err := u.db.Begin()
+	if err != nil {
+		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
+		return nil, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
+	}
 	var User model.User
 	var Users []model.User
+	var query string
+	if page == 0 || limit == 0 {
+		query = "SELECT id, email, password, created_at FROM users"
+	} else {
+		query = fmt.Sprintf("SELECT id, email, password, created_at FROM users ORDER BY id LIMIT %d OFFSET %d", limit, (page-1)*limit)
+	}
 
-	rows, err := db.Query("SELECT id, email, password, created_at FROM users")
-
+	rows, err := transaction.Query(query)
 	if err != nil {
-		log.Println("Error query user: " + err.Error())
-		return Users, err
+		u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+		return nil, fmt.Errorf("getUserAll:repository error:%w", err)
 	}
 
 	for rows.Next() {
-	if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
-			return Users, err
+		if err := rows.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
+			u.logger.Errorf("Error while scanning for user:%s", err)
+			return nil, fmt.Errorf("getUserAll:repository error:%w", err)
 		}
 		Users = append(Users, User)
 	}
-
-	return Users, nil
-}
-func GeneratePassword() string {
-	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
-		"abcdefghijklmnopqrstuvwxyzåäö" +
-		"0123456789")
-	length := 12
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
-	}
-	return  b.String()
+	return Users, transaction.Commit()
 }
 
 // CreateUser ...
-func (u *UserPostgres) CreateUser(user *model.User) (*model.User, error) {
-	db := u.db
-
-	userr := model.User{}
-
-	str := GeneratePassword()
-	if user.Password == ""{
-		user.Password = str
+func (u *UserPostgres) CreateUser(user *model.CreateUser) (*model.User, error) {
+	transaction, err := u.db.Begin()
+	if err != nil {
+		u.logger.Errorf("CreateUser: can not starts transaction:%s", err)
+		return nil, fmt.Errorf("createUser: can not starts transaction:%w", err)
 	}
-
-	userr.Password = user.Password
-	userr.Email = user.Email
-
-	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
-	user.Password = hash
-
-	row := db.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id, email, password, created_at", user.Email, user.Password, time.Now())
-	if err := row.Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt); err != nil {
-		log.Printf("Error while scanning for user:%s", err)
-		return nil, fmt.Errorf("create user: error while scanning for user:%w", err)
-
+	var createdUser model.User
+	defer transaction.Rollback()
+	row := transaction.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id, email, password, created_at", user.Email, user.Password, time.Now())
+	if err := row.Scan(&createdUser.ID, &createdUser.Email, &createdUser.Password, &createdUser.CreatedAt); err != nil {
+		u.logger.Errorf("CreateUser: error while scanning for user:%s", err)
+		return nil, fmt.Errorf("createUser: error while scanning for user:%w", err)
 	}
-	// send user password
-	//err := mail.SendEmail(userr.Email, userr.Password, "Hello, this is your personal account password")
-	//if err != nil{
-	//	log.Print(err)
-	//}
-	userr.ID = user.ID
-	userr.CreatedAt = user.CreatedAt
-
-	return &userr, nil
+	return &createdUser, transaction.Commit()
 }
 
 // UpdateUser ...
-func (u *UserPostgres) UpdateUser(user model.User, id int) (*model.User, error) {
-	db := u.db
-
-	hash, _ := utils.HashPassword(user.Password, bcrypt.DefaultCost)
-	user.Password = hash
-	row := db.QueryRow("UPDATE users SET email =$1, password =$2 WHERE id=$3 RETURNING id", user.Email, user.Password, id)
-	if err := row.Scan(&user.ID); err != nil {
-		log.Printf("Error while scanning for user:%s", err)
-		return nil, fmt.Errorf("update user: error while scanning for user:%w", err)
-	}
-	// find user by id
-	result, err := u.GetUserByID(user.ID)
+func (u *UserPostgres) UpdateUser(user *model.UpdateUser, id int) (int, error) {
+	transaction, err := u.db.Begin()
 	if err != nil {
-		log.Panic(err)
-		return nil, err
+		u.logger.Errorf("UpdateUser: can not starts transaction:%s", err)
+		return 0, fmt.Errorf("updateUser: can not starts transaction:%w", err)
 	}
-	return result, nil
+	defer transaction.Rollback()
+	var userId int
+	row := transaction.QueryRow("UPDATE users SET password =$1 WHERE id=$2 RETURNING id", user.NewPassword, id)
+	if err := row.Scan(&userId); err != nil {
+		u.logger.Errorf("UpdateUser: error while scanning for user:%s", err)
+		return 0, fmt.Errorf("updateUser: error while scanning for user:%w", err)
+	}
+	return userId, transaction.Commit()
 }
 
 // DeleteUserByID ...
-func (u *UserPostgres) DeleteUserByID(id int) error {
-	db := u.db
-
-	res, err := u.GetUserByID(id)
+func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
+	transaction, err := u.db.Begin()
 	if err != nil {
-		return err
+		u.logger.Errorf("DeleteUserByID: can not starts transaction:%s", err)
+		return 0, fmt.Errorf("deleteUserByID: can not starts transaction:%w", err)
 	}
-	if (model.User{} == *res) {
-		return errors.New("no record value with id: %v" )
+	defer transaction.Rollback()
+	var userId int
+	row := transaction.QueryRow("DELETE FROM users WHERE id=$1 RETURNING id", id)
+	if err := row.Scan(&userId); err != nil {
+		u.logger.Errorf("DeleteUserByID: error while scanning for userId:%s", err)
+		return 0, fmt.Errorf("deleteUserByID: error while scanning for userId:%w", err)
 	}
-
-	crt, err := db.Prepare("DELETE FROM users WHERE id=$1")
-	if err != nil {
-		return err
-	}
-	_, queryError := crt.Exec(id)
-	if queryError != nil {
-		return err
-	}
-
-	return nil
+	return userId, transaction.Commit()
 }
 
 // GetUserByEmail ...
@@ -175,8 +129,8 @@ func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 	query := "SELECT id, email, password, created_at FROM users WHERE email = $1"
 	row := transaction.QueryRow(query, email)
 	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
-	  u.logger.Errorf("Error while scanning for user:%s", err)
-  return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
+		u.logger.Errorf("Error while scanning for user:%s", err)
+		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 
 	}
 	return &User, transaction.Commit()

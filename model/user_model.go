@@ -3,12 +3,43 @@ package model
 import "time"
 
 type User struct {
-	ID        int       `json:"id"       sql:"id"`
-	Email     string    `json:"email" validate:"required" sql:"email"`
-	Password  string    `json:"password" validate:"required" sql:"password"`
-	CreatedAt time.Time `json:"createdAt" sql:"created_at"`
+	ID        int       `json:"id"`
+	Email     string    `json:"email" `
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type CreateUser struct {
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string `json:"password" validate:"password"`
+}
+
+type UpdateUser struct {
+	Email       string `json:"email" validate:"email"`
+	OldPassword string `json:"old_password" binding:"required" validate:"password"`
+	NewPassword string `json:"new_password" binding:"required" validate:"password"`
+}
+
+type MockUser struct {
+	ID        int    `json:"id"`
+	Email     string `json:"email" `
+	Password  string `json:"password"`
+	CreatedAt string `json:"created_at"`
 }
 
 // Users array of User type
 
 type Users []User
+
+var PasswordNumber = []rune("0123456789")
+
+var PasswordUpper = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+var PasswordLower = []rune("abcdefghijklmnopqrstuvwxyz")
+
+var PasswordSpecial = []rune("@#%&!$")
+
+var PasswordComposition = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+	"abcdefghijklmnopqrstuvwxyz" +
+	"0123456789" +
+	"@#%&!$")
