@@ -17,7 +17,7 @@ type AppUser interface {
 	UpdateUser(user *model.UpdateUser, id int) (int, error)
 	DeleteUserByID(id int) (int, error)
 	AuthUser(email string, password string) (int, error)
-	GrpcExample(map[string]string) (*auth_proto.Response, error)
+	GrpcExample(string) (*auth_proto.Response, error)
 }
 
 type Service struct {
