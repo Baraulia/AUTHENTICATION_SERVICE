@@ -6,6 +6,7 @@ import (
 	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"os"
 )
 
@@ -16,11 +17,10 @@ type GRPCClient struct {
 }
 
 func NewGRPCClient() *GRPCClient {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:8090", os.Getenv("HOST")), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:8090", os.Getenv("API_SERVER_PORT")), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalf("NewGRPCClient, Dial:%s", err)
 	}
-	defer conn.Close()
 	cli := auth_proto.NewAuthClient(conn)
 	return &GRPCClient{cli: cli}
 }
