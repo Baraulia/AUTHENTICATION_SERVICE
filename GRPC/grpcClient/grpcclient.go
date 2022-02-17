@@ -17,7 +17,7 @@ type GRPCClient struct {
 }
 
 func NewGRPCClient() *GRPCClient {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:8090", os.Getenv("API_SERVER_PORT")), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(fmt.Sprintf("%s:8090", os.Getenv("HOST")), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalf("NewGRPCClient, Dial:%s", err)
 	}
