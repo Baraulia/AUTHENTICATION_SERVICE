@@ -197,11 +197,11 @@ func (h *Handler) grpcFunc(c *gin.Context) {
 	var input string
 	input = c.Query("token")
 
-	resp, err := h.service.AppUser.GrpcExample(input)
+	_, err := h.service.AppUser.GrpcExample(input)
 	if err != nil {
 		return
 	} else {
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, input)
 	}
 
 }
