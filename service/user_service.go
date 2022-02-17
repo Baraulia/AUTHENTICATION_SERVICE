@@ -1,7 +1,10 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
@@ -14,12 +17,13 @@ import (
 )
 
 type UserService struct {
-	repo   repository.Repository
-	logger logging.Logger
+	repo    repository.Repository
+	logger  logging.Logger
+	grpcCli *grpcClient.GRPCClient
 }
 
-func NewUserService(repo repository.Repository, logger logging.Logger) *UserService {
-	return &UserService{repo: repo, logger: logger}
+func NewUserService(repo repository.Repository, grpcCli *grpcClient.GRPCClient, logger logging.Logger) *UserService {
+	return &UserService{repo: repo, grpcCli: grpcCli, logger: logger}
 }
 
 func (u *UserService) GetUser(id int) (*model.User, error) {
@@ -103,4 +107,8 @@ func GeneratePassword() string {
 		b.WriteRune(model.PasswordComposition[rand.Intn(len(model.PasswordComposition))])
 	}
 	return b.String()
+}
+
+func (u *UserService) GrpcExample(in map[string]string) (*auth_proto.Response, error) {
+	return u.grpcCli.GetUserWithRights(context.Background(), &auth_proto.Request{AccessToken: in["token"]})
 }

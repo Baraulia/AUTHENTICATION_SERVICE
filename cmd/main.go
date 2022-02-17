@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/handler"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/database"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
@@ -25,8 +26,10 @@ func main() {
 		logger.Panicf("failed to initialize db:%s", err.Error())
 	}
 
+	grpcCli := grpcClient.NewGRPCClient()
+
 	rep := repository.NewRepository(db, logger)
-	ser := service.NewService(rep, logger)
+	ser := service.NewService(rep, grpcCli, logger)
 	handlers := handler.NewHandler(logger, ser)
 
 	port := os.Getenv("API_SERVER_PORT")

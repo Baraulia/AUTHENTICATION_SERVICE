@@ -192,3 +192,19 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 		})
 	}
 }
+
+func (h *Handler) grpcFunc(c *gin.Context) {
+	var input map[string]string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+	resp, err := h.service.AppUser.GrpcExample(input)
+	if err != nil {
+		return
+	} else {
+		c.JSON(http.StatusOK, resp)
+	}
+
+}
