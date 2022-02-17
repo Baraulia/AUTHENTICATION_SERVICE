@@ -111,7 +111,7 @@ func (mr *MockAppUserMockRecorder) GetUsers(page, limit interface{}) *gomock.Cal
 }
 
 // GrpcExample mocks base method.
-func (m *MockAppUser) GrpcExample(arg0 map[string]string) (*auth_proto.Response, error) {
+func (m *MockAppUser) GrpcExample(arg0 string) (*auth_proto.Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GrpcExample", arg0)
 	ret0, _ := ret[0].(*auth_proto.Response)
