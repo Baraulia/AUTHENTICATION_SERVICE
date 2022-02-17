@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
@@ -60,7 +61,8 @@ func TestService_GetUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			user, err := service.GetUser(testCase.inputId)
 			//Assert
 			assert.Equal(t, testCase.expectedUser, user)
@@ -130,7 +132,8 @@ func TestService_GetUsers(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputPage, testCase.inputLimit)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			users, err := service.GetUsers(testCase.inputPage, testCase.inputLimit)
 			//Assert
 			assert.Equal(t, testCase.expectedUsers, users)
@@ -193,7 +196,8 @@ func TestService_CreateUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputUser)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			user, err := service.CreateUser(testCase.inputUser)
 			//Assert
 			assert.Equal(t, testCase.expectedUser, user)
@@ -286,7 +290,8 @@ func TestService_UpdateUser(t *testing.T) {
 			testCase.mockBehaviorGet(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			id, err := service.UpdateUser(testCase.inputUser, testCase.inputId)
 			//Assert
 			assert.Equal(t, testCase.expectedUserId, id)
@@ -333,7 +338,8 @@ func TestService_DeleteUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			id, err := service.DeleteUserByID(testCase.inputId)
 			//Assert
 			assert.Equal(t, testCase.expectedUserId, id)

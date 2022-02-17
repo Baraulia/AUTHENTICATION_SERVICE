@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
@@ -73,7 +74,8 @@ func TestService_authUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputEmail)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			service := NewService(repo, logger)
+			grpcCli := grpcClient.NewGRPCClient()
+			service := NewService(repo, grpcCli, logger)
 			id, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
 			//Assert
 			assert.Equal(t, testCase.expectedId, id)
