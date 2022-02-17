@@ -7,6 +7,7 @@ package mock_service
 import (
 	reflect "reflect"
 
+	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
 	model "github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -107,6 +108,21 @@ func (m *MockAppUser) GetUsers(page, limit int) ([]model.User, error) {
 func (mr *MockAppUserMockRecorder) GetUsers(page, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockAppUser)(nil).GetUsers), page, limit)
+}
+
+// GrpcExample mocks base method.
+func (m *MockAppUser) GrpcExample(arg0 string) (*auth_proto.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GrpcExample", arg0)
+	ret0, _ := ret[0].(*auth_proto.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GrpcExample indicates an expected call of GrpcExample.
+func (mr *MockAppUserMockRecorder) GrpcExample(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GrpcExample", reflect.TypeOf((*MockAppUser)(nil).GrpcExample), arg0)
 }
 
 // UpdateUser mocks base method.

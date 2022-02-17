@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -191,4 +192,19 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 			"id": id,
 		})
 	}
+}
+
+func (h *Handler) grpcFunc(c *gin.Context) {
+	var input string
+	input = c.Query("token")
+	fmt.Println("token:", input)
+
+	proto, err := h.service.AppUser.GrpcExample(input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	} else {
+		c.JSON(http.StatusOK, proto)
+	}
+
 }
