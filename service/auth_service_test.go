@@ -2,13 +2,13 @@ package service
 
 import (
 	"errors"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
-	mock_repository "github.com/Baraulia/AUTHENTICATION_SERVICE/repository/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
+	mock_repository "stlab.itechart-group.com/go/food_delivery/authentication_service/repository/mocks"
 	"testing"
 	"time"
 )

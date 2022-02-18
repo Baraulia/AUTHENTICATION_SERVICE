@@ -1,4 +1,4 @@
-module github.com/Baraulia/AUTHENTICATION_SERVICE
+module stlab.itechart-group.com/go/food_delivery/authentication_service
 
 go 1.17
 

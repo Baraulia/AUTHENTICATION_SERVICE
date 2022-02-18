@@ -20,6 +20,11 @@ type UpdateUser struct {
 	OldPassword string `json:"old_password" binding:"required" validate:"password"`
 	NewPassword string `json:"new_password" binding:"required" validate:"password"`
 }
+type ResponseUser struct {
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 type MockUser struct {
 	ID        int    `json:"id"`

@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/handler"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/database"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/server"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
 	"os"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/handler"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/database"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/server"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
 
 func main() {

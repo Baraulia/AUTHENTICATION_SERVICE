@@ -7,9 +7,9 @@ package mock_service
 import (
 	reflect "reflect"
 
-	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
-	model "github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	gomock "github.com/golang/mock/gomock"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	model "stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 )
 
 // MockAppUser is a mock of AppUser interface.

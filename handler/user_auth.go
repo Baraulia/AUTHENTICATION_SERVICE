@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 )
 
 func (h *Handler) authUser(c *gin.Context) {

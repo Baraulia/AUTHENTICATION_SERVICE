@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/middleware"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
 	"github.com/gin-gonic/gin"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/middleware"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
 
 type Handler struct {

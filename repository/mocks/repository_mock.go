@@ -7,8 +7,8 @@ package mock_repository
 import (
 	reflect "reflect"
 
-	model "github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	gomock "github.com/golang/mock/gomock"
+	model "stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 )
 
 // MockAppUser is a mock of AppUser interface.

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"fmt"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"reflect"
 	"regexp"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"strings"
 )
 

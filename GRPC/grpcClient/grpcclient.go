@@ -3,11 +3,11 @@ package grpcClient
 import (
 	"context"
 	"fmt"
-	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"os"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 )
 
 var logger = logging.GetLogger()
