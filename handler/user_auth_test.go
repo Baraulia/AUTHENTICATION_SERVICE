@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
@@ -32,10 +33,13 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, nil)
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
+				}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"id":1}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:                "Empty fields",
@@ -108,7 +112,7 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, errors.New("service failure"))
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(nil, errors.New("service failure"))
 			},
 			expectedStatusCode:  401,
 			expectedRequestBody: `{"message":"Wrong email or password entered"}`,

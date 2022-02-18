@@ -59,7 +59,6 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
 		return nil, 0, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
 	}
-	var User model.ResponseUser
 	var Users []model.ResponseUser
 	var query string
 	var pages int
@@ -76,6 +75,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	}
 
 	for rows.Next() {
+		var User model.ResponseUser
 		if err := rows.Scan(&User.ID, &User.Email, &User.CreatedAt); err != nil {
 			u.logger.Errorf("Error while scanning for user:%s", err)
 			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)

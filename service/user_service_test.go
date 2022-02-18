@@ -1,10 +1,13 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
+	mock_auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
@@ -19,24 +22,22 @@ func TestService_GetUser(t *testing.T) {
 		name          string
 		inputId       int
 		mockBehavior  mockBehavior
-		expectedUser  *model.User
+		expectedUser  *model.ResponseUser
 		expectedError error
 	}{
 		{
 			name:    "OK",
 			inputId: 1,
 			mockBehavior: func(s *mock_repository.MockAppUser, id int) {
-				s.EXPECT().GetUserByID(id).Return(&model.User{
+				s.EXPECT().GetUserByID(id).Return(&model.ResponseUser{
 					ID:        1,
 					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 				}, nil)
 			},
-			expectedUser: &model.User{
+			expectedUser: &model.ResponseUser{
 				ID:        1,
 				Email:     "test@yandex.ru",
-				Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 				CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 			},
 			expectedError: nil,
@@ -78,7 +79,7 @@ func TestService_GetUsers(t *testing.T) {
 		inputPage     int
 		inputLimit    int
 		mockBehavior  mockBehavior
-		expectedUsers []model.User
+		expectedUsers []model.ResponseUser
 		expectedError error
 	}{
 		{
@@ -86,26 +87,22 @@ func TestService_GetUsers(t *testing.T) {
 			inputPage:  1,
 			inputLimit: 10,
 			mockBehavior: func(s *mock_repository.MockAppUser, page int, limit int) {
-				s.EXPECT().GetUserAll(page, limit).Return([]model.User{
+				s.EXPECT().GetUserAll(page, limit).Return([]model.ResponseUser{
 					{ID: 1,
 						Email:     "test@yande.ru",
-						Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 						CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 					}, {ID: 2,
 						Email:     "test2@yande.ru",
-						Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 						CreatedAt: time.Date(2022, 02, 11, 16, 53, 28, 686358, time.UTC),
 					},
-				}, nil)
+				}, 1, nil)
 			},
-			expectedUsers: []model.User{
+			expectedUsers: []model.ResponseUser{
 				{ID: 1,
 					Email:     "test@yande.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 				}, {ID: 2,
 					Email:     "test2@yande.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(2022, 02, 11, 16, 53, 28, 686358, time.UTC),
 				},
 			},
@@ -116,7 +113,7 @@ func TestService_GetUsers(t *testing.T) {
 			inputPage:  1,
 			inputLimit: 10,
 			mockBehavior: func(s *mock_repository.MockAppUser, page int, limit int) {
-				s.EXPECT().GetUserAll(page, limit).Return(nil, errors.New("repository failure"))
+				s.EXPECT().GetUserAll(page, limit).Return(nil, 0, errors.New("repository failure"))
 			},
 			expectedUsers: nil,
 			expectedError: errors.New("repository failure"),
@@ -134,7 +131,7 @@ func TestService_GetUsers(t *testing.T) {
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient()
 			service := NewService(repo, grpcCli, logger)
-			users, err := service.GetUsers(testCase.inputPage, testCase.inputLimit)
+			users, _, err := service.GetUsers(testCase.inputPage, testCase.inputLimit)
 			//Assert
 			assert.Equal(t, testCase.expectedUsers, users)
 			assert.Equal(t, testCase.expectedError, err)
@@ -143,13 +140,14 @@ func TestService_GetUsers(t *testing.T) {
 }
 
 func TestService_CreateUser(t *testing.T) {
-	type mockBehavior func(s *mock_repository.MockAppUser, user *model.CreateUser)
+	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateUser)
+	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
 	testTable := []struct {
-		name          string
-		inputUser     *model.CreateUser
-		mockBehavior  mockBehavior
-		expectedUser  *model.User
-		expectedError error
+		name                  string
+		inputUser             *model.CreateUser
+		mockBehaviorId        mockBehaviorId
+		mockBehaviorGetTokens mockBehaviorGetTokens
+		expectedError         error
 	}{
 		{
 			name: "OK",
@@ -157,19 +155,16 @@ func TestService_CreateUser(t *testing.T) {
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu!98Tg",
 			},
-			mockBehavior: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
-				s.EXPECT().CreateUser(user).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
-				}, nil)
+			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
+				s.EXPECT().CreateUser(user).Return(1, nil)
 			},
-			expectedUser: &model.User{
-				ID:        1,
-				Email:     "test@yandex.ru",
-				Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-				CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+			mockBehaviorGetTokens: func(s *mock_auth_proto.MockAuthClient, id int32) {
+				s.EXPECT().TokenGenerationById(context.Background(), &auth_proto.User{
+					UserId: 1,
+				}).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
+				}, nil)
 			},
 			expectedError: nil,
 		},
@@ -179,10 +174,9 @@ func TestService_CreateUser(t *testing.T) {
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu!98Tg",
 			},
-			mockBehavior: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
-				s.EXPECT().CreateUser(user).Return(nil, errors.New("repository error"))
+			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
+				s.EXPECT().CreateUser(user).Return(0, errors.New("repository error"))
 			},
-			expectedUser:  nil,
 			expectedError: errors.New("repository error"),
 		},
 	}
@@ -193,14 +187,13 @@ func TestService_CreateUser(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			auth := mock_repository.NewMockAppUser(c)
-			testCase.mockBehavior(auth, testCase.inputUser)
+			testCase.mockBehaviorId(auth, testCase.inputUser)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient()
 			service := NewService(repo, grpcCli, logger)
-			user, err := service.CreateUser(testCase.inputUser)
+			_, err := service.CreateUser(testCase.inputUser)
 			//Assert
-			assert.Equal(t, testCase.expectedUser, user)
 			assert.Equal(t, testCase.expectedError, err)
 		})
 	}
@@ -216,7 +209,6 @@ func TestService_UpdateUser(t *testing.T) {
 		inputId            int
 		mockBehaviorUpdate mockBehaviorUpdate
 		mockBehaviorGet    mockBehaviorGet
-		expectedUserId     int
 		expectedError      error
 	}{
 		{
@@ -228,18 +220,12 @@ func TestService_UpdateUser(t *testing.T) {
 			},
 			inputId: 1,
 			mockBehaviorUpdate: func(s *mock_repository.MockAppUser, user *model.UpdateUser, id int) {
-				s.EXPECT().UpdateUser(user, id).Return(1, nil)
+				s.EXPECT().UpdateUser(user, id).Return(nil)
 			},
 			mockBehaviorGet: func(s *mock_repository.MockAppUser, id int) {
-				s.EXPECT().GetUserByID(id).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
-				}, nil)
+				s.EXPECT().GetUserPasswordByID(id).Return("$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", nil)
 			},
-			expectedUserId: 1,
-			expectedError:  nil,
+			expectedError: nil,
 		},
 		{
 			name: "Error while getting user",
@@ -251,10 +237,9 @@ func TestService_UpdateUser(t *testing.T) {
 			inputId:            1,
 			mockBehaviorUpdate: func(s *mock_repository.MockAppUser, user *model.UpdateUser, id int) {},
 			mockBehaviorGet: func(s *mock_repository.MockAppUser, id int) {
-				s.EXPECT().GetUserByID(id).Return(nil, errors.New("error while getting user"))
+				s.EXPECT().GetUserPasswordByID(id).Return("", errors.New("error while getting user"))
 			},
-			expectedUserId: 0,
-			expectedError:  errors.New("error while getting user"),
+			expectedError: errors.New("error while getting user"),
 		},
 		{
 			name: "Error while updating user",
@@ -265,18 +250,13 @@ func TestService_UpdateUser(t *testing.T) {
 			},
 			inputId: 1,
 			mockBehaviorUpdate: func(s *mock_repository.MockAppUser, user *model.UpdateUser, id int) {
-				s.EXPECT().UpdateUser(user, id).Return(0, errors.New("error while getting user"))
+				s.EXPECT().UpdateUser(user, id).Return(errors.New("error while getting user"))
 			},
 			mockBehaviorGet: func(s *mock_repository.MockAppUser, id int) {
-				s.EXPECT().GetUserByID(id).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
-				}, nil)
+				s.EXPECT().GetUserPasswordByID(id).Return("$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", nil)
 			},
-			expectedUserId: 0,
-			expectedError:  errors.New("error while getting user"),
+
+			expectedError: errors.New("error while getting user"),
 		},
 	}
 
@@ -292,9 +272,9 @@ func TestService_UpdateUser(t *testing.T) {
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient()
 			service := NewService(repo, grpcCli, logger)
-			id, err := service.UpdateUser(testCase.inputUser, testCase.inputId)
+			err := service.UpdateUser(testCase.inputUser, testCase.inputId)
 			//Assert
-			assert.Equal(t, testCase.expectedUserId, id)
+
 			assert.Equal(t, testCase.expectedError, err)
 		})
 	}

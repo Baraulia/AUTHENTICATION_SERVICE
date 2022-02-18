@@ -36,10 +36,10 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 }
 
 // AuthUser mocks base method.
-func (m *MockAppUser) AuthUser(email, password string) (int, error) {
+func (m *MockAppUser) AuthUser(email, password string) (*auth_proto.GeneratedTokens, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AuthUser", email, password)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,10 +51,10 @@ func (mr *MockAppUserMockRecorder) AuthUser(email, password interface{}) *gomock
 }
 
 // CreateUser mocks base method.
-func (m *MockAppUser) CreateUser(user *model.CreateUser) (*model.User, error) {
+func (m *MockAppUser) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", user)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,10 +81,10 @@ func (mr *MockAppUserMockRecorder) DeleteUserByID(id interface{}) *gomock.Call {
 }
 
 // GetUser mocks base method.
-func (m *MockAppUser) GetUser(id int) (*model.User, error) {
+func (m *MockAppUser) GetUser(id int) (*model.ResponseUser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", id)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(*model.ResponseUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -96,12 +96,13 @@ func (mr *MockAppUserMockRecorder) GetUser(id interface{}) *gomock.Call {
 }
 
 // GetUsers mocks base method.
-func (m *MockAppUser) GetUsers(page, limit int) ([]model.User, error) {
+func (m *MockAppUser) GetUsers(page, limit int) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", page, limit)
-	ret0, _ := ret[0].([]model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetUsers indicates an expected call of GetUsers.
@@ -126,12 +127,11 @@ func (mr *MockAppUserMockRecorder) GrpcExample(arg0 interface{}) *gomock.Call {
 }
 
 // UpdateUser mocks base method.
-func (m *MockAppUser) UpdateUser(user *model.UpdateUser, id int) (int, error) {
+func (m *MockAppUser) UpdateUser(user *model.UpdateUser, id int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", user, id)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateUser indicates an expected call of UpdateUser.

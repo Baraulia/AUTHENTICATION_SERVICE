@@ -8,6 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
@@ -32,15 +33,14 @@ func TestHandler_getUser(t *testing.T) {
 			input: "1",
 			id:    1,
 			mockBehavior: func(s *mock_service.MockAppUser, id int) {
-				s.EXPECT().GetUser(id).Return(&model.User{
+				s.EXPECT().GetUser(id).Return(&model.ResponseUser{
 					ID:        1,
 					Email:     "test@yande.ru",
-					Password:  "ghXD!36gyd",
 					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 				}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"id":1,"email":"test@yande.ru","password":"ghXD!36gyd","created_at":"2022-02-10T16:53:28.000686358Z"}`,
+			expectedRequestBody: `{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"}`,
 		},
 		{
 			name:                "invalid request",
@@ -109,20 +109,18 @@ func TestHandler_getUsers(t *testing.T) {
 			page:       1,
 			limit:      10,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int) {
-				s.EXPECT().GetUsers(page, limit).Return([]model.User{
+				s.EXPECT().GetUsers(page, limit).Return([]model.ResponseUser{
 					{ID: 1,
 						Email:     "test@yande.ru",
-						Password:  "ghXD!36gyd",
 						CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 					}, {ID: 2,
 						Email:     "test2@yande.ru",
-						Password:  "ghgD!36gyd",
 						CreatedAt: time.Date(2022, 02, 11, 16, 53, 28, 686358, time.UTC),
 					},
-				}, nil)
+				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","password":"ghXD!36gyd","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","password":"ghgD!36gyd","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
+			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
 		},
 		{
 			name:       "Empty url query",
@@ -130,20 +128,18 @@ func TestHandler_getUsers(t *testing.T) {
 			page:       0,
 			limit:      0,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int) {
-				s.EXPECT().GetUsers(page, limit).Return([]model.User{
+				s.EXPECT().GetUsers(page, limit).Return([]model.ResponseUser{
 					{ID: 1,
 						Email:     "test@yande.ru",
-						Password:  "ghXD!36gyd",
 						CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 					}, {ID: 2,
 						Email:     "test2@yande.ru",
-						Password:  "ghgD!36gyd",
 						CreatedAt: time.Date(2022, 02, 11, 16, 53, 28, 686358, time.UTC),
 					},
-				}, nil)
+				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","password":"ghXD!36gyd","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","password":"ghgD!36gyd","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
+			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
 		},
 		{
 			name:                "Invalid value of the page in url query",
@@ -169,7 +165,7 @@ func TestHandler_getUsers(t *testing.T) {
 			page:       1,
 			limit:      10,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int) {
-				s.EXPECT().GetUsers(page, limit).Return(nil, fmt.Errorf("server error"))
+				s.EXPECT().GetUsers(page, limit).Return(nil, 0, fmt.Errorf("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,
@@ -224,15 +220,13 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$RxK9zHqt84USYDuQ4wYjaO6f.03rVZH5HvoDbsyxyda35cnr/3FeK",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
 				}, nil)
 			},
 			expectedStatusCode:  201,
-			expectedRequestBody: `{"id":1,"email":"test@yandex.ru","password":"$2a$10$RxK9zHqt84USYDuQ4wYjaO6f.03rVZH5HvoDbsyxyda35cnr/3FeK","created_at":"2022-02-10T16:53:28.000686358Z"}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:      "OK(empty password)",
@@ -241,15 +235,13 @@ func TestHandler_createUser(t *testing.T) {
 				Email: "test@yandex.ru",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$RxK9zHqt84USYDuQ4wYjaO6f.03rVZH5HvoDbsyxyda35cnr/3FeK",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
 				}, nil)
 			},
 			expectedStatusCode:  201,
-			expectedRequestBody: `{"id":1,"email":"test@yandex.ru","password":"$2a$10$RxK9zHqt84USYDuQ4wYjaO6f.03rVZH5HvoDbsyxyda35cnr/3FeK","created_at":"2022-02-10T16:53:28.000686358Z"}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:      "Invalid email",
@@ -346,10 +338,9 @@ func TestHandler_updateUser(t *testing.T) {
 			},
 			id: 1,
 			mockBehavior: func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {
-				s.EXPECT().UpdateUser(&user, id).Return(1, nil)
+				s.EXPECT().UpdateUser(&user, id).Return(nil)
 			},
-			expectedStatusCode:  200,
-			expectedRequestBody: `{"id":1}`,
+			expectedStatusCode: 204,
 		},
 		{
 			name:                "Invalid url query",
@@ -386,7 +377,7 @@ func TestHandler_updateUser(t *testing.T) {
 			},
 			id: 1,
 			mockBehavior: func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {
-				s.EXPECT().UpdateUser(&user, id).Return(0, errors.New("server error"))
+				s.EXPECT().UpdateUser(&user, id).Return(errors.New("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,
