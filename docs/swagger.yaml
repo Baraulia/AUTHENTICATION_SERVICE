@@ -60,7 +60,7 @@ info:
   description: Authenticate Service for Food Delivery Application
   title: Authenticate Service
 paths:
-  /user/:
+  /users/:
     get:
       consumes:
       - application/json
@@ -153,7 +153,7 @@ paths:
       summary: updateUser
       tags:
       - User
-  /user/{id}:
+  /users/{id}:
     delete:
       consumes:
       - application/json
@@ -211,7 +211,7 @@ paths:
       summary: getUser
       tags:
       - User
-  /user/login:
+  /users/login:
     post:
       consumes:
       - application/json

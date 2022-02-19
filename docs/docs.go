@@ -16,7 +16,7 @@ const docTemplate_swagger = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/user/": {
+        "/users/": {
             "get": {
                 "description": "get list of users",
                 "consumes": [
@@ -157,7 +157,7 @@ const docTemplate_swagger = `{
                 }
             }
         },
-        "/user/login": {
+        "/users/login": {
             "post": {
                 "description": "check auth information",
                 "consumes": [
@@ -203,7 +203,7 @@ const docTemplate_swagger = `{
                 }
             }
         },
-        "/user/{id}": {
+        "/users/{id}": {
             "get": {
                 "description": "get user by ID",
                 "consumes": [
