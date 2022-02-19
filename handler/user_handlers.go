@@ -17,7 +17,7 @@ import (
 // @Success 200 {object} model.ResponseUser
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /user/{id} [get]
+// @Router /users/{id} [get]
 func (h *Handler) getUser(c *gin.Context) {
 	paramID := c.Param("id")
 	varID, err := strconv.Atoi(paramID)
@@ -49,7 +49,7 @@ type listUsers struct {
 // @Success 200 {object} listUsers
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /user/ [get]
+// @Router /users/ [get]
 func (h *Handler) getUsers(c *gin.Context) {
 	var page = 0
 	var limit = 0
@@ -92,7 +92,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 // @Success 201 {object} auth_proto.GeneratedTokens
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /user/ [post]
+// @Router /users/ [post]
 func (h *Handler) createUser(c *gin.Context) {
 	var input model.CreateUser
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -131,7 +131,7 @@ func (h *Handler) createUser(c *gin.Context) {
 // @Success 204
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /user/ [put]
+// @Router /users/ [put]
 func (h *Handler) updateUser(c *gin.Context) {
 	var input model.UpdateUser
 	paramID := c.Query("id")
@@ -170,7 +170,7 @@ func (h *Handler) updateUser(c *gin.Context) {
 // @Success 200  {string} string
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /user/{id} [delete]
+// @Router /users/{id} [delete]
 func (h *Handler) deleteUserByID(c *gin.Context) {
 	paramID := c.Param("id")
 	varID, err := strconv.Atoi(paramID)

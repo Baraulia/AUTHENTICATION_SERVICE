@@ -16,7 +16,7 @@ import (
 // @Success 200 {object} auth_proto.GeneratedTokens
 // @Failure 400 {string} string
 // @Failure 401 {string} string
-// @Router /user/login [post]
+// @Router /users/login [post]
 func (h *Handler) authUser(c *gin.Context) {
 	h.logger.Info("Working authUser")
 	var input model.AuthUser
