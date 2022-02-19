@@ -36,7 +36,7 @@ func TestHandler_authUser(t *testing.T) {
 				s.EXPECT().AuthUser(user.Email, user.Password).Return(&auth_proto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
-				}, nil)
+				}, 1, nil)
 			},
 			expectedStatusCode:  200,
 			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
@@ -112,7 +112,7 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(nil, errors.New("service failure"))
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(nil, 0, errors.New("service failure"))
 			},
 			expectedStatusCode:  401,
 			expectedRequestBody: `{"message":"Wrong email or password entered"}`,

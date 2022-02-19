@@ -120,7 +120,7 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]}`,
 		},
 		{
 			name:       "Empty url query",
@@ -139,7 +139,7 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-02-10T16:53:28.000686358Z"},{"id":2,"email":"test2@yande.ru","created_at":"2022-02-11T16:53:28.000686358Z"}]}`,
 		},
 		{
 			name:                "Invalid value of the page in url query",
@@ -223,7 +223,7 @@ func TestHandler_createUser(t *testing.T) {
 				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
-				}, nil)
+				}, 1, nil)
 			},
 			expectedStatusCode:  201,
 			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
@@ -238,7 +238,7 @@ func TestHandler_createUser(t *testing.T) {
 				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
-				}, nil)
+				}, 1, nil)
 			},
 			expectedStatusCode:  201,
 			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
@@ -272,7 +272,7 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKn!u98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(nil, errors.New("server error"))
+				s.EXPECT().CreateUser(&user).Return(nil, 0, errors.New("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,
