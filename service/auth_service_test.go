@@ -25,6 +25,7 @@ func TestService_authUser(t *testing.T) {
 		inputEmail            string
 		mockBehaviorGetUser   mockBehaviorGetUser
 		mockBehaviorGetTokens mockBehaviorGetTokens
+		expectedId            int
 		expectedError         error
 	}{
 		{
@@ -47,6 +48,7 @@ func TestService_authUser(t *testing.T) {
 					RefreshToken: "qwerty",
 				}, nil)
 			},
+			expectedId:    1,
 			expectedError: nil,
 		},
 		{
@@ -85,8 +87,9 @@ func TestService_authUser(t *testing.T) {
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient()
 			service := NewService(repo, grpcCli, logger)
-			_, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
+			_, id, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
 			//Assert
+			assert.Equal(t, testCase.expectedId, id)
 			assert.Equal(t, testCase.expectedError, err)
 		})
 	}

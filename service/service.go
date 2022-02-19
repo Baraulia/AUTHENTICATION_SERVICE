@@ -13,10 +13,10 @@ import (
 type AppUser interface {
 	GetUser(id int) (*model.ResponseUser, error)
 	GetUsers(page int, limit int) ([]model.ResponseUser, int, error)
-	CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, error)
+	CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error)
 	UpdateUser(user *model.UpdateUser, id int) error
 	DeleteUserByID(id int) (int, error)
-	AuthUser(email string, password string) (*auth_proto.GeneratedTokens, error)
+	AuthUser(email string, password string) (*auth_proto.GeneratedTokens, int, error)
 	GrpcExample(string) (*auth_proto.Result, error)
 }
 

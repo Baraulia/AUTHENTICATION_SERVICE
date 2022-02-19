@@ -36,12 +36,13 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 }
 
 // AuthUser mocks base method.
-func (m *MockAppUser) AuthUser(email, password string) (*auth_proto.GeneratedTokens, error) {
+func (m *MockAppUser) AuthUser(email, password string) (*auth_proto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AuthUser", email, password)
 	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // AuthUser indicates an expected call of AuthUser.
@@ -51,12 +52,13 @@ func (mr *MockAppUserMockRecorder) AuthUser(email, password interface{}) *gomock
 }
 
 // CreateUser mocks base method.
-func (m *MockAppUser) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, error) {
+func (m *MockAppUser) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", user)
 	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // CreateUser indicates an expected call of CreateUser.

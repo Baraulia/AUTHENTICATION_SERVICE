@@ -42,7 +42,7 @@ func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, 
 	return users, pages, nil
 }
 
-func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, error) {
+func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
@@ -50,12 +50,12 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return nil, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+		return nil, 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
 	id, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	go mail.SendEmail(u.logger, &model.Post{
 		Email:    user.Email,
@@ -67,9 +67,9 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 	})
 	if err != nil {
 		u.logger.Errorf("TokenGenerationById:%s", err)
-		return nil, fmt.Errorf("tokenGenerationById:%w", err)
+		return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
 	}
-	return tokens, nil
+	return tokens, id, nil
 }
 
 func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {

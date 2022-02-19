@@ -11,6 +11,9 @@ import (
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
 
+// @title Authenticate Service
+// @description Authenticate Service for Food Delivery Application
+
 func main() {
 	logger := logging.GetLogger()
 

@@ -7,10 +7,10 @@ import (
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/utils"
 )
 
-func (u *UserService) AuthUser(email string, password string) (*auth_proto.GeneratedTokens, error) {
+func (u *UserService) AuthUser(email string, password string) (*auth_proto.GeneratedTokens, int, error) {
 	userDb, err := u.repo.AppUser.GetUserByEmail(email)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if utils.CheckPasswordHash(password, userDb.Password) {
 		tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
@@ -18,11 +18,11 @@ func (u *UserService) AuthUser(email string, password string) (*auth_proto.Gener
 		})
 		if err != nil {
 			u.logger.Errorf("TokenGenerationById:%s", err)
-			return nil, fmt.Errorf("tokenGenerationById:%w", err)
+			return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
 		}
-		return tokens, nil
+		return tokens, userDb.ID, nil
 	} else {
 		u.logger.Warn("AuthUser: wrong email or password entered")
-		return nil, fmt.Errorf("wrong email or password entered")
+		return nil, 0, fmt.Errorf("wrong email or password entered")
 	}
 }

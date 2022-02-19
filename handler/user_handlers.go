@@ -8,17 +8,15 @@ import (
 )
 
 // getUserByID godoc
-// @Summary show master user by id
-// @Description get string by ID
+// @Summary getUser
+// @Description get user by ID
 // @Tags User
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Success 200 {object} model.User
+// @Success 200 {object} model.ResponseUser
 // @Failure 400 {string} string
-// @Failure 404 {object} model.User
 // @Failure 500 {string} string
-// @Security bearerAuth
 // @Router /user/{id} [get]
 func (h *Handler) getUser(c *gin.Context) {
 	paramID := c.Param("id")
@@ -36,17 +34,21 @@ func (h *Handler) getUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+type listUsers struct {
+	Data []model.ResponseUser
+}
+
 // getUsers godoc
-// @Summary show list master user
-// @Description get users
+// @Summary getUsers
+// @Description get list of users
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} model.User
+// @Param page query int false "Page"
+// @Param limit query int false "Limit"
+// @Success 200 {object} listUsers
 // @Failure 400 {string} string
-// @Failure 404 {object} model.User
 // @Failure 500 {string} string
-// @Security bearerAuth
 // @Router /user/ [get]
 func (h *Handler) getUsers(c *gin.Context) {
 	var page = 0
@@ -76,22 +78,20 @@ func (h *Handler) getUsers(c *gin.Context) {
 		return
 	}
 	c.Header("pages", strconv.Itoa(pages))
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, listUsers{Data: users})
 
 }
 
 // createUser godoc
-// @Summary create master user
-// @Description add by json master user
+// @Summary createUser
+// @Description create new user
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param user body model.MUser true "User ID"
-// @Success 200 {object} model.MUser
+// @Param input body model.CreateUser true "User"
+// @Success 201 {object} auth_proto.GeneratedTokens
 // @Failure 400 {string} string
-// @Failure 404 {string} string
 // @Failure 500 {string} string
-// @Security bearerAuth
 // @Router /user/ [post]
 func (h *Handler) createUser(c *gin.Context) {
 	var input model.CreateUser
@@ -106,7 +106,7 @@ func (h *Handler) createUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	tokens, err := h.service.AppUser.CreateUser(&input)
+	tokens, id, err := h.service.AppUser.CreateUser(&input)
 	if err != nil {
 		if err.Error() == "createUser: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
@@ -116,24 +116,21 @@ func (h *Handler) createUser(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusCreated, map[string]interface{}{
-		"accessToken":  tokens.AccessToken,
-		"refreshToken": tokens.RefreshToken,
-	})
+	c.Header("id", string(rune(id)))
+	c.JSON(http.StatusCreated, tokens)
 }
 
 // updateUser godoc
-// @Summary update master user
-// @Description update by json master user
+// @Summary updateUser
+// @Description change user password
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param user body model.MUser true "User ID"
-// @Success 200 {object} model.MUser
+// @Param input body model.UpdateUser true "User"
+// @Param id query int true "Id"
+// @Success 204
 // @Failure 400 {string} string
-// @Failure 404 {string} string
 // @Failure 500 {string} string
-// @Security bearerAuth
 // @Router /user/ [put]
 func (h *Handler) updateUser(c *gin.Context) {
 	var input model.UpdateUser
@@ -164,17 +161,15 @@ func (h *Handler) updateUser(c *gin.Context) {
 }
 
 // deleteUserByID godoc
-// @Summary delete a master user by id
+// @Summary deleteUserByID
 // @Description delete user by ID
 // @Tags User
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID" Format(int64)
-// @Success 200 {object} model.MUser
+// @Success 200  {string} string
 // @Failure 400 {string} string
-// @Failure 404 {object} model.MUser
 // @Failure 500 {string} string
-// @Security bearerAuth
 // @Router /user/{id} [delete]
 func (h *Handler) deleteUserByID(c *gin.Context) {
 	paramID := c.Param("id")
