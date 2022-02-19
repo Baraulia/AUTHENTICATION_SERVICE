@@ -30,7 +30,7 @@ func (c *GRPCClient) GetUserWithRights(ctx context.Context, in *auth_proto.Reque
 }
 
 func (c *GRPCClient) CheckToken(ctx context.Context, in *auth_proto.AccessToken, opts ...grpc.CallOption) (*auth_proto.Result, error) {
-	return nil, nil
+	return c.cli.CheckToken(ctx, in)
 }
 
 func (c *GRPCClient) TokenGenerationByRefresh(ctx context.Context, in *auth_proto.RefreshToken, opts ...grpc.CallOption) (*auth_proto.GeneratedTokens, error) {
@@ -38,7 +38,7 @@ func (c *GRPCClient) TokenGenerationByRefresh(ctx context.Context, in *auth_prot
 }
 
 func (c *GRPCClient) TokenGenerationById(ctx context.Context, in *auth_proto.User, opts ...grpc.CallOption) (*auth_proto.GeneratedTokens, error) {
-	return nil, nil
+	return c.cli.TokenGenerationById(ctx, in)
 }
 
 func (c *GRPCClient) GetSalt(ctx context.Context, in *auth_proto.ReqSalt, opts ...grpc.CallOption) (*auth_proto.Salt, error) {

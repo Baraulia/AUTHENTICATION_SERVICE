@@ -117,7 +117,7 @@ func GeneratePassword() string {
 	return b.String()
 }
 
-func (u *UserService) GrpcExample(in string) (*auth_proto.Response, error) {
+func (u *UserService) GrpcExample(in string) (*auth_proto.Result, error) {
 
-	return u.grpcCli.GetUserWithRights(context.Background(), &auth_proto.Request{AccessToken: in})
+	return u.grpcCli.CheckToken(context.Background(), &auth_proto.AccessToken{AccessToken: in})
 }

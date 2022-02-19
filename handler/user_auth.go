@@ -8,7 +8,6 @@ import (
 
 func (h *Handler) authUser(c *gin.Context) {
 	h.logger.Info("Working authUser")
-
 	var input model.AuthUser
 	if err := c.BindJSON(&input); err != nil {
 		h.logger.Errorf("authUser: error while decoding request:%s", err)

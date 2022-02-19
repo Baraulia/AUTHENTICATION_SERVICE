@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
@@ -199,8 +198,6 @@ func (h *Handler) deleteUserByID(c *gin.Context) {
 func (h *Handler) grpcFunc(c *gin.Context) {
 	var input string
 	input = c.Query("token")
-	fmt.Println("token:", input)
-
 	proto, err := h.service.AppUser.GrpcExample(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
