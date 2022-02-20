@@ -2,6 +2,7 @@ package grpcClient
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
@@ -15,7 +16,8 @@ type GRPCClient struct {
 }
 
 func NewGRPCClient(host string) *GRPCClient {
-	conn, err := grpc.Dial(host+":"+"8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:8090", host)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalf("NewGRPCClient, Dial:%s", err)
 	}
