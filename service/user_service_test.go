@@ -62,7 +62,7 @@ func TestService_GetUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(grpcClient.Target)
+			grpcCli := grpcClient.NewGRPCClient(grpcClient.Host)
 			service := NewService(repo, grpcCli, logger)
 			user, err := service.GetUser(testCase.inputId)
 			//Assert
@@ -129,7 +129,7 @@ func TestService_GetUsers(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputPage, testCase.inputLimit)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(grpcClient.Target)
+			grpcCli := grpcClient.NewGRPCClient(grpcClient.Host)
 			service := NewService(repo, grpcCli, logger)
 			users, _, err := service.GetUsers(testCase.inputPage, testCase.inputLimit)
 			//Assert
@@ -190,7 +190,7 @@ func TestService_CreateUser(t *testing.T) {
 			testCase.mockBehaviorId(auth, testCase.inputUser)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(grpcClient.Target)
+			grpcCli := grpcClient.NewGRPCClient(grpcClient.Host)
 			service := NewService(repo, grpcCli, logger)
 			_, _, err := service.CreateUser(testCase.inputUser)
 			//Assert
@@ -270,7 +270,7 @@ func TestService_UpdateUser(t *testing.T) {
 			testCase.mockBehaviorGet(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(grpcClient.Target)
+			grpcCli := grpcClient.NewGRPCClient(grpcClient.Host)
 			service := NewService(repo, grpcCli, logger)
 			err := service.UpdateUser(testCase.inputUser, testCase.inputId)
 			//Assert
@@ -318,7 +318,7 @@ func TestService_DeleteUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(grpcClient.Target)
+			grpcCli := grpcClient.NewGRPCClient(grpcClient.Host)
 			service := NewService(repo, grpcCli, logger)
 			id, err := service.DeleteUserByID(testCase.inputId)
 			//Assert
