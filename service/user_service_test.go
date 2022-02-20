@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	"os"
 	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
 	mock_auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
@@ -63,7 +62,7 @@ func TestService_GetUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			user, err := service.GetUser(testCase.inputId)
 			//Assert
@@ -130,7 +129,7 @@ func TestService_GetUsers(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputPage, testCase.inputLimit)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			users, _, err := service.GetUsers(testCase.inputPage, testCase.inputLimit)
 			//Assert
@@ -191,7 +190,7 @@ func TestService_CreateUser(t *testing.T) {
 			testCase.mockBehaviorId(auth, testCase.inputUser)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			_, _, err := service.CreateUser(testCase.inputUser)
 			//Assert
@@ -271,7 +270,7 @@ func TestService_UpdateUser(t *testing.T) {
 			testCase.mockBehaviorGet(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			err := service.UpdateUser(testCase.inputUser, testCase.inputId)
 			//Assert
@@ -319,7 +318,7 @@ func TestService_DeleteUser(t *testing.T) {
 			testCase.mockBehavior(auth, testCase.inputId)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			id, err := service.DeleteUserByID(testCase.inputId)
 			//Assert
