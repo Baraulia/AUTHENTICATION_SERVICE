@@ -8,6 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
+	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
@@ -219,10 +220,13 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(1, nil)
+				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
+				}, 1, nil)
 			},
 			expectedStatusCode:  201,
-			expectedRequestBody: `{"id":1}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:      "OK(empty password)",
@@ -231,10 +235,13 @@ func TestHandler_createUser(t *testing.T) {
 				Email: "test@yandex.ru",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(1, nil)
+				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
+				}, 1, nil)
 			},
 			expectedStatusCode:  201,
-			expectedRequestBody: `{"id":1}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:      "Invalid email",
@@ -265,7 +272,7 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKn!u98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(0, errors.New("server error"))
+				s.EXPECT().CreateUser(&user).Return(nil, 0, errors.New("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,

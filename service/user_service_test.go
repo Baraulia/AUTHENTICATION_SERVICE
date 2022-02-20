@@ -192,7 +192,7 @@ func TestService_CreateUser(t *testing.T) {
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
-			_, err := service.CreateUser(testCase.inputUser)
+			_, _, err := service.CreateUser(testCase.inputUser)
 			//Assert
 			assert.Equal(t, testCase.expectedError, err)
 		})

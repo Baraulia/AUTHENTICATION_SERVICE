@@ -89,7 +89,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body model.CreateUser true "User"
-// @Success 201 {string} string
+// @Success 201 {object} auth_proto.GeneratedTokens
 // @Failure 400 {string} string
 // @Failure 500 {string} string
 // @Router /users/ [post]
@@ -106,7 +106,7 @@ func (h *Handler) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	id, err := h.service.AppUser.CreateUser(&input)
+	tokens, id, err := h.service.AppUser.CreateUser(&input)
 	if err != nil {
 		if err.Error() == "createUser: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
@@ -116,9 +116,8 @@ func (h *Handler) createUser(ctx *gin.Context) {
 			return
 		}
 	}
-	ctx.JSON(http.StatusCreated, map[string]interface{}{
-		"id": id,
-	})
+	ctx.Header("id", strconv.Itoa(id))
+	ctx.JSON(http.StatusCreated, tokens)
 }
 
 // updateUser godoc
