@@ -42,7 +42,7 @@ func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, 
 	return users, pages, nil
 }
 
-func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error) {
+func (u *UserService) CreateUser(user *model.CreateUser) (int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
@@ -50,12 +50,12 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return nil, 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+		return 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
 	id, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
-		return nil, 0, err
+		return 0, err
 	}
 	go mail.SendEmail(u.logger, &model.Post{
 		Email:    user.Email,
@@ -64,15 +64,15 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 	if user.Role == "" {
 		user.Role = "Authorized Customer"
 	}
-	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
+	_, err = u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
 		UserId: int32(id),
 		Role:   user.Role,
 	})
 	if err != nil {
 		u.logger.Errorf("TokenGenerationById:%s", err)
-		return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
+		return 0, fmt.Errorf("tokenGenerationById:%w", err)
 	}
-	return tokens, id, nil
+	return id, nil
 }
 
 func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {

@@ -18,25 +18,25 @@ import (
 // @Failure 400 {string} string
 // @Failure 401 {string} string
 // @Router /users/login [post]
-func (h *Handler) authUser(c *gin.Context) {
+func (h *Handler) authUser(ctx *gin.Context) {
 	h.logger.Info("Working authUser")
 	var input model.AuthUser
-	if err := c.BindJSON(&input); err != nil {
+	if err := ctx.BindJSON(&input); err != nil {
 		h.logger.Errorf("authUser: error while decoding request:%s", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input body"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input body"})
 		return
 	}
 	validationErrors := validateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Wrong email or password entered"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Wrong email or password entered"})
 		return
 	}
 	tokens, id, err := h.service.AppUser.AuthUser(input.Email, input.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Wrong email or password entered"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Wrong email or password entered"})
 	} else {
-		c.Header("id", strconv.Itoa(id))
-		c.JSON(http.StatusOK, tokens)
+		ctx.Header("id", strconv.Itoa(id))
+		ctx.JSON(http.StatusOK, tokens)
 	}
 }
