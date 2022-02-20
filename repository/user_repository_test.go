@@ -127,9 +127,6 @@ func TestRepository_GetUserAll(t *testing.T) {
 					AddRow(2, "test1@yandex.ru", AnyTime{}).
 					AddRow(3, "test2@yandex.ru", AnyTime{})
 				mock.ExpectQuery("SELECT id, email, created_at FROM users").WillReturnRows(rows)
-				rows2 := sqlmock.NewRows([]string{"pages"}).
-					AddRow(1)
-				mock.ExpectQuery("SELECT CEILING").WillReturnRows(rows2)
 				mock.ExpectCommit()
 			},
 
