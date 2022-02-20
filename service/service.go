@@ -10,8 +10,6 @@ import (
 
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 
-var Host = ""
-
 type AppUser interface {
 	GetUser(id int) (*model.ResponseUser, error)
 	GetUsers(page int, limit int) ([]model.ResponseUser, int, error)

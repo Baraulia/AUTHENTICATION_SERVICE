@@ -61,6 +61,9 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 		Email:    user.Email,
 		Password: pas,
 	})
+	if user.Role == "" {
+		user.Role = "Authorized Customer"
+	}
 	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
 		UserId: int32(id),
 		Role:   user.Role,

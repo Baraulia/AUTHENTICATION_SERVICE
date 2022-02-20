@@ -85,7 +85,7 @@ func TestService_authUser(t *testing.T) {
 			testCase.mockBehaviorGetUser(auth, testCase.inputEmail)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient(Host)
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			_, id, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
 			//Assert
