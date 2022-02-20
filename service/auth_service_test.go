@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
+	"os"
 	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
 	mock_auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
@@ -85,7 +86,7 @@ func TestService_authUser(t *testing.T) {
 			testCase.mockBehaviorGetUser(auth, testCase.inputEmail)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
-			grpcCli := grpcClient.NewGRPCClient()
+			grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
 			service := NewService(repo, grpcCli, logger)
 			_, id, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
 			//Assert
