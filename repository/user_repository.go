@@ -64,13 +64,13 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
-		page = 1
 		query = "SELECT id, email, created_at FROM users"
 		rows, err = transaction.Query(query)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 		}
+		pages = 1
 	} else {
 		query = "SELECT id, email, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2"
 		rows, err = transaction.Query(query, limit, (page-1)*limit)
@@ -88,11 +88,12 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		}
 		Users = append(Users, User)
 	}
-	query = "SELECT CEILING(COUNT(id)/$1::float) FROM users"
-	row := transaction.QueryRow(query, limit)
-	if err := row.Scan(&pages); err != nil {
-		u.logger.Errorf("Error while scanning for pages:%s", err)
-		return nil, 0, fmt.Errorf("getUserAll: error while scanning for pages:%w", err)
+	if pages == 0 {
+		query = "SELECT CEILING(COUNT(id)/$1::float) FROM users"
+		row := transaction.QueryRow(query, limit)
+		if err := row.Scan(&pages); err != nil {
+			u.logger.Errorf("Error while scanning for pages:%s", err)
+		}
 	}
 	return Users, pages, transaction.Commit()
 }
