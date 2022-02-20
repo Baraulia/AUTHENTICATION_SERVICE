@@ -15,9 +15,11 @@ type GRPCClient struct {
 	cli auth_proto.AuthClient
 }
 
+var Target string
+
 func NewGRPCClient(host string) *GRPCClient {
-	target := fmt.Sprintf("%s:8090", host)
-	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	Target = fmt.Sprintf("%s:8090", host)
+	conn, err := grpc.Dial(Target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalf("NewGRPCClient, Dial:%s", err)
 	}
