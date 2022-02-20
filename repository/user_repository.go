@@ -62,16 +62,22 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	var Users []model.ResponseUser
 	var query string
 	var pages int
+	var rows *sql.Rows
 	if page == 0 || limit == 0 {
+		page = 1
 		query = "SELECT id, email, created_at FROM users"
+		rows, err = transaction.Query(query)
+		if err != nil {
+			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+		}
 	} else {
-		query = fmt.Sprintf("SELECT id, email, created_at FROM users ORDER BY id LIMIT %d OFFSET %d", limit, (page-1)*limit)
-	}
-
-	rows, err := transaction.Query(query)
-	if err != nil {
-		u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
-		return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+		query = "SELECT id, email, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2"
+		rows, err = transaction.Query(query, limit, (page-1)*limit)
+		if err != nil {
+			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+		}
 	}
 
 	for rows.Next() {

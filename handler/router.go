@@ -32,7 +32,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user.GET("/:id", h.getUser)
 		user.GET("/", h.getUsers)
 		user.POST("/", h.createUser)
-		user.PUT("/:id", h.updateUser)
+		user.PUT("/", h.updateUser)
 		user.DELETE("/:id", h.deleteUserByID)
 		user.POST("/login", h.authUser)
 		user.GET("/grpc", h.grpcFunc)

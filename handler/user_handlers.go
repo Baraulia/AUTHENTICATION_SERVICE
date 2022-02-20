@@ -116,7 +116,7 @@ func (h *Handler) createUser(c *gin.Context) {
 			return
 		}
 	}
-	c.Header("id", string(rune(id)))
+	c.Header("id", strconv.Itoa(id))
 	c.JSON(http.StatusCreated, tokens)
 }
 

@@ -28,8 +28,8 @@ func main() {
 	if err != nil {
 		logger.Panicf("failed to initialize db:%s", err.Error())
 	}
-
-	grpcCli := grpcClient.NewGRPCClient()
+	host := os.Getenv("HOST")
+	grpcCli := grpcClient.NewGRPCClient(host)
 
 	rep := repository.NewRepository(db, logger)
 	ser := service.NewService(rep, grpcCli, logger)

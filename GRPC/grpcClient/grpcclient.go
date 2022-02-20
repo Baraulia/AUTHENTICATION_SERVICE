@@ -14,8 +14,8 @@ type GRPCClient struct {
 	cli auth_proto.AuthClient
 }
 
-func NewGRPCClient() *GRPCClient {
-	conn, err := grpc.Dial("159.223.1.135:8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewGRPCClient(host string) *GRPCClient {
+	conn, err := grpc.Dial(host+":"+"8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalf("NewGRPCClient, Dial:%s", err)
 	}

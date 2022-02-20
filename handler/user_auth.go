@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"strconv"
 )
 
 // authUser godoc
@@ -35,7 +36,7 @@ func (h *Handler) authUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Wrong email or password entered"})
 	} else {
-		c.Header("id", string(rune(id)))
+		c.Header("id", strconv.Itoa(id))
 		c.JSON(http.StatusOK, tokens)
 	}
 }
