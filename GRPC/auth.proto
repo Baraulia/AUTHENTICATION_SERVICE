@@ -18,7 +18,7 @@ message Request {
 
 message Response {
   int32 userId = 1;
-  string role = 2;
+  int32 role = 2;
   string permissions = 3;
 }
 
@@ -41,7 +41,7 @@ message GeneratedTokens {
 
 message User {
   int32 userId = 1;
-  string role = 2;
+  int32 roleId = 2;
 }
 
 message ReqSalt {

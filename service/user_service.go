@@ -61,12 +61,12 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*auth_proto.GeneratedT
 		Email:    user.Email,
 		Password: pas,
 	})
-	if user.Role == "" {
-		user.Role = "Authorized Customer"
+	if user.RoleId == 0 {
+		user.RoleId = 1
 	}
 	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
 		UserId: int32(id),
-		Role:   user.Role,
+		RoleId: int32(user.RoleId),
 	})
 	if err != nil {
 		u.logger.Errorf("TokenGenerationById:%s", err)
