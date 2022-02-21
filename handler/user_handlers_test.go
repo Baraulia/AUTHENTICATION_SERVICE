@@ -214,10 +214,11 @@ func TestHandler_createCustomer(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu!98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "role_id":1, "password":"HGYKnu!98Tg"}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu!98Tg",
+				RoleId:   1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
@@ -230,9 +231,10 @@ func TestHandler_createCustomer(t *testing.T) {
 		},
 		{
 			name:      "OK(empty password)",
-			inputBody: `{"email":"test@yandex.ru"}`,
+			inputBody: `{"email":"test@yandex.ru", "role_id":1}`,
 			inputUser: model.CreateUser{
-				Email: "test@yandex.ru",
+				Email:  "test@yandex.ru",
+				RoleId: 1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
@@ -245,9 +247,10 @@ func TestHandler_createCustomer(t *testing.T) {
 		},
 		{
 			name:      "Invalid email",
-			inputBody: `{"email":"testyandex.ru"}`,
+			inputBody: `{"email":"testyandex.ru", "role_id":1}`,
 			inputUser: model.CreateUser{
-				Email: "test@yandex.ru",
+				Email:  "test@yandex.ru",
+				RoleId: 1,
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
@@ -255,10 +258,11 @@ func TestHandler_createCustomer(t *testing.T) {
 		},
 		{
 			name:      "Invalid password",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu98Tg", "role_id":1}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu98Tg",
+				RoleId:   1,
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
@@ -266,10 +270,11 @@ func TestHandler_createCustomer(t *testing.T) {
 		},
 		{
 			name:      "Server error",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKn!u98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKn!u98Tg", "role_id":1}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKn!u98Tg",
+				RoleId:   1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateCustomer(&user).Return(nil, 0, errors.New("server error"))
@@ -327,10 +332,11 @@ func TestHandler_createStaff(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu!98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu!98Tg", "role_id":1}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu!98Tg",
+				RoleId:   1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateStaff(&user).Return(1, nil)
@@ -340,9 +346,10 @@ func TestHandler_createStaff(t *testing.T) {
 		},
 		{
 			name:      "OK(empty password)",
-			inputBody: `{"email":"test@yandex.ru"}`,
+			inputBody: `{"email":"test@yandex.ru", "role_id":1}`,
 			inputUser: model.CreateUser{
-				Email: "test@yandex.ru",
+				Email:  "test@yandex.ru",
+				RoleId: 1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateStaff(&user).Return(1, nil)
@@ -352,9 +359,10 @@ func TestHandler_createStaff(t *testing.T) {
 		},
 		{
 			name:      "Invalid email",
-			inputBody: `{"email":"testyandex.ru"}`,
+			inputBody: `{"email":"testyandex.ru", "role_id":1}`,
 			inputUser: model.CreateUser{
-				Email: "test@yandex.ru",
+				Email:  "test@yandex.ru",
+				RoleId: 1,
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
@@ -362,10 +370,11 @@ func TestHandler_createStaff(t *testing.T) {
 		},
 		{
 			name:      "Invalid password",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu98Tg", "role_id":1}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu98Tg",
+				RoleId:   1,
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
@@ -373,10 +382,11 @@ func TestHandler_createStaff(t *testing.T) {
 		},
 		{
 			name:      "Server error",
-			inputBody: `{"email":"test@yandex.ru", "password":"HGYKn!u98Tg"}`,
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKn!u98Tg", "role_id":1}`,
 			inputUser: model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "HGYKn!u98Tg",
+				RoleId:   1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
 				s.EXPECT().CreateStaff(&user).Return(0, errors.New("server error"))
