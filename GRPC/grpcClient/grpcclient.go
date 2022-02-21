@@ -25,12 +25,16 @@ func NewGRPCClient(host string) *GRPCClient {
 	return &GRPCClient{cli: cli}
 }
 
-func (c *GRPCClient) GetUserWithRights(ctx context.Context, in *auth_proto.Request, opts ...grpc.CallOption) (*auth_proto.Response, error) {
+func (c *GRPCClient) GetUserWithRights(ctx context.Context, in *auth_proto.AccessToken, opts ...grpc.CallOption) (*auth_proto.Response, error) {
 	return c.cli.GetUserWithRights(ctx, in)
 }
 
 func (c *GRPCClient) CheckToken(ctx context.Context, in *auth_proto.AccessToken, opts ...grpc.CallOption) (*auth_proto.Result, error) {
 	return c.cli.CheckToken(ctx, in)
+}
+
+func (c *GRPCClient) BindUserAndRole(ctx context.Context, in *auth_proto.User, opts ...grpc.CallOption) (*auth_proto.Resp, error) {
+	return c.cli.BindUserAndRole(ctx, in)
 }
 
 func (c *GRPCClient) TokenGenerationByRefresh(ctx context.Context, in *auth_proto.RefreshToken, opts ...grpc.CallOption) (*auth_proto.GeneratedTokens, error) {

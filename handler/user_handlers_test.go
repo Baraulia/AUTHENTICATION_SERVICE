@@ -202,7 +202,7 @@ func TestHandler_getUsers(t *testing.T) {
 	}
 
 }
-func TestHandler_createUser(t *testing.T) {
+func TestHandler_createCustomer(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.CreateUser)
 	testTable := []struct {
 		name                string           //the name of the test
@@ -220,7 +220,7 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, 1, nil)
@@ -235,7 +235,7 @@ func TestHandler_createUser(t *testing.T) {
 				Email: "test@yandex.ru",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(&auth_proto.GeneratedTokens{
+				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, 1, nil)
@@ -272,7 +272,7 @@ func TestHandler_createUser(t *testing.T) {
 				Password: "HGYKn!u98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateUser(&user).Return(nil, 0, errors.New("server error"))
+				s.EXPECT().CreateCustomer(&user).Return(nil, 0, errors.New("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,
@@ -299,11 +299,11 @@ func TestHandler_createUser(t *testing.T) {
 
 			//Init server
 			r := gin.New()
-			r.POST("/users/", handler.createUser)
+			r.POST("/users/customer", handler.createCustomer)
 
 			//Test request
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("POST", "/users/", bytes.NewBufferString(testCase.inputBody))
+			req := httptest.NewRequest("POST", "/users/customer", bytes.NewBufferString(testCase.inputBody))
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -315,6 +315,114 @@ func TestHandler_createUser(t *testing.T) {
 	}
 
 }
+func TestHandler_createStaff(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockAppUser, user model.CreateUser)
+	testTable := []struct {
+		name                string           //the name of the test
+		inputBody           string           //the body of the request
+		inputUser           model.CreateUser //the structure which we send to the service
+		mockBehavior        mockBehavior
+		expectedStatusCode  int    //expected code
+		expectedRequestBody string //expected response
+	}{
+		{
+			name:      "OK",
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu!98Tg"}`,
+			inputUser: model.CreateUser{
+				Email:    "test@yandex.ru",
+				Password: "HGYKnu!98Tg",
+			},
+			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
+				s.EXPECT().CreateStaff(&user).Return(1, nil)
+			},
+			expectedStatusCode:  201,
+			expectedRequestBody: `{"id":1}`,
+		},
+		{
+			name:      "OK(empty password)",
+			inputBody: `{"email":"test@yandex.ru"}`,
+			inputUser: model.CreateUser{
+				Email: "test@yandex.ru",
+			},
+			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
+				s.EXPECT().CreateStaff(&user).Return(1, nil)
+			},
+			expectedStatusCode:  201,
+			expectedRequestBody: `{"id":1}`,
+		},
+		{
+			name:      "Invalid email",
+			inputBody: `{"email":"testyandex.ru"}`,
+			inputUser: model.CreateUser{
+				Email: "test@yandex.ru",
+			},
+			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
+			expectedStatusCode:  400,
+			expectedRequestBody: `{"Email":"emailValidator: it is not a valid email address"}`,
+		},
+		{
+			name:      "Invalid password",
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKnu98Tg"}`,
+			inputUser: model.CreateUser{
+				Email:    "test@yandex.ru",
+				Password: "HGYKnu98Tg",
+			},
+			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
+			expectedStatusCode:  400,
+			expectedRequestBody: `{"Password":"passwordValidator: the password must contain at least one digit(0-9), one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,\u0026,!,$)"}`,
+		},
+		{
+			name:      "Server error",
+			inputBody: `{"email":"test@yandex.ru", "password":"HGYKn!u98Tg"}`,
+			inputUser: model.CreateUser{
+				Email:    "test@yandex.ru",
+				Password: "HGYKn!u98Tg",
+			},
+			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
+				s.EXPECT().CreateStaff(&user).Return(0, errors.New("server error"))
+			},
+			expectedStatusCode:  500,
+			expectedRequestBody: `{"message":"server error"}`,
+		},
+		{
+			name:                "Empty email field",
+			inputBody:           `{"password":"HGYKn!u98Tg"}`,
+			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
+			expectedStatusCode:  400,
+			expectedRequestBody: `{"message":"Invalid request"}`,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			//Init dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+			auth := mock_service.NewMockAppUser(c)
+			testCase.mockBehavior(auth, testCase.inputUser)
+			logger := logging.GetLogger()
+			services := &service.Service{AppUser: auth}
+			handler := NewHandler(logger, services)
+
+			//Init server
+			r := gin.New()
+			r.POST("/users/staff", handler.createStaff)
+
+			//Test request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/users/staff", bytes.NewBufferString(testCase.inputBody))
+
+			//Execute the request
+			r.ServeHTTP(w, req)
+
+			//Assert
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+
+}
+
 func TestHandler_updateUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.UpdateUser, id int)
 	testTable := []struct {

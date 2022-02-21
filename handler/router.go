@@ -31,7 +31,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		user.GET("/:id", h.getUser)
 		user.GET("/", h.getUsers)
-		user.POST("/", h.createUser)
+		user.POST("/staff", h.createStaff)
+		user.POST("/customer", h.createCustomer)
 		user.PUT("/", h.updateUser)
 		user.DELETE("/:id", h.deleteUserByID)
 		user.POST("/login", h.authUser)

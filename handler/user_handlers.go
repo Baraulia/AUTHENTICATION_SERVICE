@@ -82,9 +82,9 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 
 }
 
-// createUser godoc
-// @Summary createUser
-// @Description create new user
+// createCustomer godoc
+// @Summary createCustomer
+// @Description create new customer
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -92,8 +92,8 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 // @Success 201 {object} auth_proto.GeneratedTokens
 // @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /users/ [post]
-func (h *Handler) createUser(ctx *gin.Context) {
+// @Router /users/customer [post]
+func (h *Handler) createCustomer(ctx *gin.Context) {
 	var input model.CreateUser
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
@@ -106,9 +106,9 @@ func (h *Handler) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	tokens, id, err := h.service.AppUser.CreateUser(&input)
+	tokens, id, err := h.service.AppUser.CreateCustomer(&input)
 	if err != nil {
-		if err.Error() == "createUser: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
+		if err.Error() == "createCustomer: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
 			return
 		} else {
@@ -118,6 +118,45 @@ func (h *Handler) createUser(ctx *gin.Context) {
 	}
 	ctx.Header("id", strconv.Itoa(id))
 	ctx.JSON(http.StatusCreated, tokens)
+}
+
+// createStaff godoc
+// @Summary createStaff
+// @Description create new restaurant or courier manager or courier
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Param input body model.CreateUser true "User"
+// @Success 201 {string} string
+// @Failure 400 {string} string
+// @Failure 500 {string} string
+// @Router /users/staff [post]
+func (h *Handler) createStaff(ctx *gin.Context) {
+	var input model.CreateUser
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+	validationErrors := validateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		ctx.JSON(http.StatusBadRequest, validationErrors)
+		return
+	}
+	id, err := h.service.AppUser.CreateStaff(&input)
+	if err != nil {
+		if err.Error() == "createStaff: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+	}
+	ctx.JSON(http.StatusCreated, map[string]interface{}{
+		"id": id,
+	})
 }
 
 // updateUser godoc

@@ -36,6 +36,26 @@ func (m *MockAuthClient) EXPECT() *MockAuthClientMockRecorder {
 	return m.recorder
 }
 
+// BindUserAndRole mocks base method.
+func (m *MockAuthClient) BindUserAndRole(ctx context.Context, in *auth_proto.User, opts ...grpc.CallOption) (*auth_proto.Resp, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BindUserAndRole", varargs...)
+	ret0, _ := ret[0].(*auth_proto.Resp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BindUserAndRole indicates an expected call of BindUserAndRole.
+func (mr *MockAuthClientMockRecorder) BindUserAndRole(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthClient)(nil).BindUserAndRole), varargs...)
+}
+
 // CheckToken mocks base method.
 func (m *MockAuthClient) CheckToken(ctx context.Context, in *auth_proto.AccessToken, opts ...grpc.CallOption) (*auth_proto.Result, error) {
 	m.ctrl.T.Helper()
@@ -77,7 +97,7 @@ func (mr *MockAuthClientMockRecorder) GetSalt(ctx, in interface{}, opts ...inter
 }
 
 // GetUserWithRights mocks base method.
-func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *auth_proto.Request, opts ...grpc.CallOption) (*auth_proto.Response, error) {
+func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *auth_proto.AccessToken, opts ...grpc.CallOption) (*auth_proto.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -159,6 +179,21 @@ func (m *MockAuthServer) EXPECT() *MockAuthServerMockRecorder {
 	return m.recorder
 }
 
+// BindUserAndRole mocks base method.
+func (m *MockAuthServer) BindUserAndRole(arg0 context.Context, arg1 *auth_proto.User) (*auth_proto.Resp, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BindUserAndRole", arg0, arg1)
+	ret0, _ := ret[0].(*auth_proto.Resp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BindUserAndRole indicates an expected call of BindUserAndRole.
+func (mr *MockAuthServerMockRecorder) BindUserAndRole(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthServer)(nil).BindUserAndRole), arg0, arg1)
+}
+
 // CheckToken mocks base method.
 func (m *MockAuthServer) CheckToken(arg0 context.Context, arg1 *auth_proto.AccessToken) (*auth_proto.Result, error) {
 	m.ctrl.T.Helper()
@@ -190,7 +225,7 @@ func (mr *MockAuthServerMockRecorder) GetSalt(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // GetUserWithRights mocks base method.
-func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *auth_proto.Request) (*auth_proto.Response, error) {
+func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *auth_proto.AccessToken) (*auth_proto.Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserWithRights", arg0, arg1)
 	ret0, _ := ret[0].(*auth_proto.Response)

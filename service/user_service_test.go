@@ -139,7 +139,7 @@ func TestService_GetUsers(t *testing.T) {
 	}
 }
 
-func TestService_CreateUser(t *testing.T) {
+func TestService_CreateCustomer(t *testing.T) {
 	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateUser)
 	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
 	testTable := []struct {
@@ -192,7 +192,65 @@ func TestService_CreateUser(t *testing.T) {
 			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
-			_, _, err := service.CreateUser(testCase.inputUser)
+			_, _, err := service.CreateCustomer(testCase.inputUser)
+			//Assert
+			assert.Equal(t, testCase.expectedError, err)
+		})
+	}
+
+}
+
+func TestService_CreateStaff(t *testing.T) {
+	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateUser)
+	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
+	testTable := []struct {
+		name                  string
+		inputUser             *model.CreateUser
+		mockBehaviorId        mockBehaviorId
+		mockBehaviorGetTokens mockBehaviorGetTokens
+		expectedError         error
+	}{
+		{
+			name: "OK",
+			inputUser: &model.CreateUser{
+				Email:    "test@yandex.ru",
+				Password: "HGYKnu!98Tg",
+			},
+			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
+				s.EXPECT().CreateUser(user).Return(1, nil)
+			},
+			mockBehaviorGetTokens: func(s *mock_auth_proto.MockAuthClient, id int32) {
+				s.EXPECT().BindUserAndRole(context.Background(), &auth_proto.User{
+					UserId: 1,
+				}).Return(&auth_proto.Resp{}, nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "repository error",
+			inputUser: &model.CreateUser{
+				Email:    "test@yandex.ru",
+				Password: "HGYKnu!98Tg",
+			},
+			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
+				s.EXPECT().CreateUser(user).Return(0, errors.New("repository error"))
+			},
+			expectedError: errors.New("repository error"),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			//Init dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+			auth := mock_repository.NewMockAppUser(c)
+			testCase.mockBehaviorId(auth, testCase.inputUser)
+			logger := logging.GetLogger()
+			repo := &repository.Repository{AppUser: auth}
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
+			service := NewService(repo, grpcCli, logger)
+			_, _, err := service.CreateCustomer(testCase.inputUser)
 			//Assert
 			assert.Equal(t, testCase.expectedError, err)
 		})
