@@ -111,9 +111,11 @@ const docTemplate_swagger = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/users/customer": {
             "post": {
-                "description": "create new user",
+                "description": "create new customer",
                 "consumes": [
                     "application/json"
                 ],
@@ -123,7 +125,7 @@ const docTemplate_swagger = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "createUser",
+                "summary": "createCustomer",
                 "parameters": [
                     {
                         "description": "User",
@@ -196,6 +198,52 @@ const docTemplate_swagger = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/staff": {
+            "post": {
+                "description": "create new restaurant or courier manager or courier",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "createStaff",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
@@ -341,8 +389,8 @@ const docTemplate_swagger = `{
                 "password": {
                     "type": "string"
                 },
-                "role": {
-                    "type": "string"
+                "role_id": {
+                    "type": "integer"
                 }
             }
         },
