@@ -12,7 +12,7 @@ type User struct {
 type CreateUser struct {
 	Email    string `json:"email" binding:"required" validate:"email"`
 	Password string `json:"password" validate:"password"`
-	RoleId   int    `json:"role_id"`
+	RoleId   int    `json:"role_id" binding:"required" validate:"roleId"`
 }
 
 type UpdateUser struct {
