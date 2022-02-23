@@ -49,3 +49,7 @@ var PasswordComposition = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 	"abcdefghijklmnopqrstuvwxyz" +
 	"0123456789" +
 	"@#%&!$")
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+}

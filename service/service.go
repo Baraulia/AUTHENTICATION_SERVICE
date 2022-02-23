@@ -1,7 +1,7 @@
 package service
 
 import (
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
@@ -13,12 +13,12 @@ import (
 type AppUser interface {
 	GetUser(id int) (*model.ResponseUser, error)
 	GetUsers(page int, limit int) ([]model.ResponseUser, int, error)
-	CreateCustomer(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error)
+	CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error)
 	CreateStaff(user *model.CreateUser) (int, error)
 	UpdateUser(user *model.UpdateUser, id int) error
 	DeleteUserByID(id int) (int, error)
-	AuthUser(email string, password string) (*auth_proto.GeneratedTokens, int, error)
-	GrpcExample(string) (*auth_proto.Result, error)
+	AuthUser(email string, password string) (*authProto.GeneratedTokens, int, error)
+	GrpcExample(string) (*authProto.Result, error)
 }
 
 type Service struct {

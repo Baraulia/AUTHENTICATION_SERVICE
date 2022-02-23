@@ -20,36 +20,25 @@ func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
 
 // GetUserByID ...
 func (u UserPostgres) GetUserByID(id int) (*model.ResponseUser, error) {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("GetUserByID: can not starts transaction:%s", err)
-		return nil, fmt.Errorf("getUserByID: can not starts transaction:%w", err)
-	}
 	var user model.ResponseUser
-	result := transaction.QueryRow("SELECT id, email, created_at FROM users WHERE id = $1", id)
+	result := u.db.QueryRow("SELECT id, email, created_at FROM users WHERE id = $1", id)
 	if err := result.Scan(&user.ID, &user.Email, &user.CreatedAt); err != nil {
 		u.logger.Errorf("GetUserByID: error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByID: repository error:%w", err)
 	}
 
-	return &user, transaction.Commit()
+	return &user, nil
 }
 
 // GetUserPasswordByID ...
 func (u UserPostgres) GetUserPasswordByID(id int) (string, error) {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("GetUserPasswordByID: can not starts transaction:%s", err)
-		return "", fmt.Errorf("getUserPasswordByID: can not starts transaction:%w", err)
-	}
 	var password string
-	result := transaction.QueryRow("SELECT password FROM users WHERE id = $1", id)
+	result := u.db.QueryRow("SELECT password FROM users WHERE id = $1", id)
 	if err := result.Scan(&password); err != nil {
 		u.logger.Errorf("GetUserPasswordByID: error while scanning for user:%s", err)
 		return "", fmt.Errorf("getUserPasswordByID: repository error:%w", err)
 	}
-
-	return password, transaction.Commit()
+	return password, nil
 }
 
 // GetUserAll ...
@@ -100,68 +89,45 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 
 // CreateUser ...
 func (u *UserPostgres) CreateUser(user *model.CreateUser) (int, error) {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("CreateUser: can not starts transaction:%s", err)
-		return 0, fmt.Errorf("createUser: can not starts transaction:%w", err)
-	}
 	var id int
-	defer transaction.Rollback()
-	row := transaction.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id", user.Email, user.Password, time.Now())
+	row := u.db.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id", user.Email, user.Password, time.Now())
 	if err := row.Scan(&id); err != nil {
 		u.logger.Errorf("CreateUser: error while scanning for user:%s", err)
 		return 0, fmt.Errorf("createUser: error while scanning for user:%w", err)
 	}
-	return id, transaction.Commit()
+	return id, nil
 }
 
 // UpdateUser ...
 func (u *UserPostgres) UpdateUser(user *model.UpdateUser, id int) error {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("UpdateUser: can not starts transaction:%s", err)
-		return fmt.Errorf("updateUser: can not starts transaction:%w", err)
-	}
-	defer transaction.Rollback()
-	_, err = transaction.Exec("UPDATE users SET password =$1 WHERE id=$2", user.NewPassword, id)
+	_, err := u.db.Exec("UPDATE users SET password =$1 WHERE id=$2", user.NewPassword, id)
 	if err != nil {
 		u.logger.Errorf("UpdateUser: error while updating user:%s", err)
 		return fmt.Errorf("updateUser: error while updating user:%w", err)
 	}
-	return transaction.Commit()
+	return nil
 }
 
 // DeleteUserByID ...
 func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("DeleteUserByID: can not starts transaction:%s", err)
-		return 0, fmt.Errorf("deleteUserByID: can not starts transaction:%w", err)
-	}
-	defer transaction.Rollback()
 	var userId int
-	row := transaction.QueryRow("DELETE FROM users WHERE id=$1 RETURNING id", id)
+	row := u.db.QueryRow("DELETE FROM users WHERE id=$1 RETURNING id", id)
 	if err := row.Scan(&userId); err != nil {
 		u.logger.Errorf("DeleteUserByID: error while scanning for userId:%s", err)
 		return 0, fmt.Errorf("deleteUserByID: error while scanning for userId:%w", err)
 	}
-	return userId, transaction.Commit()
+	return userId, nil
 }
 
 // GetUserByEmail ...
 func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
-	transaction, err := u.db.Begin()
-	if err != nil {
-		u.logger.Errorf("GetUserByEmail: can not starts transaction:%s", err)
-		return nil, fmt.Errorf("getUserByEmail: can not starts transaction:%w", err)
-	}
 	var User model.User
 	query := "SELECT id, email, password, created_at FROM users WHERE email = $1"
-	row := transaction.QueryRow(query, email)
+	row := u.db.QueryRow(query, email)
 	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
 		u.logger.Errorf("Error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 
 	}
-	return &User, transaction.Commit()
+	return &User, nil
 }

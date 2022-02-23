@@ -16,20 +16,20 @@ import (
 // @Produce  json
 // @Param id path int true "User ID"
 // @Success 200 {object} model.ResponseUser
-// @Failure 400 {string} string
-// @Failure 500 {string} string
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [get]
 func (h *Handler) getUser(ctx *gin.Context) {
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler getUser (reading param):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
 	user, err := h.service.AppUser.GetUser(varID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
@@ -48,8 +48,8 @@ type listUsers struct {
 // @Param page query int false "Page"
 // @Param limit query int false "Limit"
 // @Success 200 {object} listUsers
-// @Failure 400 {string} string
-// @Failure 500 {string} string
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
 // @Router /users/ [get]
 func (h *Handler) getUsers(ctx *gin.Context) {
 	var page = 0
@@ -58,7 +58,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 		paramPage, err := strconv.Atoi(ctx.Query("page"))
 		if err != nil || paramPage < 0 {
 			h.logger.Warnf("No url request:%s", err)
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid url query"})
 			return
 		}
 		page = paramPage
@@ -67,7 +67,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 		paramLimit, err := strconv.Atoi(ctx.Query("limit"))
 		if err != nil || paramLimit < 0 {
 			h.logger.Warnf("No url request:%s", err)
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid url query"})
 			return
 		}
 		limit = paramLimit
@@ -75,7 +75,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 
 	users, pages, err := h.service.AppUser.GetUsers(page, limit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 	ctx.Header("pages", strconv.Itoa(pages))
@@ -90,15 +90,16 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body model.CreateUser true "User"
-// @Success 201 {object} auth_proto.GeneratedTokens
-// @Failure 400 {string} string
-// @Failure 500 {string} string
+// @Success 201 {object} authProto.GeneratedTokens
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} model.ErrorResponse
 // @Router /users/customer [post]
 func (h *Handler) createCustomer(ctx *gin.Context) {
 	var input model.CreateUser
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
 	fmt.Println(input.RoleId)
@@ -111,10 +112,10 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 	tokens, id, err := h.service.AppUser.CreateCustomer(&input)
 	if err != nil {
 		if err.Error() == "createCustomer: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "User with such an email already exists"})
 			return
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 			return
 		}
 	}
@@ -130,14 +131,15 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // @Produce  json
 // @Param input body model.CreateUser true "User"
 // @Success 201 {string} string
-// @Failure 400 {string} string
-// @Failure 500 {string} string
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} model.ErrorResponse
 // @Router /users/staff [post]
 func (h *Handler) createStaff(ctx *gin.Context) {
 	var input model.CreateUser
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
 	validationErrors := validateStruct(input)
@@ -149,10 +151,10 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 	id, err := h.service.AppUser.CreateStaff(&input)
 	if err != nil {
 		if err.Error() == "createStaff: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User with such an email already exists"})
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "User with such an email already exists"})
 			return
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 			return
 		}
 	}
@@ -168,23 +170,24 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body model.UpdateUser true "User"
-// @Param id query int true "Id"
+// @Param id path int true "User ID" Format(int64)
 // @Success 204
-// @Failure 400 {string} string
-// @Failure 500 {string} string
-// @Router /users/ [put]
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} model.ErrorResponse
+// @Router /users/{id} [put]
 func (h *Handler) updateUser(ctx *gin.Context) {
 	var input model.UpdateUser
-	paramID := ctx.Query("id")
+	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler updateUser (reading param):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid url query"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
 		return
 	}
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
 	validationErrors := validateStruct(input)
@@ -195,7 +198,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 	}
 	err = h.service.AppUser.UpdateUser(&input, varID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 	ctx.Status(http.StatusNoContent)
@@ -209,20 +212,20 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID" Format(int64)
 // @Success 200  {string} string
-// @Failure 400 {string} string
-// @Failure 500 {string} string
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [delete]
 func (h *Handler) deleteUserByID(ctx *gin.Context) {
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil {
 		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid id"})
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
 		return
 	}
 	id, err := h.service.AppUser.DeleteUserByID(int(varID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	} else {
 		ctx.JSON(http.StatusOK, map[string]interface{}{
@@ -236,7 +239,7 @@ func (h *Handler) grpcFunc(ctx *gin.Context) {
 	input = ctx.Query("token")
 	proto, err := h.service.AppUser.GrpcExample(input)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	} else {
 		ctx.JSON(http.StatusOK, proto)

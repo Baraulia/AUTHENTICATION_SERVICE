@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
@@ -18,12 +18,12 @@ import (
 func TestHandler_authUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.AuthUser)
 	testTable := []struct {
-		name                string         //the name of the test
-		inputBody           string         //the body of the request
-		inputUser           model.AuthUser //the structure which we send to the service
+		name                string
+		inputBody           string
+		inputUser           model.AuthUser
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:      "OK",
@@ -33,7 +33,7 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(&auth_proto.GeneratedTokens{
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, 1, nil)

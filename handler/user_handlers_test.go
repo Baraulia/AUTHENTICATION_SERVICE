@@ -8,7 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
@@ -25,8 +25,8 @@ func TestHandler_getUser(t *testing.T) {
 		input               string
 		id                  int
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:  "OK",
@@ -47,7 +47,7 @@ func TestHandler_getUser(t *testing.T) {
 			input:               "a",
 			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"Invalid request"}`,
+			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 		{
 			name:  "non-existent id",
@@ -205,12 +205,12 @@ func TestHandler_getUsers(t *testing.T) {
 func TestHandler_createCustomer(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.CreateUser)
 	testTable := []struct {
-		name                string           //the name of the test
-		inputBody           string           //the body of the request
-		inputUser           model.CreateUser //the structure which we send to the service
+		name                string
+		inputBody           string
+		inputUser           model.CreateUser
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:      "OK",
@@ -221,7 +221,7 @@ func TestHandler_createCustomer(t *testing.T) {
 				RoleId:   1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
+				s.EXPECT().CreateCustomer(&user).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, 1, nil)
@@ -237,7 +237,7 @@ func TestHandler_createCustomer(t *testing.T) {
 				RoleId: 1,
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.CreateUser) {
-				s.EXPECT().CreateCustomer(&user).Return(&auth_proto.GeneratedTokens{
+				s.EXPECT().CreateCustomer(&user).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, 1, nil)
@@ -287,7 +287,7 @@ func TestHandler_createCustomer(t *testing.T) {
 			inputBody:           `{"password":"HGYKn!u98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"Invalid request"}`,
+			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 	}
 
@@ -323,12 +323,12 @@ func TestHandler_createCustomer(t *testing.T) {
 func TestHandler_createStaff(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.CreateUser)
 	testTable := []struct {
-		name                string           //the name of the test
-		inputBody           string           //the body of the request
-		inputUser           model.CreateUser //the structure which we send to the service
+		name                string
+		inputBody           string
+		inputUser           model.CreateUser
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:      "OK",
@@ -399,7 +399,7 @@ func TestHandler_createStaff(t *testing.T) {
 			inputBody:           `{"password":"HGYKn!u98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.CreateUser) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"Invalid request"}`,
+			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 	}
 
@@ -436,19 +436,19 @@ func TestHandler_createStaff(t *testing.T) {
 func TestHandler_updateUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.UpdateUser, id int)
 	testTable := []struct {
-		name                string //the name of the test
-		inputQuery          string
-		inputBody           string           //the body of the request
-		inputUser           model.UpdateUser //the structure which we send to the service
+		name                string
+		inputId             string
+		inputBody           string
+		inputUser           model.UpdateUser
 		id                  int
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
-			name:       "OK",
-			inputQuery: "?id=1",
-			inputBody:  `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
+			name:      "OK",
+			inputId:   "1",
+			inputBody: `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
 			inputUser: model.UpdateUser{
 				Email:       "test@yandex.ru",
 				OldPassword: "HGYKnu!98Tg",
@@ -461,33 +461,33 @@ func TestHandler_updateUser(t *testing.T) {
 			expectedStatusCode: 204,
 		},
 		{
-			name:                "Invalid url query",
-			inputQuery:          "?id=a",
+			name:                "Invalid parameter",
+			inputId:             "a",
 			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"Invalid url query"}`,
+			expectedRequestBody: `{"message":"Invalid id"}`,
 		},
 		{
 			name:                "Empty one field",
-			inputQuery:          "?id=1",
+			inputId:             "1",
 			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {},
 			expectedStatusCode:  400,
-			expectedRequestBody: `{"message":"Invalid request"}`,
+			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 		{
 			name:                "Invalid new password",
-			inputQuery:          "?id=1",
+			inputId:             "1",
 			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu98Tg"}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser, id int) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"NewPassword":"passwordValidator: the password must contain at least one digit(0-9), one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,\u0026,!,$)"}`,
 		},
 		{
-			name:       "Server Failure",
-			inputQuery: "?id=1",
-			inputBody:  `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
+			name:      "Server Failure",
+			inputId:   "1",
+			inputBody: `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu!!98Tg"}`,
 			inputUser: model.UpdateUser{
 				Email:       "test@yandex.ru",
 				OldPassword: "HGYKnu!98Tg",
@@ -515,11 +515,11 @@ func TestHandler_updateUser(t *testing.T) {
 
 			//Init server
 			r := gin.New()
-			r.PUT("/users/", handler.updateUser)
+			r.PUT("/users/:id", handler.updateUser)
 
 			//Test request
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("PUT", fmt.Sprintf("/users/%s", testCase.inputQuery), bytes.NewBufferString(testCase.inputBody))
+			req := httptest.NewRequest("PUT", fmt.Sprintf("/users/%s", testCase.inputId), bytes.NewBufferString(testCase.inputBody))
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -534,13 +534,13 @@ func TestHandler_updateUser(t *testing.T) {
 func TestHandler_deleteUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, id int)
 	testTable := []struct {
-		name                string //the name of the test
+		name                string
 		inputQuery          string
 		inputId             string
 		id                  int
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:    "OK",

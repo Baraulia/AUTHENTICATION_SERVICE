@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	model "stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 )
 
@@ -36,10 +36,10 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 }
 
 // AuthUser mocks base method.
-func (m *MockAppUser) AuthUser(email, password string) (*auth_proto.GeneratedTokens, int, error) {
+func (m *MockAppUser) AuthUser(email, password string) (*authProto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AuthUser", email, password)
-	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
+	ret0, _ := ret[0].(*authProto.GeneratedTokens)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -52,10 +52,10 @@ func (mr *MockAppUserMockRecorder) AuthUser(email, password interface{}) *gomock
 }
 
 // CreateCustomer mocks base method.
-func (m *MockAppUser) CreateCustomer(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error) {
+func (m *MockAppUser) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCustomer", user)
-	ret0, _ := ret[0].(*auth_proto.GeneratedTokens)
+	ret0, _ := ret[0].(*authProto.GeneratedTokens)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -129,10 +129,10 @@ func (mr *MockAppUserMockRecorder) GetUsers(page, limit interface{}) *gomock.Cal
 }
 
 // GrpcExample mocks base method.
-func (m *MockAppUser) GrpcExample(arg0 string) (*auth_proto.Result, error) {
+func (m *MockAppUser) GrpcExample(arg0 string) (*authProto.Result, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GrpcExample", arg0)
-	ret0, _ := ret[0].(*auth_proto.Result)
+	ret0, _ := ret[0].(*authProto.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

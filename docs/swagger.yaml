@@ -1,5 +1,5 @@
 definitions:
-  auth_proto.GeneratedTokens:
+  authProto.GeneratedTokens:
     properties:
       accessToken:
         type: string
@@ -33,6 +33,12 @@ definitions:
         type: integer
     required:
     - email
+    - role_id
+    type: object
+  model.ErrorResponse:
+    properties:
+      message:
+        type: string
     type: object
   model.ResponseUser:
     properties:
@@ -84,44 +90,12 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
       summary: getUsers
-      tags:
-      - User
-    put:
-      consumes:
-      - application/json
-      description: change user password
-      parameters:
-      - description: User
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/model.UpdateUser'
-      - description: Id
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: updateUser
       tags:
       - User
   /users/{id}:
@@ -146,11 +120,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
       summary: deleteUserByID
       tags:
       - User
@@ -174,12 +148,47 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
       summary: getUser
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: change user password
+      parameters:
+      - description: User
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateUser'
+      - description: User ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: updateUser
       tags:
       - User
   /users/customer:
@@ -200,15 +209,17 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/auth_proto.GeneratedTokens'
+            $ref: '#/definitions/authProto.GeneratedTokens'
         "400":
           description: Bad Request
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
       summary: createCustomer
       tags:
       - User
@@ -230,15 +241,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth_proto.GeneratedTokens'
+            $ref: '#/definitions/authProto.GeneratedTokens'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
       summary: authUser
       tags:
       - Auth
@@ -264,11 +279,13 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/model.ErrorResponse'
       summary: createStaff
       tags:
       - User

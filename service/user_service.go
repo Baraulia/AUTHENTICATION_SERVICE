@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/mail"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
@@ -42,7 +42,7 @@ func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, 
 	return users, pages, nil
 }
 
-func (u *UserService) CreateCustomer(user *model.CreateUser) (*auth_proto.GeneratedTokens, int, error) {
+func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
@@ -61,7 +61,7 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*auth_proto.Genera
 		Email:    user.Email,
 		Password: pas,
 	})
-	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &auth_proto.User{
+	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &authProto.User{
 		UserId: int32(id),
 		RoleId: int32(user.RoleId),
 	})
@@ -91,7 +91,7 @@ func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
 		Email:    user.Email,
 		Password: pas,
 	})
-	_, err = u.grpcCli.BindUserAndRole(context.Background(), &auth_proto.User{
+	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
 		UserId: int32(id),
 		RoleId: int32(user.RoleId),
 	})
@@ -147,7 +147,7 @@ func GeneratePassword() string {
 	return b.String()
 }
 
-func (u *UserService) GrpcExample(in string) (*auth_proto.Result, error) {
+func (u *UserService) GrpcExample(in string) (*authProto.Result, error) {
 
-	return u.grpcCli.CheckToken(context.Background(), &auth_proto.AccessToken{AccessToken: in})
+	return u.grpcCli.CheckToken(context.Background(), &authProto.AccessToken{AccessToken: in})
 }

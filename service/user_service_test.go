@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
-	mock_auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
+	mock_authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
@@ -141,7 +141,7 @@ func TestService_GetUsers(t *testing.T) {
 
 func TestService_CreateCustomer(t *testing.T) {
 	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateUser)
-	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
+	type mockBehaviorGetTokens func(s *mock_authProto.MockAuthClient, id int32)
 	testTable := []struct {
 		name                  string
 		inputUser             *model.CreateUser
@@ -158,10 +158,10 @@ func TestService_CreateCustomer(t *testing.T) {
 			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
 				s.EXPECT().CreateUser(user).Return(1, nil)
 			},
-			mockBehaviorGetTokens: func(s *mock_auth_proto.MockAuthClient, id int32) {
-				s.EXPECT().TokenGenerationById(context.Background(), &auth_proto.User{
+			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
+				s.EXPECT().TokenGenerationById(context.Background(), &authProto.User{
 					UserId: 1,
-				}).Return(&auth_proto.GeneratedTokens{
+				}).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, nil)
@@ -202,7 +202,7 @@ func TestService_CreateCustomer(t *testing.T) {
 
 func TestService_CreateStaff(t *testing.T) {
 	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateUser)
-	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
+	type mockBehaviorGetTokens func(s *mock_authProto.MockAuthClient, id int32)
 	testTable := []struct {
 		name                  string
 		inputUser             *model.CreateUser
@@ -219,10 +219,10 @@ func TestService_CreateStaff(t *testing.T) {
 			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateUser) {
 				s.EXPECT().CreateUser(user).Return(1, nil)
 			},
-			mockBehaviorGetTokens: func(s *mock_auth_proto.MockAuthClient, id int32) {
-				s.EXPECT().BindUserAndRole(context.Background(), &auth_proto.User{
+			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
+				s.EXPECT().BindUserAndRole(context.Background(), &authProto.User{
 					UserId: 1,
-				}).Return(&auth_proto.Resp{}, nil)
+				}).Return(&authProto.ResultBinding{}, nil)
 			},
 			expectedError: nil,
 		},

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
-	mock_auth_proto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
+	mock_authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
@@ -18,7 +18,7 @@ import (
 
 func TestService_authUser(t *testing.T) {
 	type mockBehaviorGetUser func(s *mock_repository.MockAppUser, email string)
-	type mockBehaviorGetTokens func(s *mock_auth_proto.MockAuthClient, id int32)
+	type mockBehaviorGetTokens func(s *mock_authProto.MockAuthClient, id int32)
 	testTable := []struct {
 		name                  string
 		inputPassword         string
@@ -40,10 +40,10 @@ func TestService_authUser(t *testing.T) {
 					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
 				}, nil)
 			},
-			mockBehaviorGetTokens: func(s *mock_auth_proto.MockAuthClient, id int32) {
-				s.EXPECT().TokenGenerationById(context.Background(), &auth_proto.User{
+			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
+				s.EXPECT().TokenGenerationById(context.Background(), &authProto.User{
 					UserId: 1,
-				}).Return(&auth_proto.GeneratedTokens{
+				}).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",
 					RefreshToken: "qwerty",
 				}, nil)
