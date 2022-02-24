@@ -2,10 +2,10 @@ package mail
 
 import (
 	"fmt"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"net/smtp"
 	"os"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"strings"
 )
 

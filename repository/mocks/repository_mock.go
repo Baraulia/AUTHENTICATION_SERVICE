@@ -7,8 +7,8 @@ package mock_repository
 import (
 	reflect "reflect"
 
-	model "github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	gomock "github.com/golang/mock/gomock"
+	model "stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 )
 
 // MockAppUser is a mock of AppUser interface.
@@ -35,10 +35,10 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockAppUser) CreateUser(User *model.CreateUser) (*model.User, error) {
+func (m *MockAppUser) CreateUser(User *model.CreateUser) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", User)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -65,12 +65,13 @@ func (mr *MockAppUserMockRecorder) DeleteUserByID(id interface{}) *gomock.Call {
 }
 
 // GetUserAll mocks base method.
-func (m *MockAppUser) GetUserAll(page, limit int) ([]model.User, error) {
+func (m *MockAppUser) GetUserAll(page, limit int) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserAll", page, limit)
-	ret0, _ := ret[0].([]model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetUserAll indicates an expected call of GetUserAll.
@@ -95,10 +96,10 @@ func (mr *MockAppUserMockRecorder) GetUserByEmail(email interface{}) *gomock.Cal
 }
 
 // GetUserByID mocks base method.
-func (m *MockAppUser) GetUserByID(id int) (*model.User, error) {
+func (m *MockAppUser) GetUserByID(id int) (*model.ResponseUser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByID", id)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(*model.ResponseUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -109,13 +110,27 @@ func (mr *MockAppUserMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockAppUser)(nil).GetUserByID), id)
 }
 
-// UpdateUser mocks base method.
-func (m *MockAppUser) UpdateUser(User *model.UpdateUser, id int) (int, error) {
+// GetUserPasswordByID mocks base method.
+func (m *MockAppUser) GetUserPasswordByID(id int) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", User, id)
-	ret0, _ := ret[0].(int)
+	ret := m.ctrl.Call(m, "GetUserPasswordByID", id)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
+}
+
+// GetUserPasswordByID indicates an expected call of GetUserPasswordByID.
+func (mr *MockAppUserMockRecorder) GetUserPasswordByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPasswordByID", reflect.TypeOf((*MockAppUser)(nil).GetUserPasswordByID), id)
+}
+
+// UpdateUser mocks base method.
+func (m *MockAppUser) UpdateUser(User *model.UpdateUser, id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", User, id)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateUser indicates an expected call of UpdateUser.

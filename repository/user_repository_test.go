@@ -3,10 +3,10 @@ package repository
 import (
 	"database/sql/driver"
 	"errors"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"testing"
 	"time"
 )
@@ -38,45 +38,31 @@ func TestRepository_GetUserByID(t *testing.T) {
 		name          string
 		mock          func(id int)
 		id            int
-		expectedUser  *model.User
+		expectedUser  *model.ResponseUser
 		expectedError bool
 	}{
 		{
 			name: "OK",
 			mock: func(id int) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
-					AddRow(1, "test@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{})
-
-				mock.ExpectQuery("SELECT id, email, password, created_at FROM users WHERE id = (.+)").
+				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
+					AddRow(1, "test@yandex.ru", AnyTime{})
+				mock.ExpectQuery("SELECT id, email, created_at FROM users WHERE id = (.+)").
 					WithArgs(id).WillReturnRows(rows)
-				mock.ExpectCommit()
 			},
 			id: 1,
-			expectedUser: &model.User{
+			expectedUser: &model.ResponseUser{
 				ID:        1,
 				Email:     "test@yandex.ru",
-				Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 				CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 			},
 			expectedError: false,
 		},
 		{
-			name: "db error",
-			mock: func(id int) {
-				mock.ExpectBegin().WillReturnError(errors.New("some error"))
-			},
-			id:            1,
-			expectedUser:  nil,
-			expectedError: true,
-		},
-		{
 			name: "Not found",
 			mock: func(id int) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"})
+				rows := sqlmock.NewRows([]string{"id", "email", "created_at"})
 
-				mock.ExpectQuery("SELECT id, email, password, created_at FROM users WHERE id = (.+)").
+				mock.ExpectQuery("SELECT id, email, created_at FROM users WHERE id = (.+)").
 					WithArgs(id).WillReturnRows(rows)
 
 			},
@@ -113,7 +99,8 @@ func TestRepository_GetUserAll(t *testing.T) {
 		inputPage     int
 		inputLimit    int
 		mock          func(page, limit int)
-		expectedUser  []model.User
+		expectedUser  []model.ResponseUser
+		expectedPages int
 		expectedError bool
 	}{
 		{
@@ -122,32 +109,28 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 0,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
-					AddRow(1, "test@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{}).
-					AddRow(2, "test1@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{}).
-					AddRow(3, "test2@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{})
-
-				mock.ExpectQuery("SELECT id, email, password, created_at FROM users").WillReturnRows(rows)
+				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
+					AddRow(1, "test@yandex.ru", AnyTime{}).
+					AddRow(2, "test1@yandex.ru", AnyTime{}).
+					AddRow(3, "test2@yandex.ru", AnyTime{})
+				mock.ExpectQuery("SELECT id, email, created_at FROM users").WillReturnRows(rows)
 				mock.ExpectCommit()
 			},
 
-			expectedUser: []model.User{
+			expectedUser: []model.ResponseUser{
 				{
 					ID:        1,
 					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        2,
 					Email:     "test1@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        3,
 					Email:     "test2@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 			},
@@ -159,32 +142,32 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 10,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
-					AddRow(1, "test@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{}).
-					AddRow(2, "test1@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{}).
-					AddRow(3, "test2@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{})
+				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
+					AddRow(1, "test@yandex.ru", AnyTime{}).
+					AddRow(2, "test1@yandex.ru", AnyTime{}).
+					AddRow(3, "test2@yandex.ru", AnyTime{})
 
-				mock.ExpectQuery("SELECT id, email, password, created_at FROM users ORDER BY id LIMIT 10 OFFSET 0").WillReturnRows(rows)
+				mock.ExpectQuery("SELECT id, email, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnRows(rows)
+				rows2 := sqlmock.NewRows([]string{"pages"}).
+					AddRow(1)
+				mock.ExpectQuery("SELECT CEILING").WillReturnRows(rows2)
 				mock.ExpectCommit()
 			},
 
-			expectedUser: []model.User{
+			expectedUser: []model.ResponseUser{
 				{
 					ID:        1,
 					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        2,
 					Email:     "test1@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        3,
 					Email:     "test2@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 			},
@@ -206,7 +189,7 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 10,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				mock.ExpectQuery("SELECT id, email, password, created_at FROM users ORDER BY id LIMIT 10 OFFSET 0").WillReturnError(errors.New("some error"))
+				mock.ExpectQuery("SELECT id, email, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnError(errors.New("some error"))
 			},
 			expectedUser:  nil,
 			expectedError: true,
@@ -215,7 +198,7 @@ func TestRepository_GetUserAll(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock(tt.inputPage, tt.inputLimit)
-			got, err := r.GetUserAll(tt.inputPage, tt.inputLimit)
+			got, _, err := r.GetUserAll(tt.inputPage, tt.inputLimit)
 			if tt.expectedError {
 				assert.Error(t, err)
 			} else {
@@ -245,13 +228,11 @@ func TestRepository_GetUserByEmail(t *testing.T) {
 		{
 			name: "OK",
 			mock: func(email string) {
-				mock.ExpectBegin()
 				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
 					AddRow(1, "test@yandex.ru", "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy", AnyTime{})
 
 				mock.ExpectQuery("SELECT id, email, password, created_at FROM users WHERE email = (.+)").
 					WithArgs(email).WillReturnRows(rows)
-				mock.ExpectCommit()
 			},
 			email: "test@yandex.ru",
 			expectedUser: &model.User{
@@ -263,18 +244,8 @@ func TestRepository_GetUserByEmail(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name: "db error",
-			mock: func(email string) {
-				mock.ExpectBegin().WillReturnError(errors.New("some error"))
-			},
-			email:         "test@yandex.ru",
-			expectedUser:  nil,
-			expectedError: true,
-		},
-		{
 			name: "Not found",
 			mock: func(email string) {
-				mock.ExpectBegin()
 				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"})
 
 				mock.ExpectQuery("SELECT id, email, password, created_at FROM users WHERE email = (.+)").
@@ -319,30 +290,18 @@ func TestRepository_DeleteUserByID(t *testing.T) {
 		{
 			name: "OK",
 			mock: func(id int) {
-				mock.ExpectBegin()
 				rows := sqlmock.NewRows([]string{"id"}).
 					AddRow(1)
 				mock.ExpectQuery("DELETE FROM users WHERE id=(.+) RETURNING id").
 					WithArgs(id).WillReturnRows(rows)
-				mock.ExpectCommit()
 			},
 			id:             1,
 			expectedUserId: 1,
 			expectedError:  false,
 		},
 		{
-			name: "db error",
-			mock: func(id int) {
-				mock.ExpectBegin().WillReturnError(errors.New("some error"))
-			},
-			id:             1,
-			expectedUserId: 0,
-			expectedError:  true,
-		},
-		{
 			name: "Not found",
 			mock: func(id int) {
-				mock.ExpectBegin()
 				rows := sqlmock.NewRows([]string{"id"})
 
 				mock.ExpectQuery("DELETE FROM users WHERE id=(.+) RETURNING id").
@@ -378,59 +337,25 @@ func TestRepository_CreateUser(t *testing.T) {
 	r := NewRepository(db, logger)
 
 	testTable := []struct {
-		name          string
-		mock          func(user *model.CreateUser)
-		InputUser     *model.CreateUser
-		expectedUser  *model.User
-		expectedError bool
+		name           string
+		mock           func(user *model.CreateUser)
+		InputUser      *model.CreateUser
+		expectedUserId int
+		expectedError  bool
 	}{
 		{
 			name: "OK",
 			mock: func(user *model.CreateUser) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
-					AddRow(1, "test@yandex.ru", "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW", AnyTime{})
-
-				mock.ExpectQuery("INSERT INTO users").
-					WithArgs(user.Email, user.Password, AnyTime{}).WillReturnRows(rows)
-
-				mock.ExpectCommit()
+				rows := sqlmock.NewRows([]string{"id"}).
+					AddRow(1)
+				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, AnyTime{}).WillReturnRows(rows)
 			},
 			InputUser: &model.CreateUser{
 				Email:    "test@yandex.ru",
 				Password: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
 			},
-			expectedUser: &model.User{
-				ID:        1,
-				Email:     "test@yandex.ru",
-				Password:  "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-				CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
-			},
-			expectedError: false,
-		},
-		{
-			name: "db error",
-			mock: func(user *model.CreateUser) {
-				mock.ExpectBegin().WillReturnError(errors.New("some error"))
-			},
-			expectedError: true,
-		},
-		{
-			name: "db error2",
-			mock: func(user *model.CreateUser) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "password", "created_at"}).
-					AddRow(1, "test@yandex.ru", "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW", AnyTime{})
-				mock.ExpectQuery("INSERT INTO users").
-					WithArgs(user.Email, user.Password, AnyTime{}).WillReturnRows(rows).WillReturnError(errors.New("some error"))
-				mock.ExpectRollback()
-
-			},
-			InputUser: &model.CreateUser{
-				Email:    "test@yandex.ru",
-				Password: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-			},
-			expectedError: true,
+			expectedUserId: 1,
+			expectedError:  false,
 		},
 	}
 	for _, tt := range testTable {
@@ -441,7 +366,7 @@ func TestRepository_CreateUser(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedUser, got)
+				assert.Equal(t, tt.expectedUserId, got)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -457,51 +382,18 @@ func TestRepository_UpdateUser(t *testing.T) {
 	r := NewRepository(db, logger)
 
 	testTable := []struct {
-		name           string
-		mock           func(user *model.UpdateUser, id int)
-		InputUser      *model.UpdateUser
-		inputId        int
-		expectedUserId int
-		expectedError  bool
+		name          string
+		mock          func(user *model.UpdateUser, id int)
+		InputUser     *model.UpdateUser
+		inputId       int
+		expectedError bool
 	}{
 		{
 			name: "OK",
 			mock: func(user *model.UpdateUser, id int) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id"}).
-					AddRow(1)
-
-				mock.ExpectQuery("UPDATE users").
-					WithArgs(user.NewPassword, id).WillReturnRows(rows)
-				mock.ExpectCommit()
-			},
-			InputUser: &model.UpdateUser{
-				Email:       "test@yandex.ru",
-				OldPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-				NewPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-			},
-			inputId:        1,
-			expectedUserId: 1,
-			expectedError:  false,
-		},
-		{
-			name: "db error",
-			mock: func(user *model.UpdateUser, id int) {
-				mock.ExpectBegin().WillReturnError(errors.New("some error"))
-
-			},
-			expectedError: true,
-		},
-		{
-			name: "db error2",
-			mock: func(user *model.UpdateUser, id int) {
-				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id"}).
-					AddRow(1)
-
-				mock.ExpectQuery("UPDATE users").
-					WithArgs(user.NewPassword, id).WillReturnRows(rows).WillReturnError(errors.New("some error"))
-				mock.ExpectRollback()
+				result := driver.ResultNoRows
+				mock.ExpectExec("UPDATE users").
+					WithArgs(user.NewPassword, id).WillReturnResult(result)
 			},
 			InputUser: &model.UpdateUser{
 				Email:       "test@yandex.ru",
@@ -509,18 +401,17 @@ func TestRepository_UpdateUser(t *testing.T) {
 				NewPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
 			},
 			inputId:       1,
-			expectedError: true,
+			expectedError: false,
 		},
 	}
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock(tt.InputUser, tt.inputId)
-			got, err := r.UpdateUser(tt.InputUser, tt.inputId)
+			err := r.UpdateUser(tt.InputUser, tt.inputId)
 			if tt.expectedError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedUserId, got)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})

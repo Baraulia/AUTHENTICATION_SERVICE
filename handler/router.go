@@ -1,10 +1,13 @@
 package handler
 
 import (
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/middleware"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
+	_ "stlab.itechart-group.com/go/food_delivery/authentication_service/docs"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/middleware"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
 
 type Handler struct {
@@ -18,6 +21,7 @@ func NewHandler(logger logging.Logger, service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Use(
 		middleware.CorsMiddleware,
@@ -26,10 +30,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	user := router.Group("/users")
 	{
 		user.GET("/:id", h.getUser)
-		user.GET("/", h.getUsers)
-		user.POST("/", h.createUser)
-		user.PUT("/:id", h.updateUser)
 		user.DELETE("/:id", h.deleteUserByID)
+		user.PUT("/:id", h.updateUser)
+		user.GET("/", h.getUsers)
+		user.POST("/staff", h.createStaff)
+		user.POST("/customer", h.createCustomer)
 		user.POST("/login", h.authUser)
 		user.GET("/grpc", h.grpcFunc)
 	}

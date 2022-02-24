@@ -2,9 +2,9 @@ package handler
 
 import (
 	"fmt"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
 	"reflect"
 	"regexp"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"strings"
 )
 
@@ -29,6 +29,19 @@ type EmailValidator struct {
 func (v EmailValidator) Validate(val interface{}) error {
 	if !mailRe.MatchString(val.(string)) {
 		return fmt.Errorf("emailValidator: it is not a valid email address")
+	}
+	return nil
+}
+
+type RoleIdValidator struct{}
+
+func (v RoleIdValidator) Validate(val interface{}) error {
+	if val.(int) < 0 || val.(int) == 0 {
+		return fmt.Errorf("roleIdValidator: roleId must be positive integer")
+	}
+	//check for superadmin creation
+	if val.(int) == 6 {
+		return fmt.Errorf("you don't have enaugh rights to create user with such a role")
 	}
 	return nil
 }
@@ -118,7 +131,10 @@ func getValidatorFromTag(tag string) Validator {
 		return EmailValidator{}
 	case "password":
 		return PasswordValidator{}
+	case "roleId":
+		return RoleIdValidator{}
 	}
+
 	return DefaultValidator{}
 }
 

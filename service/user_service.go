@@ -3,15 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
-	auth_proto "github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/mail"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/utils"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/mail"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/utils"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
 	"strings"
 	"time"
 )
@@ -26,7 +26,7 @@ func NewUserService(repo repository.Repository, grpcCli *grpcClient.GRPCClient, 
 	return &UserService{repo: repo, grpcCli: grpcCli, logger: logger}
 }
 
-func (u *UserService) GetUser(id int) (*model.User, error) {
+func (u *UserService) GetUser(id int) (*model.ResponseUser, error) {
 	user, err := u.repo.AppUser.GetUserByID(id)
 	if err != nil {
 		return nil, err
@@ -34,15 +34,15 @@ func (u *UserService) GetUser(id int) (*model.User, error) {
 	return user, nil
 }
 
-func (u *UserService) GetUsers(page int, limit int) ([]model.User, error) {
-	users, err := u.repo.AppUser.GetUserAll(page, limit)
+func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, error) {
+	users, pages, err := u.repo.AppUser.GetUserAll(page, limit)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return users, nil
+	return users, pages, nil
 }
 
-func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
+func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
@@ -50,40 +50,78 @@ func (u *UserService) CreateUser(user *model.CreateUser) (*model.User, error) {
 	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return nil, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+		return nil, 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
-	resUser, err := u.repo.AppUser.CreateUser(user)
+	id, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	go mail.SendEmail(u.logger, &model.Post{
 		Email:    user.Email,
 		Password: pas,
 	})
-	return resUser, nil
+	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &authProto.User{
+		UserId: int32(id),
+		RoleId: int32(user.RoleId),
+	})
+	if err != nil {
+		u.logger.Errorf("TokenGenerationById:%s", err)
+		return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
+	}
+	return tokens, id, nil
 }
 
-func (u *UserService) UpdateUser(user *model.UpdateUser, id int) (int, error) {
-	userDb, err := u.repo.AppUser.GetUserByID(id)
+func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
+	if user.Password == "" {
+		user.Password = GeneratePassword()
+	}
+	pas := user.Password
+	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	if err != nil {
+		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
+		return 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+	}
+	user.Password = hash
+	id, err := u.repo.AppUser.CreateUser(user)
 	if err != nil {
 		return 0, err
 	}
-	if utils.CheckPasswordHash(user.OldPassword, userDb.Password) {
+	go mail.SendEmail(u.logger, &model.Post{
+		Email:    user.Email,
+		Password: pas,
+	})
+	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
+		UserId: int32(id),
+		RoleId: int32(user.RoleId),
+	})
+	if err != nil {
+		u.logger.Errorf("BindUserAndRole:%s", err)
+		return id, fmt.Errorf("bindUserAndRole:%w", err)
+	}
+	return id, nil
+}
+
+func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {
+	userPassword, err := u.repo.AppUser.GetUserPasswordByID(id)
+	if err != nil {
+		return err
+	}
+	if utils.CheckPasswordHash(user.OldPassword, userPassword) {
 		newHash, err := utils.HashPassword(user.NewPassword, bcrypt.DefaultCost)
 		if err != nil {
 			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
-			return 0, fmt.Errorf("updateUser: can not generate hash from password:%w", err)
+			return fmt.Errorf("updateUser: can not generate hash from password:%w", err)
 		}
 		user.NewPassword = newHash
-		userId, err := u.repo.AppUser.UpdateUser(user, id)
+		err = u.repo.AppUser.UpdateUser(user, id)
 		if err != nil {
-			return 0, err
+			return err
 		}
-		return userId, nil
+		return nil
 	} else {
 		u.logger.Warn("wrong email or password entered")
-		return 0, fmt.Errorf("wrong email or password entered")
+		return fmt.Errorf("wrong email or password entered")
 	}
 }
 
@@ -109,7 +147,7 @@ func GeneratePassword() string {
 	return b.String()
 }
 
-func (u *UserService) GrpcExample(in string) (*auth_proto.Response, error) {
+func (u *UserService) GrpcExample(in string) (*authProto.Result, error) {
 
-	return u.grpcCli.GetUserWithRights(context.Background(), &auth_proto.Request{AccessToken: in})
+	return u.grpcCli.CheckToken(context.Background(), &authProto.AccessToken{AccessToken: in})
 }

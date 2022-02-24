@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
 	_ "github.com/lib/pq"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 )
 
 type PostgresDB struct {

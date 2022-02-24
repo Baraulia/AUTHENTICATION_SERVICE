@@ -3,26 +3,27 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/model"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
-	mock_service "github.com/Baraulia/AUTHENTICATION_SERVICE/service/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"net/http/httptest"
+	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
+	mock_service "stlab.itechart-group.com/go/food_delivery/authentication_service/service/mocks"
 	"testing"
 )
 
 func TestHandler_authUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, user model.AuthUser)
 	testTable := []struct {
-		name                string         //the name of the test
-		inputBody           string         //the body of the request
-		inputUser           model.AuthUser //the structure which we send to the service
+		name                string
+		inputBody           string
+		inputUser           model.AuthUser
 		mockBehavior        mockBehavior
-		expectedStatusCode  int    //expected code
-		expectedRequestBody string //expected response
+		expectedStatusCode  int
+		expectedRequestBody string
 	}{
 		{
 			name:      "OK",
@@ -32,10 +33,13 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, nil)
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(&authProto.GeneratedTokens{
+					AccessToken:  "qwerty",
+					RefreshToken: "qwerty",
+				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"id":1}`,
+			expectedRequestBody: `{"accessToken":"qwerty","refreshToken":"qwerty"}`,
 		},
 		{
 			name:                "Empty fields",
@@ -108,7 +112,7 @@ func TestHandler_authUser(t *testing.T) {
 				Password: "HGYKnu!98Tg",
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.AuthUser) {
-				s.EXPECT().AuthUser(user.Email, user.Password).Return(1, errors.New("service failure"))
+				s.EXPECT().AuthUser(user.Email, user.Password).Return(nil, 0, errors.New("service failure"))
 			},
 			expectedStatusCode:  401,
 			expectedRequestBody: `{"message":"Wrong email or password entered"}`,

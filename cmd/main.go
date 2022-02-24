@@ -1,15 +1,18 @@
 package main
 
 import (
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/GRPC/grpcClient"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/handler"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/database"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/pkg/logging"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/repository"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/server"
-	"github.com/Baraulia/AUTHENTICATION_SERVICE/service"
 	"os"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/handler"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/database"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/server"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
+
+// @title Authenticate Service
+// @description Authenticate Service for Food Delivery Application
 
 func main() {
 	logger := logging.GetLogger()
@@ -26,8 +29,7 @@ func main() {
 		logger.Panicf("failed to initialize db:%s", err.Error())
 	}
 
-	grpcCli := grpcClient.NewGRPCClient()
-
+	grpcCli := grpcClient.NewGRPCClient(os.Getenv("HOST"))
 	rep := repository.NewRepository(db, logger)
 	ser := service.NewService(rep, grpcCli, logger)
 	handlers := handler.NewHandler(logger, ser)

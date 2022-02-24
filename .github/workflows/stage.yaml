@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           passphrase: ${{ secrets.PASSPHRASE }}
           key: ${{ secrets.SSHKEY }}
-          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE, DB_SSL_MODE, API_SERVER_PORT, POST_FROM, POST_PASSWORD
+          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME, DB_PORT, HOST, DB_USER, DB_PASSWORD, DB_DATABASE, DB_SSL_MODE, API_SERVER_PORT, POST_FROM, POST_PASSWORD
           script: |
             # Login into Digital Ocean Registry
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} $(echo $REGISTRY)
