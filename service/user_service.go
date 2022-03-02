@@ -61,13 +61,13 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.Generat
 		Email:    user.Email,
 		Password: pas,
 	})
-	tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &authProto.User{
+	tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 		UserId: int32(id),
 		RoleId: int32(user.RoleId),
 	})
 	if err != nil {
-		u.logger.Errorf("TokenGenerationById:%s", err)
-		return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
+		u.logger.Errorf("tokenGenerationByUserId:%s", err)
+		return nil, 0, fmt.Errorf("tokenGenerationByUserId:%w", err)
 	}
 	return tokens, id, nil
 }
@@ -145,9 +145,4 @@ func GeneratePassword() string {
 		b.WriteRune(model.PasswordComposition[rand.Intn(len(model.PasswordComposition))])
 	}
 	return b.String()
-}
-
-func (u *UserService) GrpcExample(in string) (*authProto.Result, error) {
-
-	return u.grpcCli.CheckToken(context.Background(), &authProto.AccessToken{AccessToken: in})
 }

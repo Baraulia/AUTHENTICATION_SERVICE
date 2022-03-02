@@ -13,12 +13,12 @@ func (u *UserService) AuthUser(email string, password string) (*authProto.Genera
 		return nil, 0, err
 	}
 	if utils.CheckPasswordHash(password, userDb.Password) {
-		tokens, err := u.grpcCli.TokenGenerationById(context.Background(), &authProto.User{
+		tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 			UserId: int32(userDb.ID),
 		})
 		if err != nil {
-			u.logger.Errorf("TokenGenerationById:%s", err)
-			return nil, 0, fmt.Errorf("tokenGenerationById:%w", err)
+			u.logger.Errorf("TokenGenerationByUserId:%s", err)
+			return nil, 0, fmt.Errorf("TokenGenerationByUserId:%w", err)
 		}
 		return tokens, userDb.ID, nil
 	} else {
