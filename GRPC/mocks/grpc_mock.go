@@ -76,26 +76,6 @@ func (mr *MockAuthClientMockRecorder) CheckToken(ctx, in interface{}, opts ...in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckToken", reflect.TypeOf((*MockAuthClient)(nil).CheckToken), varargs...)
 }
 
-// GetSalt mocks base method.
-func (m *MockAuthClient) GetSalt(ctx context.Context, in *authProto.ReqSalt, opts ...grpc.CallOption) (*authProto.Salt, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetSalt", varargs...)
-	ret0, _ := ret[0].(*authProto.Salt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSalt indicates an expected call of GetSalt.
-func (mr *MockAuthClientMockRecorder) GetSalt(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthClient)(nil).GetSalt), varargs...)
-}
-
 // GetUserWithRights mocks base method.
 func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.Response, error) {
 	m.ctrl.T.Helper()
@@ -207,21 +187,6 @@ func (m *MockAuthServer) CheckToken(arg0 context.Context, arg1 *authProto.Access
 func (mr *MockAuthServerMockRecorder) CheckToken(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckToken", reflect.TypeOf((*MockAuthServer)(nil).CheckToken), arg0, arg1)
-}
-
-// GetSalt mocks base method.
-func (m *MockAuthServer) GetSalt(arg0 context.Context, arg1 *authProto.ReqSalt) (*authProto.Salt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSalt", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.Salt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSalt indicates an expected call of GetSalt.
-func (mr *MockAuthServerMockRecorder) GetSalt(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthServer)(nil).GetSalt), arg0, arg1)
 }
 
 // GetUserWithRights mocks base method.

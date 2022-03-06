@@ -44,7 +44,3 @@ func (c *GRPCClient) TokenGenerationByRefresh(ctx context.Context, in *authProto
 func (c *GRPCClient) TokenGenerationById(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.GeneratedTokens, error) {
 	return c.cli.TokenGenerationById(ctx, in)
 }
-
-func (c *GRPCClient) GetSalt(ctx context.Context, in *authProto.ReqSalt, opts ...grpc.CallOption) (*authProto.Salt, error) {
-	return nil, nil
-}

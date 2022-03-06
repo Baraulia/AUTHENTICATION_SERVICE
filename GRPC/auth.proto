@@ -10,7 +10,6 @@ service Auth {
   rpc CheckToken(AccessToken) returns (Result) {}
   rpc TokenGenerationByRefresh(RefreshToken) returns (GeneratedTokens) {}
   rpc TokenGenerationById(User) returns (GeneratedTokens) {}
-  rpc GetSalt(ReqSalt) returns (Salt) {}
 }
 
 message Response {
@@ -39,13 +38,6 @@ message GeneratedTokens {
 message User {
   int32 userId = 1;
   int32 roleId = 2;
-}
-
-message ReqSalt {
-}
-
-message Salt {
-  string salt = 1;
 }
 
 message ResultBinding {

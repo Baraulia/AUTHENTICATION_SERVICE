@@ -24,7 +24,6 @@ type AuthClient interface {
 	CheckToken(ctx context.Context, in *AccessToken, opts ...grpc.CallOption) (*Result, error)
 	TokenGenerationByRefresh(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*GeneratedTokens, error)
 	TokenGenerationById(ctx context.Context, in *User, opts ...grpc.CallOption) (*GeneratedTokens, error)
-	GetSalt(ctx context.Context, in *ReqSalt, opts ...grpc.CallOption) (*Salt, error)
 }
 
 type authClient struct {
@@ -80,15 +79,6 @@ func (c *authClient) TokenGenerationById(ctx context.Context, in *User, opts ...
 	return out, nil
 }
 
-func (c *authClient) GetSalt(ctx context.Context, in *ReqSalt, opts ...grpc.CallOption) (*Salt, error) {
-	out := new(Salt)
-	err := c.cc.Invoke(ctx, "/auth.Auth/GetSalt", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility
@@ -98,7 +88,6 @@ type AuthServer interface {
 	CheckToken(context.Context, *AccessToken) (*Result, error)
 	TokenGenerationByRefresh(context.Context, *RefreshToken) (*GeneratedTokens, error)
 	TokenGenerationById(context.Context, *User) (*GeneratedTokens, error)
-	GetSalt(context.Context, *ReqSalt) (*Salt, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -120,9 +109,6 @@ func (UnimplementedAuthServer) TokenGenerationByRefresh(context.Context, *Refres
 }
 func (UnimplementedAuthServer) TokenGenerationById(context.Context, *User) (*GeneratedTokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TokenGenerationById not implemented")
-}
-func (UnimplementedAuthServer) GetSalt(context.Context, *ReqSalt) (*Salt, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSalt not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
@@ -227,24 +213,6 @@ func _Auth_TokenGenerationById_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auth_GetSalt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqSalt)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).GetSalt(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/auth.Auth/GetSalt",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).GetSalt(ctx, req.(*ReqSalt))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -271,10 +239,6 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TokenGenerationById",
 			Handler:    _Auth_TokenGenerationById_Handler,
-		},
-		{
-			MethodName: "GetSalt",
-			Handler:    _Auth_GetSalt_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
