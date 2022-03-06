@@ -41,7 +41,7 @@ func TestService_authUser(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
-				s.EXPECT().TokenGenerationById(context.Background(), &authProto.User{
+				s.EXPECT().TokenGenerationByUserId(context.Background(), &authProto.User{
 					UserId: 1,
 				}).Return(&authProto.GeneratedTokens{
 					AccessToken:  "qwerty",

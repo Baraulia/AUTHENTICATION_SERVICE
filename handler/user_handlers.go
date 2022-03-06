@@ -233,16 +233,3 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 		})
 	}
 }
-
-func (h *Handler) grpcFunc(ctx *gin.Context) {
-	var input string
-	input = ctx.Query("token")
-	proto, err := h.service.AppUser.GrpcExample(input)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
-		return
-	} else {
-		ctx.JSON(http.StatusOK, proto)
-	}
-
-}

@@ -36,7 +36,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user.POST("/staff", h.createStaff)
 		user.POST("/customer", h.createCustomer)
 		user.POST("/login", h.authUser)
-		user.GET("/grpc", h.grpcFunc)
 	}
 
 	return router
