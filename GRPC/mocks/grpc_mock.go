@@ -6,10 +6,9 @@ package mock_authProto
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
+	reflect "reflect"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 )
 
@@ -56,35 +55,35 @@ func (mr *MockAuthClientMockRecorder) BindUserAndRole(ctx, in interface{}, opts 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthClient)(nil).BindUserAndRole), varargs...)
 }
 
-// CheckToken mocks base method.
-func (m *MockAuthClient) CheckToken(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.Result, error) {
+// GetSalt mocks base method.
+func (m *MockAuthClient) GetSalt(ctx context.Context, in *authProto.ReqSalt, opts ...grpc.CallOption) (*authProto.Salt, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CheckToken", varargs...)
-	ret0, _ := ret[0].(*authProto.Result)
+	ret := m.ctrl.Call(m, "GetSalt", varargs...)
+	ret0, _ := ret[0].(*authProto.Salt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CheckToken indicates an expected call of CheckToken.
-func (mr *MockAuthClientMockRecorder) CheckToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// GetSalt indicates an expected call of GetSalt.
+func (mr *MockAuthClientMockRecorder) GetSalt(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckToken", reflect.TypeOf((*MockAuthClient)(nil).CheckToken), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthClient)(nil).GetSalt), varargs...)
 }
 
 // GetUserWithRights mocks base method.
-func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.Response, error) {
+func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.UserRole, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetUserWithRights", varargs...)
-	ret0, _ := ret[0].(*authProto.Response)
+	ret0, _ := ret[0].(*authProto.UserRole)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,26 +93,6 @@ func (mr *MockAuthClientMockRecorder) GetUserWithRights(ctx, in interface{}, opt
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserWithRights", reflect.TypeOf((*MockAuthClient)(nil).GetUserWithRights), varargs...)
-}
-
-// TokenGenerationById mocks base method.
-func (m *MockAuthClient) TokenGenerationById(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.GeneratedTokens, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "TokenGenerationById", varargs...)
-	ret0, _ := ret[0].(*authProto.GeneratedTokens)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// TokenGenerationById indicates an expected call of TokenGenerationById.
-func (mr *MockAuthClientMockRecorder) TokenGenerationById(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationById", reflect.TypeOf((*MockAuthClient)(nil).TokenGenerationById), varargs...)
 }
 
 // TokenGenerationByRefresh mocks base method.
@@ -134,6 +113,26 @@ func (mr *MockAuthClientMockRecorder) TokenGenerationByRefresh(ctx, in interface
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationByRefresh", reflect.TypeOf((*MockAuthClient)(nil).TokenGenerationByRefresh), varargs...)
+}
+
+// TokenGenerationByUserId mocks base method.
+func (m *MockAuthClient) TokenGenerationByUserId(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.GeneratedTokens, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "TokenGenerationByUserId", varargs...)
+	ret0, _ := ret[0].(*authProto.GeneratedTokens)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TokenGenerationByUserId indicates an expected call of TokenGenerationByUserId.
+func (mr *MockAuthClientMockRecorder) TokenGenerationByUserId(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationByUserId", reflect.TypeOf((*MockAuthClient)(nil).TokenGenerationByUserId), varargs...)
 }
 
 // MockAuthServer is a mock of AuthServer interface.
@@ -174,26 +173,26 @@ func (mr *MockAuthServerMockRecorder) BindUserAndRole(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthServer)(nil).BindUserAndRole), arg0, arg1)
 }
 
-// CheckToken mocks base method.
-func (m *MockAuthServer) CheckToken(arg0 context.Context, arg1 *authProto.AccessToken) (*authProto.Result, error) {
+// GetSalt mocks base method.
+func (m *MockAuthServer) GetSalt(arg0 context.Context, arg1 *authProto.ReqSalt) (*authProto.Salt, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckToken", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.Result)
+	ret := m.ctrl.Call(m, "GetSalt", arg0, arg1)
+	ret0, _ := ret[0].(*authProto.Salt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CheckToken indicates an expected call of CheckToken.
-func (mr *MockAuthServerMockRecorder) CheckToken(arg0, arg1 interface{}) *gomock.Call {
+// GetSalt indicates an expected call of GetSalt.
+func (mr *MockAuthServerMockRecorder) GetSalt(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckToken", reflect.TypeOf((*MockAuthServer)(nil).CheckToken), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthServer)(nil).GetSalt), arg0, arg1)
 }
 
 // GetUserWithRights mocks base method.
-func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *authProto.AccessToken) (*authProto.Response, error) {
+func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *authProto.AccessToken) (*authProto.UserRole, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserWithRights", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.Response)
+	ret0, _ := ret[0].(*authProto.UserRole)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -202,21 +201,6 @@ func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *authProto
 func (mr *MockAuthServerMockRecorder) GetUserWithRights(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserWithRights", reflect.TypeOf((*MockAuthServer)(nil).GetUserWithRights), arg0, arg1)
-}
-
-// TokenGenerationById mocks base method.
-func (m *MockAuthServer) TokenGenerationById(arg0 context.Context, arg1 *authProto.User) (*authProto.GeneratedTokens, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TokenGenerationById", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.GeneratedTokens)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// TokenGenerationById indicates an expected call of TokenGenerationById.
-func (mr *MockAuthServerMockRecorder) TokenGenerationById(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationById", reflect.TypeOf((*MockAuthServer)(nil).TokenGenerationById), arg0, arg1)
 }
 
 // TokenGenerationByRefresh mocks base method.
@@ -232,6 +216,21 @@ func (m *MockAuthServer) TokenGenerationByRefresh(arg0 context.Context, arg1 *au
 func (mr *MockAuthServerMockRecorder) TokenGenerationByRefresh(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationByRefresh", reflect.TypeOf((*MockAuthServer)(nil).TokenGenerationByRefresh), arg0, arg1)
+}
+
+// TokenGenerationByUserId mocks base method.
+func (m *MockAuthServer) TokenGenerationByUserId(arg0 context.Context, arg1 *authProto.User) (*authProto.GeneratedTokens, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TokenGenerationByUserId", arg0, arg1)
+	ret0, _ := ret[0].(*authProto.GeneratedTokens)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TokenGenerationByUserId indicates an expected call of TokenGenerationByUserId.
+func (mr *MockAuthServerMockRecorder) TokenGenerationByUserId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenGenerationByUserId", reflect.TypeOf((*MockAuthServer)(nil).TokenGenerationByUserId), arg0, arg1)
 }
 
 // mustEmbedUnimplementedAuthServer mocks base method.

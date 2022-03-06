@@ -25,12 +25,8 @@ func NewGRPCClient(host string) *GRPCClient {
 	return &GRPCClient{cli: cli}
 }
 
-func (c *GRPCClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.Response, error) {
+func (c *GRPCClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.UserRole, error) {
 	return c.cli.GetUserWithRights(ctx, in)
-}
-
-func (c *GRPCClient) CheckToken(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.Result, error) {
-	return c.cli.CheckToken(ctx, in)
 }
 
 func (c *GRPCClient) BindUserAndRole(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.ResultBinding, error) {
@@ -41,6 +37,6 @@ func (c *GRPCClient) TokenGenerationByRefresh(ctx context.Context, in *authProto
 	return nil, nil
 }
 
-func (c *GRPCClient) TokenGenerationById(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.GeneratedTokens, error) {
-	return c.cli.TokenGenerationById(ctx, in)
+func (c *GRPCClient) TokenGenerationByUserId(ctx context.Context, in *authProto.User, opts ...grpc.CallOption) (*authProto.GeneratedTokens, error) {
+	return c.cli.TokenGenerationByUserId(ctx, in)
 }
