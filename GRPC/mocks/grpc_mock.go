@@ -6,9 +6,10 @@ package mock_authProto
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
-	reflect "reflect"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 )
 
@@ -53,26 +54,6 @@ func (mr *MockAuthClientMockRecorder) BindUserAndRole(ctx, in interface{}, opts 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthClient)(nil).BindUserAndRole), varargs...)
-}
-
-// GetSalt mocks base method.
-func (m *MockAuthClient) GetSalt(ctx context.Context, in *authProto.ReqSalt, opts ...grpc.CallOption) (*authProto.Salt, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetSalt", varargs...)
-	ret0, _ := ret[0].(*authProto.Salt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSalt indicates an expected call of GetSalt.
-func (mr *MockAuthClientMockRecorder) GetSalt(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthClient)(nil).GetSalt), varargs...)
 }
 
 // GetUserWithRights mocks base method.
@@ -171,21 +152,6 @@ func (m *MockAuthServer) BindUserAndRole(arg0 context.Context, arg1 *authProto.U
 func (mr *MockAuthServerMockRecorder) BindUserAndRole(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthServer)(nil).BindUserAndRole), arg0, arg1)
-}
-
-// GetSalt mocks base method.
-func (m *MockAuthServer) GetSalt(arg0 context.Context, arg1 *authProto.ReqSalt) (*authProto.Salt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSalt", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.Salt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSalt indicates an expected call of GetSalt.
-func (mr *MockAuthServerMockRecorder) GetSalt(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSalt", reflect.TypeOf((*MockAuthServer)(nil).GetSalt), arg0, arg1)
 }
 
 // GetUserWithRights mocks base method.
