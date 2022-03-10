@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
-	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/utils"
 )
 
 func (u *UserService) AuthUser(email string, password string) (*authProto.GeneratedTokens, int, error) {
@@ -12,7 +12,7 @@ func (u *UserService) AuthUser(email string, password string) (*authProto.Genera
 	if err != nil {
 		return nil, 0, err
 	}
-	if utils.CheckPasswordHash(password, userDb.Password) {
+	if u.CheckPasswordHash(password, userDb.Password) {
 		tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 			UserId: int32(userDb.ID),
 		})
@@ -25,4 +25,17 @@ func (u *UserService) AuthUser(email string, password string) (*authProto.Genera
 		u.logger.Warn("AuthUser: wrong email or password entered")
 		return nil, 0, fmt.Errorf("wrong email or password entered")
 	}
+}
+
+// HashPassword from string
+// bcrypt.DefaultCost = 10
+func (u *UserService) HashPassword(password string, rounds int) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), rounds)
+	return string(bytes), err
+}
+
+// CheckPasswordHash compare encrypt
+func (u *UserService) CheckPasswordHash(password string, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

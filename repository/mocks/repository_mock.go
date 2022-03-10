@@ -34,19 +34,34 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 	return m.recorder
 }
 
-// CreateUser mocks base method.
-func (m *MockAppUser) CreateUser(User *model.CreateUser) (int, error) {
+// CreateCustomer mocks base method.
+func (m *MockAppUser) CreateCustomer(User *model.CreateCustomer) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", User)
+	ret := m.ctrl.Call(m, "CreateCustomer", User)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateUser indicates an expected call of CreateUser.
-func (mr *MockAppUserMockRecorder) CreateUser(User interface{}) *gomock.Call {
+// CreateCustomer indicates an expected call of CreateCustomer.
+func (mr *MockAppUserMockRecorder) CreateCustomer(User interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockAppUser)(nil).CreateUser), User)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCustomer", reflect.TypeOf((*MockAppUser)(nil).CreateCustomer), User)
+}
+
+// CreateStaff mocks base method.
+func (m *MockAppUser) CreateStaff(User *model.CreateStaff) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateStaff", User)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateStaff indicates an expected call of CreateStaff.
+func (mr *MockAppUserMockRecorder) CreateStaff(User interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStaff", reflect.TypeOf((*MockAppUser)(nil).CreateStaff), User)
 }
 
 // DeleteUserByID mocks base method.

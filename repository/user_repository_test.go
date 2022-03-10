@@ -328,92 +328,92 @@ func TestRepository_DeleteUserByID(t *testing.T) {
 	}
 }
 
-func TestRepository_CreateUser(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer db.Close()
-	r := NewRepository(db, logger)
-
-	testTable := []struct {
-		name           string
-		mock           func(user *model.CreateUser)
-		InputUser      *model.CreateUser
-		expectedUserId int
-		expectedError  bool
-	}{
-		{
-			name: "OK",
-			mock: func(user *model.CreateUser) {
-				rows := sqlmock.NewRows([]string{"id"}).
-					AddRow(1)
-				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, AnyTime{}).WillReturnRows(rows)
-			},
-			InputUser: &model.CreateUser{
-				Email:    "test@yandex.ru",
-				Password: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-			},
-			expectedUserId: 1,
-			expectedError:  false,
-		},
-	}
-	for _, tt := range testTable {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock(tt.InputUser)
-			got, err := r.CreateUser(tt.InputUser)
-			if tt.expectedError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedUserId, got)
-			}
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
-func TestRepository_UpdateUser(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer db.Close()
-	r := NewRepository(db, logger)
-
-	testTable := []struct {
-		name          string
-		mock          func(user *model.UpdateUser, id int)
-		InputUser     *model.UpdateUser
-		inputId       int
-		expectedError bool
-	}{
-		{
-			name: "OK",
-			mock: func(user *model.UpdateUser, id int) {
-				result := driver.ResultNoRows
-				mock.ExpectExec("UPDATE users").
-					WithArgs(user.NewPassword, id).WillReturnResult(result)
-			},
-			InputUser: &model.UpdateUser{
-				Email:       "test@yandex.ru",
-				OldPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-				NewPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
-			},
-			inputId:       1,
-			expectedError: false,
-		},
-	}
-	for _, tt := range testTable {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock(tt.InputUser, tt.inputId)
-			err := r.UpdateUser(tt.InputUser, tt.inputId)
-			if tt.expectedError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
+//func TestRepository_CreateUser(t *testing.T) {
+//	db, mock, err := sqlmock.New()
+//	if err != nil {
+//		logger.Fatal(err)
+//	}
+//	defer db.Close()
+//	r := NewRepository(db, logger)
+//
+//	testTable := []struct {
+//		name           string
+//		mock           func(user *model.CreateUser)
+//		InputUser      *model.CreateUser
+//		expectedUserId int
+//		expectedError  bool
+//	}{
+//		{
+//			name: "OK",
+//			mock: func(user *model.CreateUser) {
+//				rows := sqlmock.NewRows([]string{"id"}).
+//					AddRow(1)
+//				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, AnyTime{}).WillReturnRows(rows)
+//			},
+//			InputUser: &model.CreateUser{
+//				Email:    "test@yandex.ru",
+//				Password: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
+//			},
+//			expectedUserId: 1,
+//			expectedError:  false,
+//		},
+//	}
+//	for _, tt := range testTable {
+//		t.Run(tt.name, func(t *testing.T) {
+//			tt.mock(tt.InputUser)
+//			got, err := r.CreateUser(tt.InputUser)
+//			if tt.expectedError {
+//				assert.Error(t, err)
+//			} else {
+//				assert.NoError(t, err)
+//				assert.Equal(t, tt.expectedUserId, got)
+//			}
+//			assert.NoError(t, mock.ExpectationsWereMet())
+//		})
+//	}
+//}
+//
+//func TestRepository_UpdateUser(t *testing.T) {
+//	db, mock, err := sqlmock.New()
+//	if err != nil {
+//		logger.Fatal(err)
+//	}
+//	defer db.Close()
+//	r := NewRepository(db, logger)
+//
+//	testTable := []struct {
+//		name          string
+//		mock          func(user *model.UpdateUser, id int)
+//		InputUser     *model.UpdateUser
+//		inputId       int
+//		expectedError bool
+//	}{
+//		{
+//			name: "OK",
+//			mock: func(user *model.UpdateUser, id int) {
+//				result := driver.ResultNoRows
+//				mock.ExpectExec("UPDATE users").
+//					WithArgs(user.NewPassword, id).WillReturnResult(result)
+//			},
+//			InputUser: &model.UpdateUser{
+//				Email:       "test@yandex.ru",
+//				OldPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
+//				NewPassword: "$2a$10$EpAGhm0HGkxBiPyBAB7xzuyEbZlZCjvSdcJTjamaJyxZRir1vaMmW",
+//			},
+//			inputId:       1,
+//			expectedError: false,
+//		},
+//	}
+//	for _, tt := range testTable {
+//		t.Run(tt.name, func(t *testing.T) {
+//			tt.mock(tt.InputUser, tt.inputId)
+//			err := r.UpdateUser(tt.InputUser, tt.inputId)
+//			if tt.expectedError {
+//				assert.Error(t, err)
+//			} else {
+//				assert.NoError(t, err)
+//			}
+//			assert.NoError(t, mock.ExpectationsWereMet())
+//		})
+//	}
+//}

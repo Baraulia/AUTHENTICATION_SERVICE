@@ -85,7 +85,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateCustomer"
                         }
                     }
                 ],
@@ -186,7 +186,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateStaff"
                         }
                     }
                 ],
@@ -393,11 +393,25 @@ const docTemplate = `{
                 }
             }
         },
-        "model.CreateUser": {
+        "model.CreateCustomer": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CreateStaff": {
             "type": "object",
             "required": [
                 "email",
-                "role_id"
+                "role"
             ],
             "properties": {
                 "email": {
@@ -406,8 +420,8 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -430,6 +444,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },

@@ -21,8 +21,8 @@ func NewUserPostgres(db *sql.DB, logger logging.Logger) *UserPostgres {
 // GetUserByID ...
 func (u UserPostgres) GetUserByID(id int) (*model.ResponseUser, error) {
 	var user model.ResponseUser
-	result := u.db.QueryRow("SELECT id, email, created_at FROM users WHERE id = $1", id)
-	if err := result.Scan(&user.ID, &user.Email, &user.CreatedAt); err != nil {
+	result := u.db.QueryRow("SELECT id, email, role, created_at FROM users WHERE id = $1", id)
+	if err := result.Scan(&user.ID, &user.Email, &user.Role, &user.CreatedAt); err != nil {
 		u.logger.Errorf("GetUserByID: error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByID: repository error:%w", err)
 	}
@@ -53,7 +53,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
-		query = "SELECT id, email, created_at FROM users"
+		query = "SELECT id, email, role, created_at FROM users"
 		rows, err = transaction.Query(query)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -71,7 +71,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 
 	for rows.Next() {
 		var User model.ResponseUser
-		if err := rows.Scan(&User.ID, &User.Email, &User.CreatedAt); err != nil {
+		if err := rows.Scan(&User.ID, &User.Email, &User.Role, &User.CreatedAt); err != nil {
 			u.logger.Errorf("Error while scanning for user:%s", err)
 			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 		}
@@ -87,13 +87,24 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	return Users, pages, transaction.Commit()
 }
 
-// CreateUser ...
-func (u *UserPostgres) CreateUser(user *model.CreateUser) (int, error) {
+// CreateStaff ...
+func (u *UserPostgres) CreateStaff(user *model.CreateStaff) (int, error) {
 	var id int
-	row := u.db.QueryRow("INSERT INTO users (email, password, created_at) VALUES ($1, $2, $3) RETURNING id", user.Email, user.Password, time.Now())
+	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, user.Role, time.Now())
 	if err := row.Scan(&id); err != nil {
-		u.logger.Errorf("CreateUser: error while scanning for user:%s", err)
-		return 0, fmt.Errorf("createUser: error while scanning for user:%w", err)
+		u.logger.Errorf("CreateStaff: error while scanning for user:%s", err)
+		return 0, fmt.Errorf("CreateStaff: error while scanning for user:%w", err)
+	}
+	return id, nil
+}
+
+// CreateCustomer ...
+func (u *UserPostgres) CreateCustomer(user *model.CreateCustomer) (int, error) {
+	var id int
+	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, "Authorized Customer", time.Now())
+	if err := row.Scan(&id); err != nil {
+		u.logger.Errorf("CreateCustomer: error while scanning for user:%s", err)
+		return 0, fmt.Errorf("CreateCustomer: error while scanning for user:%w", err)
 	}
 	return id, nil
 }

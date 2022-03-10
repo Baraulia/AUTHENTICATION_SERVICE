@@ -51,8 +51,22 @@ func (mr *MockAppUserMockRecorder) AuthUser(email, password interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthUser", reflect.TypeOf((*MockAppUser)(nil).AuthUser), email, password)
 }
 
+// CheckPasswordHash mocks base method.
+func (m *MockAppUser) CheckPasswordHash(password, hash string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckPasswordHash", password, hash)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// CheckPasswordHash indicates an expected call of CheckPasswordHash.
+func (mr *MockAppUserMockRecorder) CheckPasswordHash(password, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPasswordHash", reflect.TypeOf((*MockAppUser)(nil).CheckPasswordHash), password, hash)
+}
+
 // CreateCustomer mocks base method.
-func (m *MockAppUser) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
+func (m *MockAppUser) CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCustomer", user)
 	ret0, _ := ret[0].(*authProto.GeneratedTokens)
@@ -68,7 +82,7 @@ func (mr *MockAppUserMockRecorder) CreateCustomer(user interface{}) *gomock.Call
 }
 
 // CreateStaff mocks base method.
-func (m *MockAppUser) CreateStaff(user *model.CreateUser) (int, error) {
+func (m *MockAppUser) CreateStaff(user *model.CreateStaff) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateStaff", user)
 	ret0, _ := ret[0].(int)
@@ -128,19 +142,19 @@ func (mr *MockAppUserMockRecorder) GetUsers(page, limit interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockAppUser)(nil).GetUsers), page, limit)
 }
 
-// GrpcExample mocks base method.
-func (m *MockAppUser) GrpcExample(arg0 string) (*authProto.UserRole, error) {
+// HashPassword mocks base method.
+func (m *MockAppUser) HashPassword(password string, rounds int) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GrpcExample", arg0)
-	ret0, _ := ret[0].(*authProto.UserRole)
+	ret := m.ctrl.Call(m, "HashPassword", password, rounds)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GrpcExample indicates an expected call of GrpcExample.
-func (mr *MockAppUserMockRecorder) GrpcExample(arg0 interface{}) *gomock.Call {
+// HashPassword indicates an expected call of HashPassword.
+func (mr *MockAppUserMockRecorder) HashPassword(password, rounds interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GrpcExample", reflect.TypeOf((*MockAppUser)(nil).GrpcExample), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HashPassword", reflect.TypeOf((*MockAppUser)(nil).HashPassword), password, rounds)
 }
 
 // UpdateUser mocks base method.

@@ -10,7 +10,6 @@ import (
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/mail"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
-	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/utils"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
 	"strings"
 	"time"
@@ -42,18 +41,18 @@ func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, 
 	return users, pages, nil
 }
 
-func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
+func (u *UserService) CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
 	pas := user.Password
-	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	hash, err := u.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
 		return nil, 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
-	id, err := u.repo.AppUser.CreateUser(user)
+	id, err := u.repo.AppUser.CreateCustomer(user)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -61,9 +60,13 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.Generat
 		Email:    user.Email,
 		Password: pas,
 	})
+	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
+		UserId: int32(id),
+		Role:   "Authorized Customer",
+	})
 	tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 		UserId: int32(id),
-		RoleId: int32(user.RoleId),
+		Role:   "Authorized Customer",
 	})
 	if err != nil {
 		u.logger.Errorf("tokenGenerationByUserId:%s", err)
@@ -72,18 +75,18 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.Generat
 	return tokens, id, nil
 }
 
-func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
+func (u *UserService) CreateStaff(user *model.CreateStaff) (int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
 	pas := user.Password
-	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	hash, err := u.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
-		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+		u.logger.Errorf("CreateStaff: can not generate hash from password:%s", err)
+		return 0, fmt.Errorf("CreateStaff: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
-	id, err := u.repo.AppUser.CreateUser(user)
+	id, err := u.repo.AppUser.CreateStaff(user)
 	if err != nil {
 		return 0, err
 	}
@@ -93,7 +96,7 @@ func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
 	})
 	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
 		UserId: int32(id),
-		RoleId: int32(user.RoleId),
+		Role:   user.Role,
 	})
 	if err != nil {
 		u.logger.Errorf("BindUserAndRole:%s", err)
@@ -107,8 +110,8 @@ func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {
 	if err != nil {
 		return err
 	}
-	if utils.CheckPasswordHash(user.OldPassword, userPassword) {
-		newHash, err := utils.HashPassword(user.NewPassword, bcrypt.DefaultCost)
+	if u.CheckPasswordHash(user.OldPassword, userPassword) {
+		newHash, err := u.HashPassword(user.NewPassword, bcrypt.DefaultCost)
 		if err != nil {
 			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
 			return fmt.Errorf("updateUser: can not generate hash from password:%w", err)

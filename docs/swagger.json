@@ -75,7 +75,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateCustomer"
                         }
                     }
                 ],
@@ -176,7 +176,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateStaff"
                         }
                     }
                 ],
@@ -383,11 +383,25 @@
                 }
             }
         },
-        "model.CreateUser": {
+        "model.CreateCustomer": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CreateStaff": {
             "type": "object",
             "required": [
                 "email",
-                "role_id"
+                "role"
             ],
             "properties": {
                 "email": {
@@ -396,8 +410,8 @@
                 "password": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -420,6 +434,9 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },

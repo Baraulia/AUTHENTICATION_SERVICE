@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
@@ -89,21 +88,20 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param input body model.CreateUser true "User"
+// @Param input body model.CreateCustomer true "User"
 // @Success 201 {object} authProto.GeneratedTokens
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/customer [post]
 func (h *Handler) createCustomer(ctx *gin.Context) {
-	var input model.CreateUser
+	var input model.CreateCustomer
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
-	fmt.Println(input.RoleId)
-	validationErrors := validateStruct(input)
+	validationErrors := ValidateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
 		ctx.JSON(http.StatusBadRequest, validationErrors)
@@ -129,20 +127,20 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Param input body model.CreateUser true "User"
+// @Param input body model.CreateStaff true "User"
 // @Success 201 {string} string
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/staff [post]
 func (h *Handler) createStaff(ctx *gin.Context) {
-	var input model.CreateUser
+	var input model.CreateStaff
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
-	validationErrors := validateStruct(input)
+	validationErrors := ValidateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
 		ctx.JSON(http.StatusBadRequest, validationErrors)
@@ -150,7 +148,7 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 	}
 	id, err := h.service.AppUser.CreateStaff(&input)
 	if err != nil {
-		if err.Error() == "createStaff: error while scanning for user:pq: duplicate key value violates unique constraint \"users_email_key\"" {
+		if err.Error() == "createStaff: error while scanning for user:pq: duplicate key value violates unique constraint users_email_key" {
 			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "User with such an email already exists"})
 			return
 		} else {
@@ -190,7 +188,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
-	validationErrors := validateStruct(input)
+	validationErrors := ValidateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
 		ctx.JSON(http.StatusBadRequest, validationErrors)

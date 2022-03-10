@@ -42,6 +42,7 @@ const USER_SCHEMA = `
 		id serial not null primary key ,
 		email varchar(225) NOT NULL UNIQUE,
 		password varchar(225) NOT NULL,
+	    role varchar(50) NOT NULL,
 	  	created_at timestamp NOT NULL
-	);
+	);	
 `

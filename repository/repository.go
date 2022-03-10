@@ -11,7 +11,8 @@ import (
 type AppUser interface {
 	GetUserByID(id int) (*model.ResponseUser, error)
 	GetUserAll(page int, limit int) ([]model.ResponseUser, int, error)
-	CreateUser(User *model.CreateUser) (int, error)
+	CreateStaff(User *model.CreateStaff) (int, error)
+	CreateCustomer(User *model.CreateCustomer) (int, error)
 	UpdateUser(User *model.UpdateUser, id int) error
 	DeleteUserByID(id int) (int, error)
 	GetUserByEmail(email string) (*model.User, error)

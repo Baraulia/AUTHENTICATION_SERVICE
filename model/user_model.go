@@ -9,10 +9,21 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type CreateUser struct {
+type CreateStaff struct {
 	Email    string `json:"email" binding:"required" validate:"email"`
-	RoleId   int    `json:"role_id" binding:"required" validate:"roleId"`
+	Role     string `json:"role" binding:"required"`
 	Password string `json:"password" validate:"password"`
+}
+
+type CreateCustomer struct {
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string `json:"password" validate:"password"`
+}
+
+type UserDB struct {
+	Email    string `json:"email" binding:"required"`
+	Role     string `json:"role"`
+	Password string `json:"password"`
 }
 
 type UpdateUser struct {
@@ -24,6 +35,7 @@ type ResponseUser struct {
 	ID        int       `json:"id"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
+	Role      string    `json:"role"`
 }
 
 type MockUser struct {
