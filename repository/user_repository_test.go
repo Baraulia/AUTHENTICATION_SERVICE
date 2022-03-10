@@ -44,15 +44,16 @@ func TestRepository_GetUserByID(t *testing.T) {
 		{
 			name: "OK",
 			mock: func(id int) {
-				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
-					AddRow(1, "test@yandex.ru", AnyTime{})
-				mock.ExpectQuery("SELECT id, email, created_at FROM users WHERE id = (.+)").
+				rows := sqlmock.NewRows([]string{"id", "email", "role", "created_at"}).
+					AddRow(1, "test@yandex.ru", "Courier", AnyTime{})
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE id = (.+)").
 					WithArgs(id).WillReturnRows(rows)
 			},
 			id: 1,
 			expectedUser: &model.ResponseUser{
 				ID:        1,
 				Email:     "test@yandex.ru",
+				Role:      "Courier",
 				CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 			},
 			expectedError: false,
@@ -60,9 +61,9 @@ func TestRepository_GetUserByID(t *testing.T) {
 		{
 			name: "Not found",
 			mock: func(id int) {
-				rows := sqlmock.NewRows([]string{"id", "email", "created_at"})
+				rows := sqlmock.NewRows([]string{"id", "email", "role", "created_at"})
 
-				mock.ExpectQuery("SELECT id, email, created_at FROM users WHERE id = (.+)").
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE id = (.+)").
 					WithArgs(id).WillReturnRows(rows)
 
 			},
@@ -109,11 +110,11 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 0,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
-					AddRow(1, "test@yandex.ru", AnyTime{}).
-					AddRow(2, "test1@yandex.ru", AnyTime{}).
-					AddRow(3, "test2@yandex.ru", AnyTime{})
-				mock.ExpectQuery("SELECT id, email, created_at FROM users").WillReturnRows(rows)
+				rows := sqlmock.NewRows([]string{"id", "email", "role", "created_at"}).
+					AddRow(1, "test@yandex.ru", "Courier", AnyTime{}).
+					AddRow(2, "test1@yandex.ru", "Courier", AnyTime{}).
+					AddRow(3, "test2@yandex.ru", "Courier", AnyTime{})
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users").WillReturnRows(rows)
 				mock.ExpectCommit()
 			},
 
@@ -121,16 +122,19 @@ func TestRepository_GetUserAll(t *testing.T) {
 				{
 					ID:        1,
 					Email:     "test@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        2,
 					Email:     "test1@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        3,
 					Email:     "test2@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 			},
@@ -142,12 +146,12 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 10,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				rows := sqlmock.NewRows([]string{"id", "email", "created_at"}).
-					AddRow(1, "test@yandex.ru", AnyTime{}).
-					AddRow(2, "test1@yandex.ru", AnyTime{}).
-					AddRow(3, "test2@yandex.ru", AnyTime{})
+				rows := sqlmock.NewRows([]string{"id", "email", "role", "created_at"}).
+					AddRow(1, "test@yandex.ru", "Courier", AnyTime{}).
+					AddRow(2, "test1@yandex.ru", "Courier", AnyTime{}).
+					AddRow(3, "test2@yandex.ru", "Courier", AnyTime{})
 
-				mock.ExpectQuery("SELECT id, email, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnRows(rows)
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnRows(rows)
 				rows2 := sqlmock.NewRows([]string{"pages"}).
 					AddRow(1)
 				mock.ExpectQuery("SELECT CEILING").WillReturnRows(rows2)
@@ -158,16 +162,19 @@ func TestRepository_GetUserAll(t *testing.T) {
 				{
 					ID:        1,
 					Email:     "test@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        2,
 					Email:     "test1@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
 					ID:        3,
 					Email:     "test2@yandex.ru",
+					Role:      "Courier",
 					CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
 				},
 			},
@@ -189,7 +196,7 @@ func TestRepository_GetUserAll(t *testing.T) {
 			inputLimit: 10,
 			mock: func(page, limit int) {
 				mock.ExpectBegin()
-				mock.ExpectQuery("SELECT id, email, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnError(errors.New("some error"))
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users ORDER BY id LIMIT (.+) OFFSET (.+)").WithArgs(limit, (page-1)*limit).WillReturnError(errors.New("some error"))
 			},
 			expectedUser:  nil,
 			expectedError: true,

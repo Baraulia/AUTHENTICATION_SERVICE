@@ -61,7 +61,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		}
 		pages = 1
 	} else {
-		query = "SELECT id, email, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2"
+		query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2"
 		rows, err = transaction.Query(query, limit, (page-1)*limit)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
