@@ -26,7 +26,6 @@ func (u UserPostgres) GetUserByID(id int) (*model.ResponseUser, error) {
 		u.logger.Errorf("GetUserByID: error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByID: repository error:%w", err)
 	}
-
 	return &user, nil
 }
 
@@ -53,7 +52,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
-		query = "SELECT id, email, role, created_at FROM users"
+		query = "SELECT id, email, role, created_at FROM users WHERE deleted = false"
 		rows, err = transaction.Query(query)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -61,7 +60,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		}
 		pages = 1
 	} else {
-		query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2"
+		query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE deleted = false"
 		rows, err = transaction.Query(query, limit, (page-1)*limit)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -86,11 +85,140 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	}
 	return Users, pages, transaction.Commit()
 }
+func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+	transaction, err := u.db.Begin()
+	if err != nil {
+		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
+		return nil, 0, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
+	}
+	var Users []model.ResponseUser
+	var query string
+	var pages int
+	var rows *sql.Rows
+	if page == 0 || limit == 0 {
+		if filters.ShowDeleted {
+			query = "SELECT id, email, role, created_at FROM users WHERE role = $1"
+			rows, err = transaction.Query(query, filters.FilterRole)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+		} else {
+			query = "SELECT id, email, role, created_at FROM users WHERE deleted = false AND role = $1"
+			rows, err = transaction.Query(query, filters.FilterRole)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+		}
+		pages = 1
+	} else {
+		if filters.ShowDeleted {
+			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE role = $3"
+			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.FilterRole)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2"
+			row := transaction.QueryRow(query, limit, filters.FilterRole)
+			if err := row.Scan(&pages); err != nil {
+				u.logger.Errorf("Error while scanning for pages:%s", err)
+			}
+		} else {
+			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE role = $3 AND deleted = false"
+			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.FilterRole)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2 AND deleted = false"
+			row := transaction.QueryRow(query, limit, filters.FilterRole)
+			if err := row.Scan(&pages); err != nil {
+				u.logger.Errorf("Error while scanning for pages:%s", err)
+			}
+		}
+	}
+	for rows.Next() {
+		var User model.ResponseUser
+		if err := rows.Scan(&User.ID, &User.Email, &User.Role, &User.CreatedAt); err != nil {
+			u.logger.Errorf("Error while scanning for user:%s", err)
+			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+		}
+		Users = append(Users, User)
+	}
+	return Users, pages, transaction.Commit()
+}
+
+func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+	transaction, err := u.db.Begin()
+	if err != nil {
+		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
+		return nil, 0, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
+	}
+	var Users []model.ResponseUser
+	var query string
+	var pages int
+	var rows *sql.Rows
+	if page == 0 || limit == 0 {
+		if filters.ShowDeleted {
+			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2"
+			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+		} else {
+			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false"
+			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+		}
+		pages = 1
+	} else {
+		if filters.ShowDeleted {
+			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE created_at >= $3 AND created_at < $4"
+			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.StartTime, filters.EndTime)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $2 AND created_at < $3"
+			row := transaction.QueryRow(query, limit, filters.StartTime, filters.EndTime)
+			if err := row.Scan(&pages); err != nil {
+				u.logger.Errorf("Error while scanning for pages:%s", err)
+			}
+		} else {
+			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE created_at >= $3 AND created_at < $4 AND deleted = false"
+			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.StartTime, filters.EndTime)
+			if err != nil {
+				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
+				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+			}
+			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $3 AND created_at < $4 AND deleted = false"
+			row := transaction.QueryRow(query, limit, filters.StartTime, filters.EndTime)
+			if err := row.Scan(&pages); err != nil {
+				u.logger.Errorf("Error while scanning for pages:%s", err)
+			}
+		}
+	}
+	for rows.Next() {
+		var User model.ResponseUser
+		if err := rows.Scan(&User.ID, &User.Email, &User.Role, &User.CreatedAt); err != nil {
+			u.logger.Errorf("Error while scanning for user:%s", err)
+			return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
+		}
+		Users = append(Users, User)
+	}
+	return Users, pages, transaction.Commit()
+}
 
 // CreateStaff ...
 func (u *UserPostgres) CreateStaff(user *model.CreateStaff) (int, error) {
 	var id int
-	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, user.Role, time.Now())
+	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at, deleted) VALUES ($1, $2, $3, $4, $5) RETURNING id", user.Email, user.Password, user.Role, time.Now().Format(model.Layout), false)
 	if err := row.Scan(&id); err != nil {
 		u.logger.Errorf("CreateStaff: error while scanning for user:%s", err)
 		return 0, fmt.Errorf("CreateStaff: error while scanning for user:%w", err)
@@ -101,7 +229,7 @@ func (u *UserPostgres) CreateStaff(user *model.CreateStaff) (int, error) {
 // CreateCustomer ...
 func (u *UserPostgres) CreateCustomer(user *model.CreateCustomer) (int, error) {
 	var id int
-	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4) RETURNING id", user.Email, user.Password, "Authorized Customer", time.Now())
+	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id", user.Email, user.Password, "Authorized Customer", time.Now().Format(model.Layout), false)
 	if err := row.Scan(&id); err != nil {
 		u.logger.Errorf("CreateCustomer: error while scanning for user:%s", err)
 		return 0, fmt.Errorf("CreateCustomer: error while scanning for user:%w", err)
@@ -122,7 +250,7 @@ func (u *UserPostgres) UpdateUser(user *model.UpdateUser, id int) error {
 // DeleteUserByID ...
 func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
 	var userId int
-	row := u.db.QueryRow("DELETE FROM users WHERE id=$1 RETURNING id", id)
+	row := u.db.QueryRow("UPDATE users SET deleted = true WHERE id=$2 RETURNING id", id)
 	if err := row.Scan(&userId); err != nil {
 		u.logger.Errorf("DeleteUserByID: error while scanning for userId:%s", err)
 		return 0, fmt.Errorf("deleteUserByID: error while scanning for userId:%w", err)
@@ -133,9 +261,9 @@ func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
 // GetUserByEmail ...
 func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 	var User model.User
-	query := "SELECT id, email, password, created_at FROM users WHERE email = $1"
+	query := "SELECT id, email, password, deleted FROM users WHERE email = $1"
 	row := u.db.QueryRow(query, email)
-	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.CreatedAt); err != nil {
+	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.Deleted); err != nil {
 		u.logger.Errorf("Error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 

@@ -12,6 +12,10 @@ func (u *UserService) AuthUser(email string, password string) (*authProto.Genera
 	if err != nil {
 		return nil, 0, err
 	}
+	if userDb.Deleted {
+		u.logger.Errorf("this user (id = %d) is deactivated", userDb.ID)
+		return nil, 0, fmt.Errorf("this user (id = %d) is deactivated", userDb.ID)
+	}
 	if u.CheckPasswordHash(password, userDb.Password) {
 		tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 			UserId: int32(userDb.ID),

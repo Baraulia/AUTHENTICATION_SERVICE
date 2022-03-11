@@ -95,6 +95,22 @@ func (mr *MockAppUserMockRecorder) GetUserAll(page, limit interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAll", reflect.TypeOf((*MockAppUser)(nil).GetUserAll), page, limit)
 }
 
+// GetUserByDataFilter mocks base method.
+func (m *MockAppUser) GetUserByDataFilter(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByDataFilter", page, limit, filters)
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetUserByDataFilter indicates an expected call of GetUserByDataFilter.
+func (mr *MockAppUserMockRecorder) GetUserByDataFilter(page, limit, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByDataFilter", reflect.TypeOf((*MockAppUser)(nil).GetUserByDataFilter), page, limit, filters)
+}
+
 // GetUserByEmail mocks base method.
 func (m *MockAppUser) GetUserByEmail(email string) (*model.User, error) {
 	m.ctrl.T.Helper()
@@ -123,6 +139,22 @@ func (m *MockAppUser) GetUserByID(id int) (*model.ResponseUser, error) {
 func (mr *MockAppUserMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockAppUser)(nil).GetUserByID), id)
+}
+
+// GetUserByRoleFilter mocks base method.
+func (m *MockAppUser) GetUserByRoleFilter(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByRoleFilter", page, limit, filters)
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetUserByRoleFilter indicates an expected call of GetUserByRoleFilter.
+func (mr *MockAppUserMockRecorder) GetUserByRoleFilter(page, limit, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByRoleFilter", reflect.TypeOf((*MockAppUser)(nil).GetUserByRoleFilter), page, limit, filters)
 }
 
 // GetUserPasswordByID mocks base method.

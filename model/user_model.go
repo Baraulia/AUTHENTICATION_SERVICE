@@ -1,12 +1,10 @@
 package model
 
-import "time"
-
 type User struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email" `
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID       int    `json:"id"`
+	Email    string `json:"email" `
+	Password string `json:"password"`
+	Deleted  bool   `json:"deleted"`
 }
 
 type CreateStaff struct {
@@ -32,10 +30,10 @@ type UpdateUser struct {
 	NewPassword string `json:"new_password" binding:"required" validate:"password"`
 }
 type ResponseUser struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
-	Role      string    `json:"role"`
+	ID        int    `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt MyTime `json:"created_at"`
+	Role      string `json:"role"`
 }
 
 type MockUser struct {

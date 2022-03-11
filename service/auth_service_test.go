@@ -13,7 +13,6 @@ import (
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
 	mock_repository "stlab.itechart-group.com/go/food_delivery/authentication_service/repository/mocks"
 	"testing"
-	"time"
 )
 
 func TestService_authUser(t *testing.T) {
@@ -34,10 +33,10 @@ func TestService_authUser(t *testing.T) {
 			inputEmail:    "test@yandex.ru",
 			mockBehaviorGetUser: func(s *mock_repository.MockAppUser, email string) {
 				s.EXPECT().GetUserByEmail(email).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+					ID:       1,
+					Email:    "test@yandex.ru",
+					Password: "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
+					Deleted:  false,
 				}, nil)
 			},
 			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
@@ -57,10 +56,10 @@ func TestService_authUser(t *testing.T) {
 			inputEmail:    "test@yandex.ru",
 			mockBehaviorGetUser: func(s *mock_repository.MockAppUser, email string) {
 				s.EXPECT().GetUserByEmail(email).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+					ID:       1,
+					Email:    "test@yandex.ru",
+					Password: "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
+					Deleted:  false,
 				}, nil)
 			},
 			expectedError: errors.New("wrong email or password entered"),

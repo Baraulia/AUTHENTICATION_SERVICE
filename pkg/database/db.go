@@ -43,6 +43,7 @@ const USER_SCHEMA = `
 		email varchar(225) NOT NULL UNIQUE,
 		password varchar(225) NOT NULL,
 	    role varchar(50) NOT NULL,
-	  	created_at timestamp NOT NULL
+	  	created_at date NOT NULL,
+	    deleted bool NOT NULL
 	);	
 `

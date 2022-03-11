@@ -33,12 +33,29 @@ func (u *UserService) GetUser(id int) (*model.ResponseUser, error) {
 	return user, nil
 }
 
-func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, error) {
-	users, pages, err := u.repo.AppUser.GetUserAll(page, limit)
-	if err != nil {
-		return nil, 0, err
+func (u *UserService) GetUsers(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+	if filters.FilterRole != "" {
+		users, pages, err := u.repo.AppUser.GetUserByRoleFilter(page, limit, filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
+	} else if filters.FilterData {
+		if filters.EndTime.Unix() < filters.StartTime.Unix() {
+			filters.EndTime.Time = filters.StartTime.Time.Add(24 * time.Hour)
+		}
+		users, pages, err := u.repo.AppUser.GetUserByDataFilter(page, limit, filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
+	} else {
+		users, pages, err := u.repo.AppUser.GetUserAll(page, limit)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
 	}
-	return users, pages, nil
 }
 
 func (u *UserService) CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error) {

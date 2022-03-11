@@ -127,9 +127,9 @@ func (mr *MockAppUserMockRecorder) GetUser(id interface{}) *gomock.Call {
 }
 
 // GetUsers mocks base method.
-func (m *MockAppUser) GetUsers(page, limit int) ([]model.ResponseUser, int, error) {
+func (m *MockAppUser) GetUsers(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsers", page, limit)
+	ret := m.ctrl.Call(m, "GetUsers", page, limit, filters)
 	ret0, _ := ret[0].([]model.ResponseUser)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
@@ -137,9 +137,9 @@ func (m *MockAppUser) GetUsers(page, limit int) ([]model.ResponseUser, int, erro
 }
 
 // GetUsers indicates an expected call of GetUsers.
-func (mr *MockAppUserMockRecorder) GetUsers(page, limit interface{}) *gomock.Call {
+func (mr *MockAppUserMockRecorder) GetUsers(page, limit, filters interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockAppUser)(nil).GetUsers), page, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockAppUser)(nil).GetUsers), page, limit, filters)
 }
 
 // HashPassword mocks base method.
