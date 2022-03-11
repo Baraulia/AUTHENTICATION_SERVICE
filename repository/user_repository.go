@@ -250,7 +250,7 @@ func (u *UserPostgres) UpdateUser(user *model.UpdateUser, id int) error {
 // DeleteUserByID ...
 func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
 	var userId int
-	row := u.db.QueryRow("UPDATE users SET deleted = true WHERE id=$2 RETURNING id", id)
+	row := u.db.QueryRow("UPDATE users SET deleted = true WHERE id=$1 RETURNING id", id)
 	if err := row.Scan(&userId); err != nil {
 		u.logger.Errorf("DeleteUserByID: error while scanning for userId:%s", err)
 		return 0, fmt.Errorf("deleteUserByID: error while scanning for userId:%w", err)
