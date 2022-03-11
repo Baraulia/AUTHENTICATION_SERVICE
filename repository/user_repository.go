@@ -229,7 +229,7 @@ func (u *UserPostgres) CreateStaff(user *model.CreateStaff) (int, error) {
 // CreateCustomer ...
 func (u *UserPostgres) CreateCustomer(user *model.CreateCustomer) (int, error) {
 	var id int
-	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id", user.Email, user.Password, "Authorized Customer", time.Now().Format(model.Layout), false)
+	row := u.db.QueryRow("INSERT INTO users (email, password, role, created_at, deleted) VALUES ($1, $2, $3, $4, $5) RETURNING id", user.Email, user.Password, "Authorized Customer", time.Now().Format(model.Layout), false)
 	if err := row.Scan(&id); err != nil {
 		u.logger.Errorf("CreateCustomer: error while scanning for user:%s", err)
 		return 0, fmt.Errorf("CreateCustomer: error while scanning for user:%w", err)
