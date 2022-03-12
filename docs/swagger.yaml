@@ -96,7 +96,7 @@ info:
   title: Authenticate Service
 paths:
   /users/:
-    get:
+    post:
       consumes:
       - application/json
       description: get list of users

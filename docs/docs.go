@@ -17,7 +17,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/users/": {
-            "get": {
+            "post": {
                 "description": "get list of users",
                 "consumes": [
                     "application/json"
