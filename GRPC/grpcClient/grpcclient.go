@@ -12,8 +12,7 @@ import (
 var logger = logging.GetLogger()
 
 type GRPCClient struct {
-	cli     authProto.AuthClient
-	cliRole authProto.RoleClient
+	cli authProto.AuthClient
 }
 
 func NewGRPCClient(host string) *GRPCClient {
@@ -43,5 +42,5 @@ func (c *GRPCClient) TokenGenerationByUserId(ctx context.Context, in *authProto.
 }
 
 func (c *GRPCClient) GetAllRoles(ctx context.Context, in *authProto.Request, opts ...grpc.CallOption) (*authProto.Roles, error) {
-	return c.cliRole.GetAllRoles(ctx, in)
+	return c.cli.GetAllRoles(ctx, in)
 }

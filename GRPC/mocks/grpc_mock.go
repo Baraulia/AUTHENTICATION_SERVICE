@@ -56,6 +56,26 @@ func (mr *MockAuthClientMockRecorder) BindUserAndRole(ctx, in interface{}, opts 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthClient)(nil).BindUserAndRole), varargs...)
 }
 
+// GetAllRoles mocks base method.
+func (m *MockAuthClient) GetAllRoles(ctx context.Context, in *authProto.Request, opts ...grpc.CallOption) (*authProto.Roles, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAllRoles", varargs...)
+	ret0, _ := ret[0].(*authProto.Roles)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllRoles indicates an expected call of GetAllRoles.
+func (mr *MockAuthClientMockRecorder) GetAllRoles(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRoles", reflect.TypeOf((*MockAuthClient)(nil).GetAllRoles), varargs...)
+}
+
 // GetUserWithRights mocks base method.
 func (m *MockAuthClient) GetUserWithRights(ctx context.Context, in *authProto.AccessToken, opts ...grpc.CallOption) (*authProto.UserRole, error) {
 	m.ctrl.T.Helper()
@@ -154,6 +174,21 @@ func (mr *MockAuthServerMockRecorder) BindUserAndRole(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindUserAndRole", reflect.TypeOf((*MockAuthServer)(nil).BindUserAndRole), arg0, arg1)
 }
 
+// GetAllRoles mocks base method.
+func (m *MockAuthServer) GetAllRoles(arg0 context.Context, arg1 *authProto.Request) (*authProto.Roles, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllRoles", arg0, arg1)
+	ret0, _ := ret[0].(*authProto.Roles)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllRoles indicates an expected call of GetAllRoles.
+func (mr *MockAuthServerMockRecorder) GetAllRoles(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRoles", reflect.TypeOf((*MockAuthServer)(nil).GetAllRoles), arg0, arg1)
+}
+
 // GetUserWithRights mocks base method.
 func (m *MockAuthServer) GetUserWithRights(arg0 context.Context, arg1 *authProto.AccessToken) (*authProto.UserRole, error) {
 	m.ctrl.T.Helper()
@@ -244,132 +279,4 @@ func (m *MockUnsafeAuthServer) mustEmbedUnimplementedAuthServer() {
 func (mr *MockUnsafeAuthServerMockRecorder) mustEmbedUnimplementedAuthServer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedAuthServer", reflect.TypeOf((*MockUnsafeAuthServer)(nil).mustEmbedUnimplementedAuthServer))
-}
-
-// MockRoleClient is a mock of RoleClient interface.
-type MockRoleClient struct {
-	ctrl     *gomock.Controller
-	recorder *MockRoleClientMockRecorder
-}
-
-// MockRoleClientMockRecorder is the mock recorder for MockRoleClient.
-type MockRoleClientMockRecorder struct {
-	mock *MockRoleClient
-}
-
-// NewMockRoleClient creates a new mock instance.
-func NewMockRoleClient(ctrl *gomock.Controller) *MockRoleClient {
-	mock := &MockRoleClient{ctrl: ctrl}
-	mock.recorder = &MockRoleClientMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRoleClient) EXPECT() *MockRoleClientMockRecorder {
-	return m.recorder
-}
-
-// GetAllRoles mocks base method.
-func (m *MockRoleClient) GetAllRoles(ctx context.Context, in *authProto.Request, opts ...grpc.CallOption) (*authProto.Roles, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetAllRoles", varargs...)
-	ret0, _ := ret[0].(*authProto.Roles)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllRoles indicates an expected call of GetAllRoles.
-func (mr *MockRoleClientMockRecorder) GetAllRoles(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRoles", reflect.TypeOf((*MockRoleClient)(nil).GetAllRoles), varargs...)
-}
-
-// MockRoleServer is a mock of RoleServer interface.
-type MockRoleServer struct {
-	ctrl     *gomock.Controller
-	recorder *MockRoleServerMockRecorder
-}
-
-// MockRoleServerMockRecorder is the mock recorder for MockRoleServer.
-type MockRoleServerMockRecorder struct {
-	mock *MockRoleServer
-}
-
-// NewMockRoleServer creates a new mock instance.
-func NewMockRoleServer(ctrl *gomock.Controller) *MockRoleServer {
-	mock := &MockRoleServer{ctrl: ctrl}
-	mock.recorder = &MockRoleServerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRoleServer) EXPECT() *MockRoleServerMockRecorder {
-	return m.recorder
-}
-
-// GetAllRoles mocks base method.
-func (m *MockRoleServer) GetAllRoles(arg0 context.Context, arg1 *authProto.Request) (*authProto.Roles, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllRoles", arg0, arg1)
-	ret0, _ := ret[0].(*authProto.Roles)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllRoles indicates an expected call of GetAllRoles.
-func (mr *MockRoleServerMockRecorder) GetAllRoles(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRoles", reflect.TypeOf((*MockRoleServer)(nil).GetAllRoles), arg0, arg1)
-}
-
-// mustEmbedUnimplementedRoleServer mocks base method.
-func (m *MockRoleServer) mustEmbedUnimplementedRoleServer() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "mustEmbedUnimplementedRoleServer")
-}
-
-// mustEmbedUnimplementedRoleServer indicates an expected call of mustEmbedUnimplementedRoleServer.
-func (mr *MockRoleServerMockRecorder) mustEmbedUnimplementedRoleServer() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedRoleServer", reflect.TypeOf((*MockRoleServer)(nil).mustEmbedUnimplementedRoleServer))
-}
-
-// MockUnsafeRoleServer is a mock of UnsafeRoleServer interface.
-type MockUnsafeRoleServer struct {
-	ctrl     *gomock.Controller
-	recorder *MockUnsafeRoleServerMockRecorder
-}
-
-// MockUnsafeRoleServerMockRecorder is the mock recorder for MockUnsafeRoleServer.
-type MockUnsafeRoleServerMockRecorder struct {
-	mock *MockUnsafeRoleServer
-}
-
-// NewMockUnsafeRoleServer creates a new mock instance.
-func NewMockUnsafeRoleServer(ctrl *gomock.Controller) *MockUnsafeRoleServer {
-	mock := &MockUnsafeRoleServer{ctrl: ctrl}
-	mock.recorder = &MockUnsafeRoleServerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUnsafeRoleServer) EXPECT() *MockUnsafeRoleServerMockRecorder {
-	return m.recorder
-}
-
-// mustEmbedUnimplementedRoleServer mocks base method.
-func (m *MockUnsafeRoleServer) mustEmbedUnimplementedRoleServer() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "mustEmbedUnimplementedRoleServer")
-}
-
-// mustEmbedUnimplementedRoleServer indicates an expected call of mustEmbedUnimplementedRoleServer.
-func (mr *MockUnsafeRoleServerMockRecorder) mustEmbedUnimplementedRoleServer() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedRoleServer", reflect.TypeOf((*MockUnsafeRoleServer)(nil).mustEmbedUnimplementedRoleServer))
 }
