@@ -51,6 +51,20 @@ func (mr *MockAppUserMockRecorder) AuthUser(email, password interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthUser", reflect.TypeOf((*MockAppUser)(nil).AuthUser), email, password)
 }
 
+// CheckInputRole mocks base method.
+func (m *MockAppUser) CheckInputRole(role string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckInputRole", role)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckInputRole indicates an expected call of CheckInputRole.
+func (mr *MockAppUserMockRecorder) CheckInputRole(role interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckInputRole", reflect.TypeOf((*MockAppUser)(nil).CheckInputRole), role)
+}
+
 // CheckPasswordHash mocks base method.
 func (m *MockAppUser) CheckPasswordHash(password, hash string) bool {
 	m.ctrl.T.Helper()
