@@ -54,19 +54,6 @@ definitions:
       time.Time:
         type: string
     type: object
-  model.ResponseFilters:
-    properties:
-      end_time:
-        $ref: '#/definitions/model.MyTime'
-      filter_data:
-        type: boolean
-      filter_role:
-        type: string
-      show_deleted:
-        type: boolean
-      start_time:
-        $ref: '#/definitions/model.MyTime'
-    type: object
   model.ResponseUser:
     properties:
       created_at:
@@ -76,6 +63,19 @@ definitions:
       id:
         type: integer
       role:
+        type: string
+    type: object
+  model.SwaggerRequestFilters:
+    properties:
+      end_time:
+        type: string
+      filter_data:
+        type: boolean
+      filter_role:
+        type: string
+      show_deleted:
+        type: boolean
+      start_time:
         type: string
     type: object
   model.UpdateUser:
@@ -113,7 +113,7 @@ paths:
         in: body
         name: input
         schema:
-          $ref: '#/definitions/model.ResponseFilters'
+          $ref: '#/definitions/model.SwaggerRequestFilters'
       produces:
       - application/json
       responses:

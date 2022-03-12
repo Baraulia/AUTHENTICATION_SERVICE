@@ -52,7 +52,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
-		query = "SELECT id, email, role, created_at FROM users WHERE deleted = false"
+		query = "SELECT id, email, role, created_at FROM users WHERE deleted = false ORDER BY id"
 		rows, err = transaction.Query(query)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -77,7 +77,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		Users = append(Users, User)
 	}
 	if pages == 0 {
-		query = "SELECT CEILING(COUNT(id)/$1::float) FROM users"
+		query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE deleted = false"
 		row := transaction.QueryRow(query, limit)
 		if err := row.Scan(&pages); err != nil {
 			u.logger.Errorf("Error while scanning for pages:%s", err)
@@ -85,26 +85,25 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 	}
 	return Users, pages, transaction.Commit()
 }
-func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	transaction, err := u.db.Begin()
 	if err != nil {
 		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
 		return nil, 0, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
 	}
 	var Users []model.ResponseUser
-	var query string
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users WHERE role = $1"
+			query := "SELECT id, email, role, created_at FROM users WHERE role = $1 ORDER BY id"
 			rows, err = transaction.Query(query, filters.FilterRole)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users WHERE deleted = false AND role = $1"
+			query := "SELECT id, email, role, created_at FROM users WHERE deleted = false AND role = $1"
 			rows, err = transaction.Query(query, filters.FilterRole)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -114,26 +113,26 @@ func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.R
 		pages = 1
 	} else {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users WHERE role = $1 ORDER BY id LIMIT $2 OFFSET $3"
+			query := "SELECT id, email, role, created_at FROM users WHERE role = $1 ORDER BY id LIMIT $2 OFFSET $3"
 			rows, err = transaction.Query(query, filters.FilterRole, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
-			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2"
-			row := transaction.QueryRow(query, limit, filters.FilterRole)
+			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2"
+			row := transaction.QueryRow(query2, limit, filters.FilterRole)
 			if err := row.Scan(&pages); err != nil {
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users WHERE role = $1 AND deleted = false ORDER BY id LIMIT $2 OFFSET $3"
+			query := "SELECT id, email, role, created_at FROM users WHERE role = $1 AND deleted = false ORDER BY id LIMIT $2 OFFSET $3"
 			rows, err = transaction.Query(query, filters.FilterRole, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
-			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2 AND deleted = false"
-			row := transaction.QueryRow(query, limit, filters.FilterRole)
+			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE role = $2 AND deleted = false"
+			row := transaction.QueryRow(query2, limit, filters.FilterRole)
 			if err := row.Scan(&pages); err != nil {
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}
@@ -150,26 +149,25 @@ func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.R
 	return Users, pages, transaction.Commit()
 }
 
-func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	transaction, err := u.db.Begin()
 	if err != nil {
 		u.logger.Errorf("GetUserAll: can not starts transaction:%s", err)
 		return nil, 0, fmt.Errorf("getUserAll: can not starts transaction:%w", err)
 	}
 	var Users []model.ResponseUser
-	var query string
 	var pages int
 	var rows *sql.Rows
 	if page == 0 || limit == 0 {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2"
+			query := "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 ORDER BY id"
 			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false"
+			query := "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false ORDER BY id"
 			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -179,26 +177,26 @@ func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.R
 		pages = 1
 	} else {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 ORDER BY id LIMIT $3 OFFSET $4"
+			query := "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 ORDER BY id LIMIT $3 OFFSET $4"
 			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
-			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $2 AND created_at < $3"
-			row := transaction.QueryRow(query, limit, filters.StartTime, filters.EndTime)
+			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $2 AND created_at < $3"
+			row := transaction.QueryRow(query2, limit, filters.StartTime, filters.EndTime)
 			if err := row.Scan(&pages); err != nil {
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false ORDER BY id LIMIT $3 OFFSET $4"
+			query := "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false ORDER BY id LIMIT $3 OFFSET $4"
 			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
-			query = "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $3 AND created_at < $4 AND deleted = false"
-			row := transaction.QueryRow(query, limit, filters.StartTime, filters.EndTime)
+			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $3 AND created_at < $4 AND deleted = false"
+			row := transaction.QueryRow(query2, limit, filters.StartTime, filters.EndTime)
 			if err := row.Scan(&pages); err != nil {
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}

@@ -47,7 +47,7 @@ const docTemplate = `{
                         "name": "input",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponseFilters"
+                            "$ref": "#/definitions/model.SwaggerRequestFilters"
                         }
                     }
                 ],
@@ -441,26 +441,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.ResponseFilters": {
-            "type": "object",
-            "properties": {
-                "end_time": {
-                    "$ref": "#/definitions/model.MyTime"
-                },
-                "filter_data": {
-                    "type": "boolean"
-                },
-                "filter_role": {
-                    "type": "string"
-                },
-                "show_deleted": {
-                    "type": "boolean"
-                },
-                "start_time": {
-                    "$ref": "#/definitions/model.MyTime"
-                }
-            }
-        },
         "model.ResponseUser": {
             "type": "object",
             "properties": {
@@ -474,6 +454,26 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SwaggerRequestFilters": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "filter_data": {
+                    "type": "boolean"
+                },
+                "filter_role": {
+                    "type": "string"
+                },
+                "show_deleted": {
+                    "type": "boolean"
+                },
+                "start_time": {
                     "type": "string"
                 }
             }

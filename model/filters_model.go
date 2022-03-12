@@ -18,8 +18,8 @@ type MyTime struct {
 
 func (c *MyTime) UnmarshalJSON(data []byte) (err error) {
 	if string(data) == "null" || string(data) == "" {
-		logger.Error("date of birth is not specified")
-		return fmt.Errorf("date of birth is not specified")
+		logger.Error("date  is not specified")
+		return fmt.Errorf("date is not specified")
 	} else {
 		s := strings.Trim(string(data), "\"")
 		// Fractional seconds are handled implicitly by Parse.
@@ -49,10 +49,18 @@ func (c MyTime) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, c.Time.Format(Layout))), nil
 }
 
-type ResponseFilters struct {
+type RequestFilters struct {
 	ShowDeleted bool   `json:"show_deleted"`
 	FilterData  bool   `json:"filter_data"`
 	StartTime   MyTime `json:"start_time"`
 	EndTime     MyTime `json:"end_time"`
+	FilterRole  string `json:"filter_role"`
+}
+
+type SwaggerRequestFilters struct {
+	ShowDeleted bool   `json:"show_deleted"`
+	FilterData  bool   `json:"filter_data"`
+	StartTime   string `json:"start_time"`
+	EndTime     string `json:"end_time"`
 	FilterRole  string `json:"filter_role"`
 }

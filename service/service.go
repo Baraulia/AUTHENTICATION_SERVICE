@@ -12,7 +12,7 @@ import (
 
 type AppUser interface {
 	GetUser(id int) (*model.ResponseUser, error)
-	GetUsers(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error)
+	GetUsers(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error)
 	CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error)
 	CreateStaff(user *model.CreateStaff) (int, error)
 	UpdateUser(user *model.UpdateUser) error

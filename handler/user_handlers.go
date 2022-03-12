@@ -46,7 +46,7 @@ type listUsers struct {
 // @Produce  json
 // @Param page query int false "Page"
 // @Param limit query int false "Limit"
-// @Param input body model.ResponseFilters false "Filters"
+// @Param input body model.SwaggerRequestFilters false "Filters"
 // @Success 200 {object} listUsers
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 500 {object} model.ErrorResponse
@@ -54,7 +54,7 @@ type listUsers struct {
 func (h *Handler) getUsers(ctx *gin.Context) {
 	var page = 0
 	var limit = 0
-	var filters model.ResponseFilters
+	var filters model.RequestFilters
 	if ctx.Query("page") != "" {
 		paramPage, err := strconv.Atoi(ctx.Query("page"))
 		if err != nil || paramPage < 0 {

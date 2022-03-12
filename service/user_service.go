@@ -33,7 +33,7 @@ func (u *UserService) GetUser(id int) (*model.ResponseUser, error) {
 	return user, nil
 }
 
-func (u *UserService) GetUsers(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (u *UserService) GetUsers(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	if filters.FilterRole != "" {
 		users, pages, err := u.repo.AppUser.GetUserByRoleFilter(page, limit, filters)
 		if err != nil {
