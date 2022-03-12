@@ -41,6 +41,14 @@ const docTemplate = `{
                         "description": "Limit",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "description": "Filters",
+                        "name": "input",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseFilters"
+                        }
                     }
                 ],
                 "responses": {
@@ -279,14 +287,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.UpdateUser"
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "format": "int64",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -433,11 +433,39 @@ const docTemplate = `{
                 }
             }
         },
+        "model.MyTime": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ResponseFilters": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "$ref": "#/definitions/model.MyTime"
+                },
+                "filter_data": {
+                    "type": "boolean"
+                },
+                "filter_role": {
+                    "type": "string"
+                },
+                "show_deleted": {
+                    "type": "boolean"
+                },
+                "start_time": {
+                    "$ref": "#/definitions/model.MyTime"
+                }
+            }
+        },
         "model.ResponseUser": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.MyTime"
                 },
                 "email": {
                     "type": "string"

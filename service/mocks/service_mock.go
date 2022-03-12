@@ -172,15 +172,15 @@ func (mr *MockAppUserMockRecorder) HashPassword(password, rounds interface{}) *g
 }
 
 // UpdateUser mocks base method.
-func (m *MockAppUser) UpdateUser(user *model.UpdateUser, id int) error {
+func (m *MockAppUser) UpdateUser(user *model.UpdateUser) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", user, id)
+	ret := m.ctrl.Call(m, "UpdateUser", user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateUser indicates an expected call of UpdateUser.
-func (mr *MockAppUserMockRecorder) UpdateUser(user, id interface{}) *gomock.Call {
+func (mr *MockAppUserMockRecorder) UpdateUser(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockAppUser)(nil).UpdateUser), user, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockAppUser)(nil).UpdateUser), user)
 }

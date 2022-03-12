@@ -49,10 +49,28 @@ definitions:
       message:
         type: string
     type: object
+  model.MyTime:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  model.ResponseFilters:
+    properties:
+      end_time:
+        $ref: '#/definitions/model.MyTime'
+      filter_data:
+        type: boolean
+      filter_role:
+        type: string
+      show_deleted:
+        type: boolean
+      start_time:
+        $ref: '#/definitions/model.MyTime'
+    type: object
   model.ResponseUser:
     properties:
       created_at:
-        type: string
+        $ref: '#/definitions/model.MyTime'
       email:
         type: string
       id:
@@ -91,6 +109,11 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filters
+        in: body
+        name: input
+        schema:
+          $ref: '#/definitions/model.ResponseFilters'
       produces:
       - application/json
       responses:
@@ -178,12 +201,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.UpdateUser'
-      - description: User ID
-        format: int64
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
