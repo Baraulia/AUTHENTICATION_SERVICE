@@ -141,7 +141,7 @@ func (mr *MockAppUserMockRecorder) GetUser(id interface{}) *gomock.Call {
 }
 
 // GetUsers mocks base method.
-func (m *MockAppUser) GetUsers(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (m *MockAppUser) GetUsers(page, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", page, limit, filters)
 	ret0, _ := ret[0].([]model.ResponseUser)
