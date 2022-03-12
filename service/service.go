@@ -20,6 +20,7 @@ type AppUser interface {
 	AuthUser(email string, password string) (*authProto.GeneratedTokens, int, error)
 	HashPassword(password string, rounds int) (string, error)
 	CheckPasswordHash(password string, hash string) bool
+	CheckInputRole(role string) error
 }
 
 type Service struct {

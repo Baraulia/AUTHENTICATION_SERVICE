@@ -157,6 +157,26 @@ func (u *UserService) DeleteUserByID(id int) (int, error) {
 	return userId, nil
 }
 
+func (u *UserService) CheckInputRole(role string) error {
+	roles, err := u.grpcCli.GetAllRoles(context.Background(), &authProto.Request{})
+	if err != nil {
+		u.logger.Errorf("CheckInputRole:%s", err)
+		return err
+	}
+	roleSlice := strings.Split(roles.Roles, ",")
+	var resultCheck = false
+	for _, saveRole := range roleSlice {
+		if saveRole == role {
+			resultCheck = true
+		}
+	}
+	if resultCheck == false {
+		return fmt.Errorf("incorrect role in request")
+	} else {
+		return nil
+	}
+}
+
 func GeneratePassword() string {
 	rand.Seed(time.Now().UnixNano())
 	length := 8 + rand.Intn(7)

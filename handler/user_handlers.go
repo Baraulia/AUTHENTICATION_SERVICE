@@ -155,6 +155,11 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
+	if err := h.service.AppUser.CheckInputRole(input.Role); err != nil {
+		h.logger.Warnf("Incorrect role came from the request:%s", err)
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Incorrect role came from the request"})
+		return
+	}
 	id, err := h.service.AppUser.CreateStaff(&input)
 	if err != nil {
 		if err.Error() == "createStaff: error while scanning for user:pq: duplicate key value violates unique constraint users_email_key" {
