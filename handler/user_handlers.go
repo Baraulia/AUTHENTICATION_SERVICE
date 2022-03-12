@@ -191,13 +191,6 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 // @Router /users/{id} [put]
 func (h *Handler) updateUser(ctx *gin.Context) {
 	var input model.UpdateUser
-	paramID := ctx.Param("id")
-	varID, err := strconv.Atoi(paramID)
-	if err != nil || varID <= 0 {
-		h.logger.Warnf("Handler updateUser (reading param):%s", err)
-		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
-		return
-	}
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
@@ -209,7 +202,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	err = h.service.AppUser.UpdateUser(&input, varID)
+	err := h.service.AppUser.UpdateUser(&input)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return

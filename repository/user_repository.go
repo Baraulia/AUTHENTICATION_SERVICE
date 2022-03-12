@@ -238,8 +238,8 @@ func (u *UserPostgres) CreateCustomer(user *model.CreateCustomer) (int, error) {
 }
 
 // UpdateUser ...
-func (u *UserPostgres) UpdateUser(user *model.UpdateUser, id int) error {
-	_, err := u.db.Exec("UPDATE users SET password =$1 WHERE id=$2", user.NewPassword, id)
+func (u *UserPostgres) UpdateUser(user *model.UpdateUser) error {
+	_, err := u.db.Exec("UPDATE users SET password = $1 WHERE email = $2", user.NewPassword, user.Email)
 	if err != nil {
 		u.logger.Errorf("UpdateUser: error while updating user:%s", err)
 		return fmt.Errorf("updateUser: error while updating user:%w", err)

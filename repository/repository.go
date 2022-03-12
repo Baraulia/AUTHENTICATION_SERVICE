@@ -15,7 +15,7 @@ type AppUser interface {
 	GetUserByDataFilter(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error)
 	CreateStaff(User *model.CreateStaff) (int, error)
 	CreateCustomer(User *model.CreateCustomer) (int, error)
-	UpdateUser(User *model.UpdateUser, id int) error
+	UpdateUser(User *model.UpdateUser) error
 	DeleteUserByID(id int) (int, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetUserPasswordByID(id int) (string, error)

@@ -126,19 +126,19 @@ func (u *UserService) CreateStaff(user *model.CreateStaff) (int, error) {
 	return id, nil
 }
 
-func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {
-	userPassword, err := u.repo.AppUser.GetUserPasswordByID(id)
+func (u *UserService) UpdateUser(user *model.UpdateUser) error {
+	userDb, err := u.repo.AppUser.GetUserByEmail(user.Email)
 	if err != nil {
 		return err
 	}
-	if u.CheckPasswordHash(user.OldPassword, userPassword) {
+	if u.CheckPasswordHash(user.OldPassword, userDb.Password) {
 		newHash, err := u.HashPassword(user.NewPassword, bcrypt.DefaultCost)
 		if err != nil {
 			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
 			return fmt.Errorf("updateUser: can not generate hash from password:%w", err)
 		}
 		user.NewPassword = newHash
-		err = u.repo.AppUser.UpdateUser(user, id)
+		err = u.repo.AppUser.UpdateUser(user)
 		if err != nil {
 			return err
 		}

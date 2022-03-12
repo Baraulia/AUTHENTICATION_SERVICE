@@ -15,7 +15,7 @@ type AppUser interface {
 	GetUsers(page int, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error)
 	CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error)
 	CreateStaff(user *model.CreateStaff) (int, error)
-	UpdateUser(user *model.UpdateUser, id int) error
+	UpdateUser(user *model.UpdateUser) error
 	DeleteUserByID(id int) (int, error)
 	AuthUser(email string, password string) (*authProto.GeneratedTokens, int, error)
 	HashPassword(password string, rounds int) (string, error)
