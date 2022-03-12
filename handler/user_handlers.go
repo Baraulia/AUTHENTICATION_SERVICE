@@ -21,7 +21,7 @@ import (
 func (h *Handler) getUser(ctx *gin.Context) {
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
-	if err != nil {
+	if err != nil || varID <= 0 {
 		h.logger.Warnf("Handler getUser (reading param):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
@@ -187,7 +187,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 	var input model.UpdateUser
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
-	if err != nil {
+	if err != nil || varID <= 0 {
 		h.logger.Warnf("Handler updateUser (reading param):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
 		return
@@ -225,7 +225,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 func (h *Handler) deleteUserByID(ctx *gin.Context) {
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
-	if err != nil {
+	if err != nil || varID <= 0 {
 		h.logger.Warnf("Handler deleteUserByID (reading param):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
 		return

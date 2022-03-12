@@ -77,6 +77,14 @@ func (u *UserService) CreateCustomer(user *model.CreateCustomer) (*authProto.Gen
 		Email:    user.Email,
 		Password: pas,
 	})
+	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
+		UserId: int32(id),
+		Role:   "Authorized Customer",
+	})
+	if err != nil {
+		u.logger.Errorf("BindUserAndRole:%s", err)
+		return nil, id, fmt.Errorf("bindUserAndRole:%w", err)
+	}
 	tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 		UserId: int32(id),
 		Role:   "Authorized Customer",

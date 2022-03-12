@@ -261,9 +261,9 @@ func (u *UserPostgres) DeleteUserByID(id int) (int, error) {
 // GetUserByEmail ...
 func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 	var User model.User
-	query := "SELECT id, email, password, deleted FROM users WHERE email = $1"
+	query := "SELECT id, email, password, role, deleted FROM users WHERE email = $1"
 	row := u.db.QueryRow(query, email)
-	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.Deleted); err != nil {
+	if err := row.Scan(&User.ID, &User.Email, &User.Password, &User.Role, &User.Deleted); err != nil {
 		u.logger.Errorf("Error while scanning for user:%s", err)
 		return nil, fmt.Errorf("getUserByEmail: repository error:%w", err)
 

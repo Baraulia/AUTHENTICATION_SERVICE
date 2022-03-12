@@ -19,6 +19,7 @@ func (u *UserService) AuthUser(email string, password string) (*authProto.Genera
 	if u.CheckPasswordHash(password, userDb.Password) {
 		tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 			UserId: int32(userDb.ID),
+			Role:   userDb.Role,
 		})
 		if err != nil {
 			u.logger.Errorf("TokenGenerationByUserId:%s", err)
