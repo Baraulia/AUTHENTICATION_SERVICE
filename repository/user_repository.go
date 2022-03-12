@@ -60,7 +60,7 @@ func (u *UserPostgres) GetUserAll(page int, limit int) ([]model.ResponseUser, in
 		}
 		pages = 1
 	} else {
-		query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE deleted = false"
+		query = "SELECT id, email, role, created_at FROM users WHERE deleted = false ORDER BY id LIMIT $1 OFFSET $2"
 		rows, err = transaction.Query(query, limit, (page-1)*limit)
 		if err != nil {
 			u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
@@ -114,8 +114,8 @@ func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.R
 		pages = 1
 	} else {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE role = $3"
-			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.FilterRole)
+			query = "SELECT id, email, role, created_at FROM users WHERE role = $1 ORDER BY id LIMIT $2 OFFSET $3"
+			rows, err = transaction.Query(query, filters.FilterRole, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
@@ -126,8 +126,8 @@ func (u *UserPostgres) GetUserByRoleFilter(page int, limit int, filters *model.R
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE role = $3 AND deleted = false"
-			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.FilterRole)
+			query = "SELECT id, email, role, created_at FROM users WHERE role = $1 AND deleted = false ORDER BY id LIMIT $2 OFFSET $3"
+			rows, err = transaction.Query(query, filters.FilterRole, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
@@ -179,8 +179,8 @@ func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.R
 		pages = 1
 	} else {
 		if filters.ShowDeleted {
-			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE created_at >= $3 AND created_at < $4"
-			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.StartTime, filters.EndTime)
+			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 ORDER BY id LIMIT $3 OFFSET $4"
+			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
@@ -191,8 +191,8 @@ func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.R
 				u.logger.Errorf("Error while scanning for pages:%s", err)
 			}
 		} else {
-			query = "SELECT id, email, role, created_at FROM users ORDER BY id LIMIT $1 OFFSET $2 WHERE created_at >= $3 AND created_at < $4 AND deleted = false"
-			rows, err = transaction.Query(query, limit, (page-1)*limit, filters.StartTime, filters.EndTime)
+			query = "SELECT id, email, role, created_at FROM users WHERE created_at >= $1 AND created_at < $2 AND deleted = false ORDER BY id LIMIT $3 OFFSET $4"
+			rows, err = transaction.Query(query, filters.StartTime, filters.EndTime, limit, (page-1)*limit)
 			if err != nil {
 				u.logger.Errorf("GetUserAll: can not executes a query:%s", err)
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
