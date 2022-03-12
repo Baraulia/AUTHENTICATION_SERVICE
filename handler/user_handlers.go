@@ -50,7 +50,7 @@ type listUsers struct {
 // @Success 200 {object} listUsers
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 500 {object} model.ErrorResponse
-// @Router /users/ [get]
+// @Router /users/ [post]
 func (h *Handler) getUsers(ctx *gin.Context) {
 	var page = 0
 	var limit = 0
