@@ -155,7 +155,8 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	if err := h.service.AppUser.CheckInputRole(input.Role); err != nil {
+	err := h.service.AppUser.CheckInputRole(input.Role)
+	if err != nil {
 		h.logger.Warnf("Incorrect role came from the request:%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Incorrect role came from the request"})
 		return
