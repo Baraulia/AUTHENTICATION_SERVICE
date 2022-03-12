@@ -183,7 +183,6 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body model.UpdateUser true "User"
-// @Param id path int true "User ID" Format(int64)
 // @Success 204
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 400 {object} map[string]string
