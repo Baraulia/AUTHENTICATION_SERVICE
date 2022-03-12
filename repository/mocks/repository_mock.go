@@ -96,7 +96,7 @@ func (mr *MockAppUserMockRecorder) GetUserAll(page, limit interface{}) *gomock.C
 }
 
 // GetUserByDataFilter mocks base method.
-func (m *MockAppUser) GetUserByDataFilter(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (m *MockAppUser) GetUserByDataFilter(page, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByDataFilter", page, limit, filters)
 	ret0, _ := ret[0].([]model.ResponseUser)
@@ -142,7 +142,7 @@ func (mr *MockAppUserMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 }
 
 // GetUserByRoleFilter mocks base method.
-func (m *MockAppUser) GetUserByRoleFilter(page, limit int, filters *model.ResponseFilters) ([]model.ResponseUser, int, error) {
+func (m *MockAppUser) GetUserByRoleFilter(page, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByRoleFilter", page, limit, filters)
 	ret0, _ := ret[0].([]model.ResponseUser)
