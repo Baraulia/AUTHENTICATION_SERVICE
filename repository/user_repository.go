@@ -188,7 +188,7 @@ func (u *UserPostgres) GetUserByDataFilter(page int, limit int, filters *model.R
 				return nil, 0, fmt.Errorf("getUserAll:repository error:%w", err)
 			}
 		} else {
-			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $3 AND created_at <= $4 AND deleted = false"
+			query2 := "SELECT CEILING(COUNT(id)/$1::float) FROM users WHERE created_at >= $2 AND created_at <= $3 AND deleted = false"
 			row := transaction.QueryRow(query2, limit, filters.StartTime, filters.EndTime)
 			if err := row.Scan(&pages); err != nil {
 				u.logger.Errorf("Error while scanning for pages:%s", err)
