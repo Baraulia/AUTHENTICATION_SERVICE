@@ -42,7 +42,7 @@ func (u *UserService) GetUsers(page int, limit int, filters *model.RequestFilter
 		return users, pages, nil
 	} else if filters.FilterData {
 		if filters.EndTime.Unix() < filters.StartTime.Unix() {
-			filters.EndTime.Time = filters.StartTime.Time.Add(24 * time.Hour)
+			filters.EndTime.Time = filters.StartTime.Time
 		}
 		users, pages, err := u.repo.AppUser.GetUserByDataFilter(page, limit, filters)
 		if err != nil {
