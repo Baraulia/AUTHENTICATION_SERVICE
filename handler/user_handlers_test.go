@@ -41,7 +41,7 @@ func TestHandler_getUser(t *testing.T) {
 				}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"id":1,"email":"test@yande.ru","created_at":"2022-03-11","role":"Courier"}`,
+			expectedRequestBody: `{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"}`,
 		},
 		{
 			name:                "invalid request",
@@ -101,7 +101,6 @@ func TestHandler_getUsers(t *testing.T) {
 		page                int
 		limit               int
 		inputFilter         *model.RequestFilters
-		inputRequestBody    string
 		mockBehavior        mockBehavior
 		expectedStatusCode  int
 		expectedRequestBody string
@@ -116,9 +115,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody: `{}`,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -133,21 +131,20 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-03-11","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"2022-03-11","role":"Courier"}]}`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"20220311","role":"Courier"}]}`,
 		},
 		{
 			name:       "OK with role filter",
-			inputQuery: "?page=1&limit=10",
+			inputQuery: "?page=1&limit=10&role=Courier",
 			page:       1,
 			limit:      10,
 			inputFilter: &model.RequestFilters{
-				ShowDeleted: true,
+				ShowDeleted: false,
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
-			inputRequestBody: `{"filter_role": "Courier", "show_deleted": true}`,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -162,11 +159,11 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-03-11","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"2022-03-11","role":"Courier"}]}`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"20220311","role":"Courier"}]}`,
 		},
 		{
 			name:       "OK with data filter",
-			inputQuery: "?page=1&limit=10",
+			inputQuery: "?page=1&limit=10&show_deleted=true&filter_data=true&start_time=20220311",
 			page:       1,
 			limit:      10,
 			inputFilter: &model.RequestFilters{
@@ -174,9 +171,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody: `{"filter_data": true,  "show_deleted": true,  "start_time": "2022-03-11"}`,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -191,7 +187,7 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-03-11","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"2022-03-11","role":"Courier"}]}`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"20220311","role":"Courier"}]}`,
 		},
 		{
 			name:       "Empty url query",
@@ -203,9 +199,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody: `{}`,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -220,7 +215,7 @@ func TestHandler_getUsers(t *testing.T) {
 				}, 1, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"2022-03-11","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"2022-03-11","role":"Courier"}]}`,
+			expectedRequestBody: `{"Data":[{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"},{"id":2,"email":"test2@yande.ru","created_at":"20220311","role":"Courier"}]}`,
 		},
 		{
 			name:       "Invalid value of the page in url query",
@@ -232,9 +227,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody:    `{}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"Invalid url query"}`,
@@ -249,9 +243,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody:    `{}`,
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"Invalid url query"}`,
@@ -266,9 +259,8 @@ func TestHandler_getUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
-			inputRequestBody: `{}`,
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return(nil, 0, fmt.Errorf("server error"))
 			},
@@ -290,12 +282,12 @@ func TestHandler_getUsers(t *testing.T) {
 
 			//Init server
 			r := gin.New()
-			r.POST("/users/", handler.getUsers)
+			r.GET("/users/", handler.getUsers)
 
 			//Test request
 			w := httptest.NewRecorder()
 
-			req := httptest.NewRequest("POST", fmt.Sprintf("/users/%s", testCase.inputQuery), bytes.NewBufferString(testCase.inputRequestBody))
+			req := httptest.NewRequest("GET", fmt.Sprintf("/users/%s", testCase.inputQuery), nil)
 
 			//Execute the request
 			r.ServeHTTP(w, req)

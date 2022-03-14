@@ -10,7 +10,7 @@ import (
 
 var logger logging.Logger
 
-const Layout = "2006-01-02"
+const Layout = "20060102"
 
 type MyTime struct {
 	time.Time
@@ -50,17 +50,9 @@ func (c MyTime) MarshalJSON() ([]byte, error) {
 }
 
 type RequestFilters struct {
-	ShowDeleted bool   `json:"show_deleted"`
-	FilterData  bool   `json:"filter_data"`
-	StartTime   MyTime `json:"start_time"`
-	EndTime     MyTime `json:"end_time"`
-	FilterRole  string `json:"filter_role"`
-}
-
-type SwaggerRequestFilters struct {
-	ShowDeleted bool   `json:"show_deleted"`
-	FilterData  bool   `json:"filter_data"`
-	StartTime   string `json:"start_time"`
-	EndTime     string `json:"end_time"`
-	FilterRole  string `json:"filter_role"`
+	ShowDeleted bool   `form:"show_deleted,omitempty"`
+	FilterData  bool   `form:"filter_data,omitempty"`
+	StartTime   MyTime `form:"start_time,omitempty"`
+	EndTime     MyTime `form:"end_time,omitempty"`
+	Role        string `form:"role,omitempty"`
 }

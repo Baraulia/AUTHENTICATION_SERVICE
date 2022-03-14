@@ -95,7 +95,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mockBehaviorGetAllUsers: func(s *mock_repository.MockAppUser, page int, limit int) {
 				s.EXPECT().GetUserAll(page, limit).Return([]model.ResponseUser{
@@ -134,7 +134,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mockBehaviorGetAllUsers: func(s *mock_repository.MockAppUser, page int, limit int) {
 				s.EXPECT().GetUserAll(page, limit).Return(nil, 0, errors.New("repository failure"))
@@ -153,7 +153,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
 			mockBehaviorGetAllUsers: func(s *mock_repository.MockAppUser, page int, limit int) {},
 			mockBehaviorFilterByRole: func(s *mock_repository.MockAppUser, page int, limit int, filter *model.RequestFilters) {
@@ -192,7 +192,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
 			mockBehaviorGetAllUsers: func(s *mock_repository.MockAppUser, page int, limit int) {},
 			mockBehaviorFilterByRole: func(s *mock_repository.MockAppUser, page int, limit int, filter *model.RequestFilters) {
@@ -211,7 +211,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mockBehaviorGetAllUsers:  func(s *mock_repository.MockAppUser, page int, limit int) {},
 			mockBehaviorFilterByRole: func(s *mock_repository.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
@@ -250,7 +250,7 @@ func TestService_GetUsers(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mockBehaviorGetAllUsers:  func(s *mock_repository.MockAppUser, page int, limit int) {},
 			mockBehaviorFilterByRole: func(s *mock_repository.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
@@ -273,6 +273,7 @@ func TestService_GetUsers(t *testing.T) {
 			testCase.mockBehaviorFilterByData(auth, testCase.inputPage, testCase.inputLimit, testCase.inputFilter)
 			logger := logging.GetLogger()
 			repo := &repository.Repository{AppUser: auth}
+
 			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
 			service := NewService(repo, grpcCli, logger)
 			users, _, err := service.GetUsers(testCase.inputPage, testCase.inputLimit, testCase.inputFilter)

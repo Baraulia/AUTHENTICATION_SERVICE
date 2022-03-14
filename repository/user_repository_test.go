@@ -284,7 +284,7 @@ func TestRepository_GetUserByRoleFilter(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()
@@ -292,7 +292,7 @@ func TestRepository_GetUserByRoleFilter(t *testing.T) {
 					AddRow(1, "test@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(2, "test1@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(3, "test2@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)})
-				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.FilterRole).WillReturnRows(rows)
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.Role).WillReturnRows(rows)
 				mock.ExpectCommit()
 			},
 
@@ -327,17 +327,17 @@ func TestRepository_GetUserByRoleFilter(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()
 				rowsForPages := sqlmock.NewRows([]string{"pages"}).AddRow("1")
-				mock.ExpectQuery("SELECT CEILING").WithArgs(limit, filter.FilterRole).WillReturnRows(rowsForPages)
+				mock.ExpectQuery("SELECT CEILING").WithArgs(limit, filter.Role).WillReturnRows(rowsForPages)
 				rows := sqlmock.NewRows([]string{"id", "email", "role", "created_at"}).
 					AddRow(1, "test@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(2, "test1@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(3, "test2@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)})
-				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.FilterRole, limit, (page-1)*limit).WillReturnRows(rows)
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.Role, limit, (page-1)*limit).WillReturnRows(rows)
 				mock.ExpectCommit()
 			},
 
@@ -372,7 +372,7 @@ func TestRepository_GetUserByRoleFilter(t *testing.T) {
 				FilterData:  false,
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
-				FilterRole:  "Courier",
+				Role:        "Courier",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()
@@ -380,7 +380,7 @@ func TestRepository_GetUserByRoleFilter(t *testing.T) {
 					AddRow(1, "test@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(2, "test1@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)}).
 					AddRow(3, "test2@yandex.ru", "Courier", model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)})
-				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.FilterRole).WillReturnRows(rows)
+				mock.ExpectQuery("SELECT id, email, role, created_at FROM users WHERE").WithArgs(filter.Role).WillReturnRows(rows)
 				mock.ExpectCommit()
 			},
 
@@ -459,7 +459,7 @@ func TestRepository_GetUserByDataFilter(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()
@@ -502,7 +502,7 @@ func TestRepository_GetUserByDataFilter(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()
@@ -547,7 +547,7 @@ func TestRepository_GetUserByDataFilter(t *testing.T) {
 				FilterData:  true,
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
-				FilterRole:  "",
+				Role:        "",
 			},
 			mock: func(page, limit int, filter *model.RequestFilters) {
 				mock.ExpectBegin()

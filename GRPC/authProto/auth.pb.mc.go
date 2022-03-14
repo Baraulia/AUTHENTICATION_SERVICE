@@ -5,6 +5,7 @@ package mockAuthProto
 import (
 	"context"
 	"github.com/bxcodec/faker"
+	"github.com/golang/protobuf/ptypes/empty"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 )
 
@@ -15,7 +16,7 @@ type MockAuthServer struct {
 }
 
 // GetUserWithRights is mock implementation of the method GetUserWithRights
-func (MockAuthServer) GetUserWithRights(context.Context, *authProto.AccessToken) (*authProto.UserRole, error) {
+func (*MockAuthServer) GetUserWithRights(context.Context, *authProto.AccessToken) (*authProto.UserRole, error) {
 	var res authProto.UserRole
 	if err := faker.FakeData(&res); err != nil {
 		return nil, err
@@ -24,7 +25,7 @@ func (MockAuthServer) GetUserWithRights(context.Context, *authProto.AccessToken)
 }
 
 // BindUserAndRole is mock implementation of the method BindUserAndRole
-func (MockAuthServer) BindUserAndRole(context.Context, *authProto.User) (*authProto.ResultBinding, error) {
+func (*MockAuthServer) BindUserAndRole(context.Context, *authProto.User) (*authProto.ResultBinding, error) {
 	var res authProto.ResultBinding
 	if err := faker.FakeData(&res); err != nil {
 		return nil, err
@@ -33,7 +34,7 @@ func (MockAuthServer) BindUserAndRole(context.Context, *authProto.User) (*authPr
 }
 
 // TokenGenerationByRefresh is mock implementation of the method TokenGenerationByRefresh
-func (MockAuthServer) TokenGenerationByRefresh(context.Context, *authProto.RefreshToken) (*authProto.GeneratedTokens, error) {
+func (*MockAuthServer) TokenGenerationByRefresh(context.Context, *authProto.RefreshToken) (*authProto.GeneratedTokens, error) {
 	var res authProto.GeneratedTokens
 	if err := faker.FakeData(&res); err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func (MockAuthServer) TokenGenerationByRefresh(context.Context, *authProto.Refre
 }
 
 // TokenGenerationByUserId is mock implementation of the method TokenGenerationByUserId
-func (MockAuthServer) TokenGenerationByUserId(context.Context, *authProto.User) (*authProto.GeneratedTokens, error) {
+func (*MockAuthServer) TokenGenerationByUserId(context.Context, *authProto.User) (*authProto.GeneratedTokens, error) {
 	var res authProto.GeneratedTokens
 	if err := faker.FakeData(&res); err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (MockAuthServer) TokenGenerationByUserId(context.Context, *authProto.User) 
 }
 
 // GetAllRoles is mock implementation of the method GetAllRoles
-func (MockAuthServer) GetAllRoles(context.Context, *authProto.Request) (*authProto.Roles, error) {
+func (*MockAuthServer) GetAllRoles(context.Context, *empty.Empty) (*authProto.Roles, error) {
 	var res authProto.Roles
 	if err := faker.FakeData(&res); err != nil {
 		return nil, err

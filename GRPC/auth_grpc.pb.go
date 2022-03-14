@@ -4,12 +4,12 @@ package authProto
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 )
 
-//go:generate mockgen -source=auth_grpc.pb.go -destination=mocks/grpc_mock.go
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
 // Requires gRPC-Go v1.32.0 or later.
@@ -23,7 +23,7 @@ type AuthClient interface {
 	BindUserAndRole(ctx context.Context, in *User, opts ...grpc.CallOption) (*ResultBinding, error)
 	TokenGenerationByRefresh(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*GeneratedTokens, error)
 	TokenGenerationByUserId(ctx context.Context, in *User, opts ...grpc.CallOption) (*GeneratedTokens, error)
-	GetAllRoles(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Roles, error)
+	GetAllRoles(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Roles, error)
 }
 
 type authClient struct {
@@ -70,7 +70,7 @@ func (c *authClient) TokenGenerationByUserId(ctx context.Context, in *User, opts
 	return out, nil
 }
 
-func (c *authClient) GetAllRoles(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Roles, error) {
+func (c *authClient) GetAllRoles(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Roles, error) {
 	out := new(Roles)
 	err := c.cc.Invoke(ctx, "/auth.Auth/GetAllRoles", in, out, opts...)
 	if err != nil {
@@ -87,7 +87,7 @@ type AuthServer interface {
 	BindUserAndRole(context.Context, *User) (*ResultBinding, error)
 	TokenGenerationByRefresh(context.Context, *RefreshToken) (*GeneratedTokens, error)
 	TokenGenerationByUserId(context.Context, *User) (*GeneratedTokens, error)
-	GetAllRoles(context.Context, *Request) (*Roles, error)
+	GetAllRoles(context.Context, *empty.Empty) (*Roles, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -107,7 +107,7 @@ func (UnimplementedAuthServer) TokenGenerationByRefresh(context.Context, *Refres
 func (UnimplementedAuthServer) TokenGenerationByUserId(context.Context, *User) (*GeneratedTokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TokenGenerationByUserId not implemented")
 }
-func (UnimplementedAuthServer) GetAllRoles(context.Context, *Request) (*Roles, error) {
+func (UnimplementedAuthServer) GetAllRoles(context.Context, *empty.Empty) (*Roles, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllRoles not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
@@ -196,7 +196,7 @@ func _Auth_TokenGenerationByUserId_Handler(srv interface{}, ctx context.Context,
 }
 
 func _Auth_GetAllRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -208,7 +208,7 @@ func _Auth_GetAllRoles_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/auth.Auth/GetAllRoles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).GetAllRoles(ctx, req.(*Request))
+		return srv.(AuthServer).GetAllRoles(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

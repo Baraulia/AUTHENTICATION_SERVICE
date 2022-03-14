@@ -65,19 +65,6 @@ definitions:
       role:
         type: string
     type: object
-  model.SwaggerRequestFilters:
-    properties:
-      end_time:
-        type: string
-      filter_data:
-        type: boolean
-      filter_role:
-        type: string
-      show_deleted:
-        type: boolean
-      start_time:
-        type: string
-    type: object
   model.UpdateUser:
     properties:
       email:
@@ -96,7 +83,7 @@ info:
   title: Authenticate Service
 paths:
   /users/:
-    post:
+    get:
       consumes:
       - application/json
       description: get list of users
@@ -109,11 +96,26 @@ paths:
         in: query
         name: limit
         type: integer
-      - description: Filters
-        in: body
-        name: input
-        schema:
-          $ref: '#/definitions/model.SwaggerRequestFilters'
+      - description: Role
+        in: query
+        name: role
+        type: string
+      - description: FilterData
+        in: query
+        name: filter_data
+        type: boolean
+      - description: ShowDeleted
+        in: query
+        name: show_deleted
+        type: boolean
+      - description: StartTime
+        in: query
+        name: start_time
+        type: string
+      - description: EndTime
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:

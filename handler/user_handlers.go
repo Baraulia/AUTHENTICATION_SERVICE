@@ -46,15 +46,25 @@ type listUsers struct {
 // @Produce  json
 // @Param page query int false "Page"
 // @Param limit query int false "Limit"
-// @Param input body model.SwaggerRequestFilters false "Filters"
+// @Param role query string false "Role"
+// @Param filter_data query bool false "FilterData"
+// @Param show_deleted query bool false "ShowDeleted"
+// @Param start_time query string false "StartTime"
+// @Param end_time query string false "EndTime"
 // @Success 200 {object} listUsers
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 500 {object} model.ErrorResponse
-// @Router /users/ [post]
+// @Router /users/ [get]
 func (h *Handler) getUsers(ctx *gin.Context) {
 	var page = 0
 	var limit = 0
 	var filters model.RequestFilters
+	err := ctx.Bind(&filters)
+	if err != nil {
+		h.logger.Warnf("Handler getUsers (bind query):%s", err)
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request body"})
+		return
+	}
 	if ctx.Query("page") != "" {
 		paramPage, err := strconv.Atoi(ctx.Query("page"))
 		if err != nil || paramPage < 0 {
@@ -73,14 +83,6 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 		}
 		limit = paramLimit
 	}
-	if ctx.Request.Body != nil {
-		if err := ctx.ShouldBindJSON(&filters); err != nil {
-			h.logger.Warnf("Handler getUsers (binding JSON):%s", err)
-			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request body"})
-			return
-		}
-
-	}
 	users, pages, err := h.service.AppUser.GetUsers(page, limit, &filters)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
@@ -88,7 +90,6 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 	}
 	ctx.Header("pages", strconv.Itoa(pages))
 	ctx.JSON(http.StatusOK, listUsers{Data: users})
-
 }
 
 // createCustomer godoc

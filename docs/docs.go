@@ -17,7 +17,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/users/": {
-            "post": {
+            "get": {
                 "description": "get list of users",
                 "consumes": [
                     "application/json"
@@ -43,12 +43,34 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "description": "Filters",
-                        "name": "input",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/model.SwaggerRequestFilters"
-                        }
+                        "type": "string",
+                        "description": "Role",
+                        "name": "role",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "FilterData",
+                        "name": "filter_data",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ShowDeleted",
+                        "name": "show_deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartTime",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "EndTime",
+                        "name": "end_time",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -454,26 +476,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "role": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.SwaggerRequestFilters": {
-            "type": "object",
-            "properties": {
-                "end_time": {
-                    "type": "string"
-                },
-                "filter_data": {
-                    "type": "boolean"
-                },
-                "filter_role": {
-                    "type": "string"
-                },
-                "show_deleted": {
-                    "type": "boolean"
-                },
-                "start_time": {
                     "type": "string"
                 }
             }

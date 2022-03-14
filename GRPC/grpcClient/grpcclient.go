@@ -3,6 +3,7 @@ package grpcClient
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
@@ -41,6 +42,6 @@ func (c *GRPCClient) TokenGenerationByUserId(ctx context.Context, in *authProto.
 	return c.cli.TokenGenerationByUserId(ctx, in)
 }
 
-func (c *GRPCClient) GetAllRoles(ctx context.Context, in *authProto.Request, opts ...grpc.CallOption) (*authProto.Roles, error) {
+func (c *GRPCClient) GetAllRoles(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*authProto.Roles, error) {
 	return c.cli.GetAllRoles(ctx, in)
 }

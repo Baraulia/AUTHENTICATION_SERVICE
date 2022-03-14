@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
@@ -34,7 +35,7 @@ func (u *UserService) GetUser(id int) (*model.ResponseUser, error) {
 }
 
 func (u *UserService) GetUsers(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
-	if filters.FilterRole != "" {
+	if filters.Role != "" {
 		users, pages, err := u.repo.AppUser.GetUserByRoleFilter(page, limit, filters)
 		if err != nil {
 			return nil, 0, err
@@ -158,7 +159,7 @@ func (u *UserService) DeleteUserByID(id int) (int, error) {
 }
 
 func (u *UserService) CheckInputRole(role string) error {
-	roles, err := u.grpcCli.GetAllRoles(context.Background(), &authProto.Request{})
+	roles, err := u.grpcCli.GetAllRoles(context.Background(), &empty.Empty{})
 	if err != nil {
 		u.logger.Errorf("CheckInputRole:%s", err)
 		return err
