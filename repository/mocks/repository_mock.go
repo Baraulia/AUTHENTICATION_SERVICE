@@ -34,19 +34,34 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 	return m.recorder
 }
 
-// CreateUser mocks base method.
-func (m *MockAppUser) CreateUser(User *model.CreateUser) (int, error) {
+// CreateCustomer mocks base method.
+func (m *MockAppUser) CreateCustomer(User *model.CreateCustomer) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", User)
+	ret := m.ctrl.Call(m, "CreateCustomer", User)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateUser indicates an expected call of CreateUser.
-func (mr *MockAppUserMockRecorder) CreateUser(User interface{}) *gomock.Call {
+// CreateCustomer indicates an expected call of CreateCustomer.
+func (mr *MockAppUserMockRecorder) CreateCustomer(User interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockAppUser)(nil).CreateUser), User)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCustomer", reflect.TypeOf((*MockAppUser)(nil).CreateCustomer), User)
+}
+
+// CreateStaff mocks base method.
+func (m *MockAppUser) CreateStaff(User *model.CreateStaff) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateStaff", User)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateStaff indicates an expected call of CreateStaff.
+func (mr *MockAppUserMockRecorder) CreateStaff(User interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStaff", reflect.TypeOf((*MockAppUser)(nil).CreateStaff), User)
 }
 
 // DeleteUserByID mocks base method.
@@ -80,6 +95,22 @@ func (mr *MockAppUserMockRecorder) GetUserAll(page, limit interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAll", reflect.TypeOf((*MockAppUser)(nil).GetUserAll), page, limit)
 }
 
+// GetUserByDataFilter mocks base method.
+func (m *MockAppUser) GetUserByDataFilter(page, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByDataFilter", page, limit, filters)
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetUserByDataFilter indicates an expected call of GetUserByDataFilter.
+func (mr *MockAppUserMockRecorder) GetUserByDataFilter(page, limit, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByDataFilter", reflect.TypeOf((*MockAppUser)(nil).GetUserByDataFilter), page, limit, filters)
+}
+
 // GetUserByEmail mocks base method.
 func (m *MockAppUser) GetUserByEmail(email string) (*model.User, error) {
 	m.ctrl.T.Helper()
@@ -110,6 +141,22 @@ func (mr *MockAppUserMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockAppUser)(nil).GetUserByID), id)
 }
 
+// GetUserByRoleFilter mocks base method.
+func (m *MockAppUser) GetUserByRoleFilter(page, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByRoleFilter", page, limit, filters)
+	ret0, _ := ret[0].([]model.ResponseUser)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetUserByRoleFilter indicates an expected call of GetUserByRoleFilter.
+func (mr *MockAppUserMockRecorder) GetUserByRoleFilter(page, limit, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByRoleFilter", reflect.TypeOf((*MockAppUser)(nil).GetUserByRoleFilter), page, limit, filters)
+}
+
 // GetUserPasswordByID mocks base method.
 func (m *MockAppUser) GetUserPasswordByID(id int) (string, error) {
 	m.ctrl.T.Helper()
@@ -126,15 +173,15 @@ func (mr *MockAppUserMockRecorder) GetUserPasswordByID(id interface{}) *gomock.C
 }
 
 // UpdateUser mocks base method.
-func (m *MockAppUser) UpdateUser(User *model.UpdateUser, id int) error {
+func (m *MockAppUser) UpdateUser(User *model.UpdateUser) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", User, id)
+	ret := m.ctrl.Call(m, "UpdateUser", User)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateUser indicates an expected call of UpdateUser.
-func (mr *MockAppUserMockRecorder) UpdateUser(User, id interface{}) *gomock.Call {
+func (mr *MockAppUserMockRecorder) UpdateUser(User interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockAppUser)(nil).UpdateUser), User, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockAppUser)(nil).UpdateUser), User)
 }

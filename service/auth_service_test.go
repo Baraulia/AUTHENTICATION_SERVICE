@@ -4,25 +4,25 @@ import (
 	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
+	mockAuthProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/authProto"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/grpcClient"
-	mock_authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC/mocks"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
 	mock_repository "stlab.itechart-group.com/go/food_delivery/authentication_service/repository/mocks"
 	"testing"
-	"time"
 )
 
 func TestService_authUser(t *testing.T) {
 	type mockBehaviorGetUser func(s *mock_repository.MockAppUser, email string)
-	type mockBehaviorGetTokens func(s *mock_authProto.MockAuthClient, id int32)
+	type mockBehaviorGetTokens func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error)
 	testTable := []struct {
 		name                  string
 		inputPassword         string
 		inputEmail            string
+		mockUser              *authProto.User
 		mockBehaviorGetUser   mockBehaviorGetUser
 		mockBehaviorGetTokens mockBehaviorGetTokens
 		expectedId            int
@@ -32,21 +32,21 @@ func TestService_authUser(t *testing.T) {
 			name:          "OK",
 			inputPassword: "HGYKnu!98Tg",
 			inputEmail:    "test@yandex.ru",
+			mockUser: &authProto.User{
+				UserId: 1,
+				Role:   "Superadmin",
+			},
 			mockBehaviorGetUser: func(s *mock_repository.MockAppUser, email string) {
 				s.EXPECT().GetUserByEmail(email).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+					ID:       1,
+					Email:    "test@yandex.ru",
+					Password: "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
+					Deleted:  false,
 				}, nil)
 			},
-			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
-				s.EXPECT().TokenGenerationByUserId(context.Background(), &authProto.User{
-					UserId: 1,
-				}).Return(&authProto.GeneratedTokens{
-					AccessToken:  "qwerty",
-					RefreshToken: "qwerty",
-				}, nil)
+			mockBehaviorGetTokens: func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error) {
+				_, _ = s.TokenGenerationByUserId(context.Background(), user)
+				return &authProto.GeneratedTokens{AccessToken: "qwerty", RefreshToken: "qwerty"}, nil
 			},
 			expectedId:    1,
 			expectedError: nil,
@@ -57,11 +57,14 @@ func TestService_authUser(t *testing.T) {
 			inputEmail:    "test@yandex.ru",
 			mockBehaviorGetUser: func(s *mock_repository.MockAppUser, email string) {
 				s.EXPECT().GetUserByEmail(email).Return(&model.User{
-					ID:        1,
-					Email:     "test@yandex.ru",
-					Password:  "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
-					CreatedAt: time.Date(2022, 02, 10, 16, 53, 28, 686358, time.UTC),
+					ID:       1,
+					Email:    "test@yandex.ru",
+					Password: "$2a$10$ooCmcWnLIubagB1MqM3UWOIpJTrq58tPQO6HVraj3yTKASiXBXHqy",
+					Deleted:  false,
 				}, nil)
+			},
+			mockBehaviorGetTokens: func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error) {
+				return nil, nil
 			},
 			expectedError: errors.New("wrong email or password entered"),
 		},
@@ -72,6 +75,9 @@ func TestService_authUser(t *testing.T) {
 			mockBehaviorGetUser: func(s *mock_repository.MockAppUser, email string) {
 				s.EXPECT().GetUserByEmail(email).Return(nil, errors.New("repository error"))
 			},
+			mockBehaviorGetTokens: func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error) {
+				return nil, nil
+			},
 			expectedError: errors.New("repository error"),
 		},
 	}
@@ -81,12 +87,14 @@ func TestService_authUser(t *testing.T) {
 			//Init dependencies
 			c := gomock.NewController(t)
 			defer c.Finish()
-			auth := mock_repository.NewMockAppUser(c)
-			testCase.mockBehaviorGetUser(auth, testCase.inputEmail)
+			repo := mock_repository.NewMockAppUser(c)
+			reposit := &repository.Repository{AppUser: repo}
+			testCase.mockBehaviorGetUser(repo, testCase.inputEmail)
+			mockProto := new(mockAuthProto.MockAuthServer)
+			testCase.mockBehaviorGetTokens(mockProto, testCase.mockUser)
 			logger := logging.GetLogger()
-			repo := &repository.Repository{AppUser: auth}
 			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
-			service := NewService(repo, grpcCli, logger)
+			service := NewService(reposit, grpcCli, logger)
 			_, id, err := service.AuthUser(testCase.inputEmail, testCase.inputPassword)
 			//Assert
 			assert.Equal(t, testCase.expectedId, id)

@@ -41,6 +41,36 @@ const docTemplate = `{
                         "description": "Limit",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Role",
+                        "name": "role",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "FilterData",
+                        "name": "filter_data",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ShowDeleted",
+                        "name": "show_deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartTime",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "EndTime",
+                        "name": "end_time",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -85,7 +115,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateCustomer"
                         }
                     }
                 ],
@@ -186,7 +216,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateUser"
+                            "$ref": "#/definitions/model.CreateStaff"
                         }
                     }
                 ],
@@ -279,14 +309,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.UpdateUser"
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "format": "int64",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -393,11 +415,25 @@ const docTemplate = `{
                 }
             }
         },
-        "model.CreateUser": {
+        "model.CreateCustomer": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CreateStaff": {
             "type": "object",
             "required": [
                 "email",
-                "role_id"
+                "role"
             ],
             "properties": {
                 "email": {
@@ -406,8 +442,8 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -419,17 +455,28 @@ const docTemplate = `{
                 }
             }
         },
+        "model.MyTime": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ResponseUser": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.MyTime"
                 },
                 "email": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },

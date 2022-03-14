@@ -1,18 +1,28 @@
 package model
 
-import "time"
-
 type User struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email" `
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID       int    `json:"id"`
+	Email    string `json:"email" `
+	Password string `json:"password"`
+	Role     string `json:"role"`
+	Deleted  bool   `json:"deleted"`
 }
 
-type CreateUser struct {
+type CreateStaff struct {
 	Email    string `json:"email" binding:"required" validate:"email"`
-	RoleId   int    `json:"role_id" binding:"required" validate:"roleId"`
+	Role     string `json:"role" binding:"required"`
 	Password string `json:"password" validate:"password"`
+}
+
+type CreateCustomer struct {
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string `json:"password" validate:"password"`
+}
+
+type UserDB struct {
+	Email    string `json:"email" binding:"required"`
+	Role     string `json:"role"`
+	Password string `json:"password"`
 }
 
 type UpdateUser struct {
@@ -21,9 +31,10 @@ type UpdateUser struct {
 	NewPassword string `json:"new_password" binding:"required" validate:"password"`
 }
 type ResponseUser struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int    `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt MyTime `json:"created_at"`
+	Role      string `json:"role"`
 }
 
 type MockUser struct {

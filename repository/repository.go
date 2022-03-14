@@ -11,8 +11,11 @@ import (
 type AppUser interface {
 	GetUserByID(id int) (*model.ResponseUser, error)
 	GetUserAll(page int, limit int) ([]model.ResponseUser, int, error)
-	CreateUser(User *model.CreateUser) (int, error)
-	UpdateUser(User *model.UpdateUser, id int) error
+	GetUserByRoleFilter(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error)
+	GetUserByDataFilter(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error)
+	CreateStaff(User *model.CreateStaff) (int, error)
+	CreateCustomer(User *model.CreateCustomer) (int, error)
+	UpdateUser(User *model.UpdateUser) error
 	DeleteUserByID(id int) (int, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetUserPasswordByID(id int) (string, error)

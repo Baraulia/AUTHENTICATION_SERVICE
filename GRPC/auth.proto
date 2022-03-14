@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 option go_package = "GRPC/authProto";
 
@@ -9,6 +10,7 @@ service Auth {
   rpc BindUserAndRole(User) returns (ResultBinding) {}
   rpc TokenGenerationByRefresh(RefreshToken) returns (GeneratedTokens) {}
   rpc TokenGenerationByUserId(User) returns (GeneratedTokens) {}
+  rpc GetAllRoles(google.protobuf.Empty) returns (Roles) {}
 }
 
 message UserRole {
@@ -32,9 +34,13 @@ message GeneratedTokens {
 
 message User {
   int32 userId = 1;
-  int32 roleId = 2;
+  string role = 2;
 }
 
 message ResultBinding {
   bool result = 1;
+}
+
+message Roles {
+  string roles = 1;
 }

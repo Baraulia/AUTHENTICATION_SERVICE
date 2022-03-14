@@ -23,31 +23,47 @@ definitions:
     - email
     - password
     type: object
-  model.CreateUser:
+  model.CreateCustomer:
     properties:
       email:
         type: string
       password:
         type: string
-      role_id:
-        type: integer
     required:
     - email
-    - role_id
+    type: object
+  model.CreateStaff:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - role
     type: object
   model.ErrorResponse:
     properties:
       message:
         type: string
     type: object
+  model.MyTime:
+    properties:
+      time.Time:
+        type: string
+    type: object
   model.ResponseUser:
     properties:
       created_at:
-        type: string
+        $ref: '#/definitions/model.MyTime'
       email:
         type: string
       id:
         type: integer
+      role:
+        type: string
     type: object
   model.UpdateUser:
     properties:
@@ -80,6 +96,26 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Role
+        in: query
+        name: role
+        type: string
+      - description: FilterData
+        in: query
+        name: filter_data
+        type: boolean
+      - description: ShowDeleted
+        in: query
+        name: show_deleted
+        type: boolean
+      - description: StartTime
+        in: query
+        name: start_time
+        type: string
+      - description: EndTime
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:
@@ -167,12 +203,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.UpdateUser'
-      - description: User ID
-        format: int64
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -202,7 +232,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.CreateUser'
+          $ref: '#/definitions/model.CreateCustomer'
       produces:
       - application/json
       responses:
@@ -268,7 +298,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.CreateUser'
+          $ref: '#/definitions/model.CreateStaff'
       produces:
       - application/json
       responses:

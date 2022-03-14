@@ -40,5 +40,4 @@ func main() {
 	if err := serv.Run(port, handlers.InitRoutes()); err != nil {
 		logger.Panicf("Error occured while running http server: %s", err.Error())
 	}
-
 }

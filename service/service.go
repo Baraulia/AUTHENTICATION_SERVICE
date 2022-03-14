@@ -12,12 +12,15 @@ import (
 
 type AppUser interface {
 	GetUser(id int) (*model.ResponseUser, error)
-	GetUsers(page int, limit int) ([]model.ResponseUser, int, error)
-	CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error)
-	CreateStaff(user *model.CreateUser) (int, error)
-	UpdateUser(user *model.UpdateUser, id int) error
+	GetUsers(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error)
+	CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error)
+	CreateStaff(user *model.CreateStaff) (int, error)
+	UpdateUser(user *model.UpdateUser) error
 	DeleteUserByID(id int) (int, error)
 	AuthUser(email string, password string) (*authProto.GeneratedTokens, int, error)
+	HashPassword(password string, rounds int) (string, error)
+	CheckPasswordHash(password string, hash string) bool
+	CheckInputRole(role string) error
 }
 
 type Service struct {

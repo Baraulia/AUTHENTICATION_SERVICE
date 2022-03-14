@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
@@ -10,7 +11,6 @@ import (
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/mail"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
-	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/utils"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/repository"
 	"strings"
 	"time"
@@ -34,26 +34,43 @@ func (u *UserService) GetUser(id int) (*model.ResponseUser, error) {
 	return user, nil
 }
 
-func (u *UserService) GetUsers(page int, limit int) ([]model.ResponseUser, int, error) {
-	users, pages, err := u.repo.AppUser.GetUserAll(page, limit)
-	if err != nil {
-		return nil, 0, err
+func (u *UserService) GetUsers(page int, limit int, filters *model.RequestFilters) ([]model.ResponseUser, int, error) {
+	if filters.Role != "" {
+		users, pages, err := u.repo.AppUser.GetUserByRoleFilter(page, limit, filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
+	} else if filters.FilterData {
+		if filters.EndTime.Unix() < filters.StartTime.Unix() {
+			filters.EndTime.Time = filters.StartTime.Time
+		}
+		users, pages, err := u.repo.AppUser.GetUserByDataFilter(page, limit, filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
+	} else {
+		users, pages, err := u.repo.AppUser.GetUserAll(page, limit)
+		if err != nil {
+			return nil, 0, err
+		}
+		return users, pages, nil
 	}
-	return users, pages, nil
 }
 
-func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.GeneratedTokens, int, error) {
+func (u *UserService) CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
 	pas := user.Password
-	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	hash, err := u.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
 		return nil, 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
-	id, err := u.repo.AppUser.CreateUser(user)
+	id, err := u.repo.AppUser.CreateCustomer(user)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -61,9 +78,17 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.Generat
 		Email:    user.Email,
 		Password: pas,
 	})
+	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
+		UserId: int32(id),
+		Role:   "Authorized Customer",
+	})
+	if err != nil {
+		u.logger.Errorf("BindUserAndRole:%s", err)
+		return nil, id, fmt.Errorf("bindUserAndRole:%w", err)
+	}
 	tokens, err := u.grpcCli.TokenGenerationByUserId(context.Background(), &authProto.User{
 		UserId: int32(id),
-		RoleId: int32(user.RoleId),
+		Role:   "Authorized Customer",
 	})
 	if err != nil {
 		u.logger.Errorf("tokenGenerationByUserId:%s", err)
@@ -72,18 +97,18 @@ func (u *UserService) CreateCustomer(user *model.CreateUser) (*authProto.Generat
 	return tokens, id, nil
 }
 
-func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
+func (u *UserService) CreateStaff(user *model.CreateStaff) (int, error) {
 	if user.Password == "" {
 		user.Password = GeneratePassword()
 	}
 	pas := user.Password
-	hash, err := utils.HashPassword(user.Password, bcrypt.DefaultCost)
+	hash, err := u.HashPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
-		u.logger.Errorf("CreateUser: can not generate hash from password:%s", err)
-		return 0, fmt.Errorf("createUser: can not generate hash from password:%w", err)
+		u.logger.Errorf("CreateStaff: can not generate hash from password:%s", err)
+		return 0, fmt.Errorf("CreateStaff: can not generate hash from password:%w", err)
 	}
 	user.Password = hash
-	id, err := u.repo.AppUser.CreateUser(user)
+	id, err := u.repo.AppUser.CreateStaff(user)
 	if err != nil {
 		return 0, err
 	}
@@ -93,7 +118,7 @@ func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
 	})
 	_, err = u.grpcCli.BindUserAndRole(context.Background(), &authProto.User{
 		UserId: int32(id),
-		RoleId: int32(user.RoleId),
+		Role:   user.Role,
 	})
 	if err != nil {
 		u.logger.Errorf("BindUserAndRole:%s", err)
@@ -102,19 +127,19 @@ func (u *UserService) CreateStaff(user *model.CreateUser) (int, error) {
 	return id, nil
 }
 
-func (u *UserService) UpdateUser(user *model.UpdateUser, id int) error {
-	userPassword, err := u.repo.AppUser.GetUserPasswordByID(id)
+func (u *UserService) UpdateUser(user *model.UpdateUser) error {
+	userDb, err := u.repo.AppUser.GetUserByEmail(user.Email)
 	if err != nil {
 		return err
 	}
-	if utils.CheckPasswordHash(user.OldPassword, userPassword) {
-		newHash, err := utils.HashPassword(user.NewPassword, bcrypt.DefaultCost)
+	if u.CheckPasswordHash(user.OldPassword, userDb.Password) {
+		newHash, err := u.HashPassword(user.NewPassword, bcrypt.DefaultCost)
 		if err != nil {
 			u.logger.Errorf("UpdateUser: can not generate hash from password:%s", err)
 			return fmt.Errorf("updateUser: can not generate hash from password:%w", err)
 		}
 		user.NewPassword = newHash
-		err = u.repo.AppUser.UpdateUser(user, id)
+		err = u.repo.AppUser.UpdateUser(user)
 		if err != nil {
 			return err
 		}
@@ -131,6 +156,26 @@ func (u *UserService) DeleteUserByID(id int) (int, error) {
 		return 0, err
 	}
 	return userId, nil
+}
+
+func (u *UserService) CheckInputRole(role string) error {
+	roles, err := u.grpcCli.GetAllRoles(context.Background(), &empty.Empty{})
+	if err != nil {
+		u.logger.Errorf("CheckInputRole:%s", err)
+		return err
+	}
+	roleSlice := strings.Split(roles.Roles, ",")
+	var resultCheck = false
+	for _, saveRole := range roleSlice {
+		if saveRole == role {
+			resultCheck = true
+		}
+	}
+	if resultCheck == false {
+		return fmt.Errorf("incorrect role in request")
+	} else {
+		return nil
+	}
 }
 
 func GeneratePassword() string {

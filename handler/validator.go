@@ -138,7 +138,7 @@ func getValidatorFromTag(tag string) Validator {
 	return DefaultValidator{}
 }
 
-func validateStruct(s interface{}) map[string]string {
+func ValidateStruct(s interface{}) map[string]string {
 	var errs = make(map[string]string)
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {

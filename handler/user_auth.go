@@ -27,7 +27,7 @@ func (h *Handler) authUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid input body"})
 		return
 	}
-	validationErrors := validateStruct(input)
+	validationErrors := ValidateStruct(input)
 	if len(validationErrors) != 0 {
 		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Wrong email or password entered"})
