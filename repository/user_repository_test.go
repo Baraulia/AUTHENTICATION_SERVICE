@@ -746,7 +746,7 @@ func TestRepository_CreateStaff(t *testing.T) {
 			mock: func(user *model.CreateStaff) {
 				rows := sqlmock.NewRows([]string{"id"}).
 					AddRow(1)
-				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, user.Role, "2022-03-13", false).
+				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, user.Role, time.Now().Format(model.Layout), false).
 					WillReturnRows(rows)
 			},
 			InputUser: &model.CreateStaff{
@@ -793,7 +793,7 @@ func TestRepository_CreateCustomer(t *testing.T) {
 			mock: func(user *model.CreateCustomer) {
 				rows := sqlmock.NewRows([]string{"id"}).
 					AddRow(1)
-				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, "Authorized Customer", "2022-03-13", false).
+				mock.ExpectQuery("INSERT INTO users").WithArgs(user.Email, user.Password, "Authorized Customer", time.Now().Format(model.Layout), false).
 					WillReturnRows(rows)
 			},
 			InputUser: &model.CreateCustomer{
