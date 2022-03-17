@@ -9,6 +9,7 @@ import (
 
 // getUserByID godoc
 // @Summary getUser
+// @Security ApiKeyAuth
 // @Description get user by ID
 // @Tags User
 // @Accept  json
@@ -19,6 +20,12 @@ import (
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [get]
 func (h *Handler) getUser(ctx *gin.Context) {
+	necessaryRole := "Superadmin"
+	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler getRoleById:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil || varID <= 0 {
@@ -40,6 +47,7 @@ type listUsers struct {
 
 // getUsers godoc
 // @Summary getUsers
+// @Security ApiKeyAuth
 // @Description get list of users
 // @Tags User
 // @Accept  json
@@ -56,6 +64,12 @@ type listUsers struct {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/ [get]
 func (h *Handler) getUsers(ctx *gin.Context) {
+	necessaryRole := "Superadmin"
+	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler getRoleById:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	var page = 0
 	var limit = 0
 	var filters model.RequestFilters
@@ -133,6 +147,7 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 
 // createStaff godoc
 // @Summary createStaff
+// @Security ApiKeyAuth
 // @Description create new restaurant or courier manager or courier
 // @Tags User
 // @Accept  json
@@ -144,6 +159,12 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/staff [post]
 func (h *Handler) createStaff(ctx *gin.Context) {
+	necessaryRole := "Superadmin"
+	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler getRoleById:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	var input model.CreateStaff
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)

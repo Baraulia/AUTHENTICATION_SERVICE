@@ -5,7 +5,6 @@ import (
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "stlab.itechart-group.com/go/food_delivery/authentication_service/docs"
-	"stlab.itechart-group.com/go/food_delivery/authentication_service/middleware"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 )
@@ -24,18 +23,24 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Use(
-		middleware.CorsMiddleware,
+		h.CorsMiddleware,
 	)
 
-	user := router.Group("/users")
+	userNoAuth := router.Group("/users")
 	{
-		user.GET("/:id", h.getUser)
-		user.DELETE("/:id", h.deleteUserByID)
-		user.PUT("/", h.updateUser)
-		user.GET("/", h.getUsers)
-		user.POST("/staff", h.createStaff)
-		user.POST("/customer", h.createCustomer)
-		user.POST("/login", h.authUser)
+		userNoAuth.PUT("/", h.updateUser)
+		userNoAuth.POST("/login", h.authUser)
+		userNoAuth.POST("/customer", h.createCustomer)
+		userNoAuth.DELETE("/:id", h.deleteUserByID)
+
+	}
+
+	userAuth := router.Group("/users")
+	userAuth.Use(h.userIdentity)
+	{
+		userAuth.GET("/:id", h.getUser)
+		userAuth.GET("/", h.getUsers)
+		userAuth.POST("/staff", h.createStaff)
 	}
 
 	return router
