@@ -22,7 +22,7 @@ import (
 func (h *Handler) getUser(ctx *gin.Context) {
 	necessaryRole := "Superadmin"
 	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
-		h.logger.Warnf("Handler getRoleById:not enough rights")
+		h.logger.Warnf("Handler getUser:not enough rights")
 		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
 		return
 	}
@@ -66,7 +66,7 @@ type listUsers struct {
 func (h *Handler) getUsers(ctx *gin.Context) {
 	necessaryRole := "Superadmin"
 	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
-		h.logger.Warnf("Handler getRoleById:not enough rights")
+		h.logger.Warnf("Handler getUsers:not enough rights")
 		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
 		return
 	}
@@ -121,7 +121,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 func (h *Handler) createCustomer(ctx *gin.Context) {
 	var input model.CreateCustomer
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		h.logger.Warnf("Handler createCustomer (binding JSON):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
@@ -161,7 +161,7 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 func (h *Handler) createStaff(ctx *gin.Context) {
 	necessaryRole := "Superadmin"
 	if err := h.service.CheckRoleRights(nil, necessaryRole, ctx.GetString("perms"), ctx.GetString("role")); err != nil {
-		h.logger.Warnf("Handler getRoleById:not enough rights")
+		h.logger.Warnf("Handler createStaff:not enough rights")
 		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
 		return
 	}
