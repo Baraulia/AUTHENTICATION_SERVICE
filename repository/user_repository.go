@@ -283,9 +283,9 @@ func (u *UserPostgres) CheckEmail(email string) error {
 	}
 	return nil
 }
-func (u *UserPostgres) RestorePassword(email, hash string) error {
+func (u *UserPostgres) RestorePassword(restore *model.RestorePassword) error {
 	query := "UPDATE users SET password = $1 WHERE email=$2"
-	_, err := u.db.Exec(query, hash, email)
+	_, err := u.db.Exec(query, restore.Password, restore.Email)
 	if err != nil {
 		return err
 	}

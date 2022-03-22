@@ -1070,7 +1070,9 @@ func TestHandler_restorePassword(t *testing.T) {
 			inputBody:  `{"email":"test@yandex.ru"}`,
 			inputEmail: "test@yandex.ru",
 			mockBehavior: func(s *mock_service.MockAppUser, email string) {
-				s.EXPECT().RestorePassword(email).Return(nil)
+				s.EXPECT().RestorePassword(&model.RestorePassword{
+					Email: email,
+				}).Return(nil)
 			},
 			expectedStatusCode: 204,
 		},
@@ -1087,7 +1089,9 @@ func TestHandler_restorePassword(t *testing.T) {
 			inputBody:  `{"email":"test@yandex.ru"}`,
 			inputEmail: "test@yandex.ru",
 			mockBehavior: func(s *mock_service.MockAppUser, email string) {
-				s.EXPECT().RestorePassword(email).Return(errors.New("server error"))
+				s.EXPECT().RestorePassword(&model.RestorePassword{
+					Email: email,
+				}).Return(errors.New("server error"))
 			},
 			expectedStatusCode:  500,
 			expectedRequestBody: `{"message":"server error"}`,
@@ -1097,7 +1101,9 @@ func TestHandler_restorePassword(t *testing.T) {
 			inputBody:  `{"email":"test@yandex.ru"}`,
 			inputEmail: "test@yandex.ru",
 			mockBehavior: func(s *mock_service.MockAppUser, email string) {
-				s.EXPECT().RestorePassword(email).Return(errors.New("user with this email does not exist"))
+				s.EXPECT().RestorePassword(&model.RestorePassword{
+					Email: email,
+				}).Return(errors.New("user with this email does not exist"))
 			},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"user with this email does not exist"}`,

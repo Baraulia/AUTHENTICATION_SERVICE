@@ -300,7 +300,7 @@ func (h *Handler) restorePassword(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-	err := h.service.AppUser.RestorePassword(input.Email)
+	err := h.service.AppUser.RestorePassword(&input)
 	if err != nil {
 		if err.Error() == "user with this email does not exist" {
 			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})

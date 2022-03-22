@@ -215,17 +215,17 @@ func (mr *MockAppUserMockRecorder) ParseToken(token interface{}) *gomock.Call {
 }
 
 // RestorePassword mocks base method.
-func (m *MockAppUser) RestorePassword(email string) error {
+func (m *MockAppUser) RestorePassword(restore *model.RestorePassword) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RestorePassword", email)
+	ret := m.ctrl.Call(m, "RestorePassword", restore)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RestorePassword indicates an expected call of RestorePassword.
-func (mr *MockAppUserMockRecorder) RestorePassword(email interface{}) *gomock.Call {
+func (mr *MockAppUserMockRecorder) RestorePassword(restore interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestorePassword", reflect.TypeOf((*MockAppUser)(nil).RestorePassword), email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestorePassword", reflect.TypeOf((*MockAppUser)(nil).RestorePassword), restore)
 }
 
 // UpdateUser mocks base method.

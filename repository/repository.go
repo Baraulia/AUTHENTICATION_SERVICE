@@ -20,7 +20,7 @@ type AppUser interface {
 	GetUserByEmail(email string) (*model.User, error)
 	GetUserPasswordByID(id int) (string, error)
 	CheckEmail(email string) error
-	RestorePassword(email, hash string) error
+	RestorePassword(restore *model.RestorePassword) error
 }
 
 type Repository struct {

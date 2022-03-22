@@ -187,17 +187,17 @@ func (mr *MockAppUserMockRecorder) GetUserPasswordByID(id interface{}) *gomock.C
 }
 
 // RestorePassword mocks base method.
-func (m *MockAppUser) RestorePassword(email, hash string) error {
+func (m *MockAppUser) RestorePassword(restore *model.RestorePassword) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RestorePassword", email, hash)
+	ret := m.ctrl.Call(m, "RestorePassword", restore)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RestorePassword indicates an expected call of RestorePassword.
-func (mr *MockAppUserMockRecorder) RestorePassword(email, hash interface{}) *gomock.Call {
+func (mr *MockAppUserMockRecorder) RestorePassword(restore interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestorePassword", reflect.TypeOf((*MockAppUser)(nil).RestorePassword), email, hash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestorePassword", reflect.TypeOf((*MockAppUser)(nil).RestorePassword), restore)
 }
 
 // UpdateUser mocks base method.

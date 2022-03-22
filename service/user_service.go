@@ -222,8 +222,8 @@ func (u *UserService) CheckRights(neededPerms []string, givenPerms string) error
 	return nil
 }
 
-func (u *UserService) RestorePassword(email string) error {
-	err := u.repo.CheckEmail(email)
+func (u *UserService) RestorePassword(restore *model.RestorePassword) error {
+	err := u.repo.CheckEmail(restore.Email)
 	if err != nil {
 		return err
 	}
@@ -233,12 +233,13 @@ func (u *UserService) RestorePassword(email string) error {
 		u.logger.Errorf("RestorePassword: can not generate hash from password:%s", err)
 		return fmt.Errorf("RestorePassword: can not generate hash from password:%w", err)
 	}
-	err = u.repo.AppUser.RestorePassword(email, hash)
+	restore.Password = hash
+	err = u.repo.AppUser.RestorePassword(restore)
 	if err != nil {
 		return err
 	}
 	go mail.SendEmail(u.logger, &model.Post{
-		Email:    email,
+		Email:    restore.Email,
 		Password: password,
 	})
 	return nil

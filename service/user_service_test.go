@@ -284,136 +284,6 @@ func TestService_GetUsers(t *testing.T) {
 	}
 }
 
-//func TestService_CreateCustomer(t *testing.T) {
-//	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateCustomer)
-//	type mockBehaviorGetTokens func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error)
-//	testTable := []struct {
-//		name                  string
-//		inputUser             *model.CreateCustomer
-//		mockBehaviorId        mockBehaviorId
-//		mockBehaviorGetTokens mockBehaviorGetTokens
-//		expectedError         error
-//	}{
-//		{
-//			name: "OK",
-//			inputUser: &model.CreateCustomer{
-//				Email:    "test@yandex.ru",
-//				Password: "HGYKnu!98Tg",
-//			},
-//			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateCustomer) {
-//				s.EXPECT().CreateCustomer(user).Return(1, nil)
-//			},
-//			mockBehaviorGetTokens: func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error) {
-//				_, _ = s.TokenGenerationByUserId(context.Background(), user)
-//				return &authProto.GeneratedTokens{
-//					AccessToken:  "qwerty",
-//					RefreshToken: "qwerty",
-//				}, nil
-//			},
-//			expectedError: nil,
-//		},
-//		{
-//			name: "repository error",
-//			inputUser: &model.CreateCustomer{
-//				Email:    "test@yandex.ru",
-//				Password: "HGYKnu!98Tg",
-//			},
-//			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateCustomer) {
-//				s.EXPECT().CreateCustomer(user).Return(0, errors.New("repository error"))
-//			},
-//			mockBehaviorGetTokens: func(s *mockAuthProto.MockAuthServer, user *authProto.User) (*authProto.GeneratedTokens, error) {
-//				return nil, nil
-//			},
-//			expectedError: errors.New("repository error"),
-//		},
-//	}
-//
-//	for _, testCase := range testTable {
-//		t.Run(testCase.name, func(t *testing.T) {
-//			//Init dependencies
-//			c := gomock.NewController(t)
-//			defer c.Finish()
-//			auth := mock_repository.NewMockAppUser(c)
-//			testCase.mockBehaviorId(auth, testCase.inputUser)
-//			mockProto := new(mockAuthProto.MockAuthServer)
-//			testCase.mockBehaviorGetTokens(mockProto, &authProto.User{
-//				UserId: 1,
-//				Role:   "Authorized Customer",
-//			})
-//			logger := logging.GetLogger()
-//			repo := &repository.Repository{AppUser: auth}
-//
-//			service := NewService(repo, grpcCli, logger)
-//			_, _, err := service.CreateCustomer(testCase.inputUser)
-//			//Assert
-//			assert.Equal(t, testCase.expectedError, err)
-//		})
-//	}
-//
-//}
-
-//func TestService_CreateStaff(t *testing.T) {
-//	type mockBehaviorId func(s *mock_repository.MockAppUser, user *model.CreateStaff)
-//	type mockBehaviorGetTokens func(s *mock_authProto.MockAuthClient, id int32)
-//	testTable := []struct {
-//		name                  string
-//		inputUser             *model.CreateStaff
-//		mockBehaviorId        mockBehaviorId
-//		mockBehaviorGetTokens mockBehaviorGetTokens
-//		expectedError         error
-//	}{
-//		{
-//			name: "OK",
-//			inputUser: &model.CreateStaff{
-//				Email:    "test@yandex.ru",
-//				Role:     "Courier",
-//				Password: "HGYKnu!98Tg",
-//			},
-//			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateStaff) {
-//				s.EXPECT().CreateStaff(user).Return(1, nil)
-//			},
-//			mockBehaviorGetTokens: func(s *mock_authProto.MockAuthClient, id int32) {
-//				s.EXPECT().TokenGenerationByUserId(context.Background(), &authProto.User{
-//					UserId: 1,
-//				}).Return(&authProto.GeneratedTokens{
-//					AccessToken:  "qwerty",
-//					RefreshToken: "qwerty",
-//				}, nil)
-//			},
-//			expectedError: nil,
-//		},
-//		{
-//			name: "repository error",
-//			inputUser: &model.CreateStaff{
-//				Email:    "test@yandex.ru",
-//				Password: "HGYKnu!98Tg",
-//			},
-//			mockBehaviorId: func(s *mock_repository.MockAppUser, user *model.CreateStaff) {
-//				s.EXPECT().CreateStaff(user).Return(0, errors.New("repository error"))
-//			},
-//			expectedError: errors.New("repository error"),
-//		},
-//	}
-//
-//	for _, testCase := range testTable {
-//		t.Run(testCase.name, func(t *testing.T) {
-//			//Init dependencies
-//			c := gomock.NewController(t)
-//			defer c.Finish()
-//			auth := mock_repository.NewMockAppUser(c)
-//			testCase.mockBehaviorId(auth, testCase.inputUser)
-//			logger := logging.GetLogger()
-//			repo := &repository.Repository{AppUser: auth}
-//			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
-//			service := NewService(repo, grpcCli, logger)
-//			_, err := service.CreateStaff(testCase.inputUser)
-//			//Assert
-//			assert.Equal(t, testCase.expectedError, err)
-//		})
-//	}
-//
-//}
-//
 func TestService_UpdateUser(t *testing.T) {
 	type mockBehaviorUpdate func(s *mock_repository.MockAppUser, user *model.UpdateUser)
 	type mockBehaviorGet func(s *mock_repository.MockAppUser, user *model.UpdateUser)
@@ -543,6 +413,75 @@ func TestService_DeleteUser(t *testing.T) {
 			id, err := service.DeleteUserByID(testCase.inputId)
 			//Assert
 			assert.Equal(t, testCase.expectedUserId, id)
+			assert.Equal(t, testCase.expectedError, err)
+		})
+	}
+}
+
+func TestService_RestorePassword(t *testing.T) {
+	type mockBehaviorCheckEmail func(s *mock_repository.MockAppUser, email string)
+	type mockBehavior func(s *mock_repository.MockAppUser, restore *model.RestorePassword)
+	testTable := []struct {
+		name                   string
+		input                  *model.RestorePassword
+		mockBehaviorCheckEmail mockBehaviorCheckEmail
+		mockBehavior           mockBehavior
+		expectedError          error
+	}{
+		{
+			name: "OK",
+			input: &model.RestorePassword{
+				Email: "test@yandex.ru",
+			},
+			mockBehaviorCheckEmail: func(s *mock_repository.MockAppUser, email string) {
+				s.EXPECT().CheckEmail(email).Return(nil)
+			},
+			mockBehavior: func(s *mock_repository.MockAppUser, restore *model.RestorePassword) {
+				s.EXPECT().RestorePassword(restore).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "user does not exist",
+			input: &model.RestorePassword{
+				Email: "test@yandex.ru",
+			},
+			mockBehaviorCheckEmail: func(s *mock_repository.MockAppUser, email string) {
+				s.EXPECT().CheckEmail(email).Return(errors.New("user with this email does not exist"))
+			},
+			mockBehavior:  func(s *mock_repository.MockAppUser, restore *model.RestorePassword) {},
+			expectedError: errors.New("user with this email does not exist"),
+		},
+		{
+			name: "Error while updating user",
+			input: &model.RestorePassword{
+				Email: "test@yandex.ru",
+			},
+			mockBehaviorCheckEmail: func(s *mock_repository.MockAppUser, email string) {
+				s.EXPECT().CheckEmail(email).Return(nil)
+			},
+			mockBehavior: func(s *mock_repository.MockAppUser, restore *model.RestorePassword) {
+				s.EXPECT().RestorePassword(restore).Return(errors.New("error while updating password"))
+			},
+			expectedError: errors.New("error while updating password"),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			//Init dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+			auth := mock_repository.NewMockAppUser(c)
+			testCase.mockBehaviorCheckEmail(auth, testCase.input.Email)
+			testCase.mockBehavior(auth, testCase.input)
+			logger := logging.GetLogger()
+			repo := &repository.Repository{AppUser: auth}
+			grpcCli := grpcClient.NewGRPCClient("159.223.1.135")
+			service := NewService(repo, grpcCli, logger)
+			err := service.RestorePassword(testCase.input)
+			//Assert
+
 			assert.Equal(t, testCase.expectedError, err)
 		})
 	}

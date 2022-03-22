@@ -6,5 +6,6 @@ type AuthUser struct {
 }
 
 type RestorePassword struct {
-	Email string `json:"email" binding:"required" validate:"email"`
+	Email    string `json:"email" binding:"required" validate:"email"`
+	Password string
 }
