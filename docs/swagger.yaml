@@ -101,6 +101,8 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.RestorePassword'
+      produces:
+      - application/json
       responses:
         "204":
           description: ""

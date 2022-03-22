@@ -281,6 +281,7 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 // @Description restore user password
 // @Tags User
 // @Accept  json
+// @Produce  json
 // @Param input body model.RestorePassword true "Email"
 // @Success 204
 // @Failure 400 {object} model.ErrorResponse

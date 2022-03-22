@@ -1053,5 +1053,82 @@ func TestHandler_deleteUser(t *testing.T) {
 			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
 		})
 	}
+}
+
+func TestHandler_restorePassword(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockAppUser, email string)
+	testTable := []struct {
+		name                string
+		inputBody           string
+		inputEmail          string
+		mockBehavior        mockBehavior
+		expectedStatusCode  int
+		expectedRequestBody string
+	}{
+		{
+			name:       "OK",
+			inputBody:  `{"email":"test@yandex.ru"}`,
+			inputEmail: "test@yandex.ru",
+			mockBehavior: func(s *mock_service.MockAppUser, email string) {
+				s.EXPECT().RestorePassword(email).Return(nil)
+			},
+			expectedStatusCode: 204,
+		},
+		{
+			name:                "incorrect email",
+			inputBody:           `{"email":"testyandex.ru"}`,
+			inputEmail:          "testyandex.ru",
+			mockBehavior:        func(s *mock_service.MockAppUser, email string) {},
+			expectedStatusCode:  400,
+			expectedRequestBody: `{"Email":"emailValidator: it is not a valid email address"}`,
+		},
+		{
+			name:       "Server error",
+			inputBody:  `{"email":"test@yandex.ru"}`,
+			inputEmail: "test@yandex.ru",
+			mockBehavior: func(s *mock_service.MockAppUser, email string) {
+				s.EXPECT().RestorePassword(email).Return(errors.New("server error"))
+			},
+			expectedStatusCode:  500,
+			expectedRequestBody: `{"message":"server error"}`,
+		},
+		{
+			name:       "non-existent user",
+			inputBody:  `{"email":"test@yandex.ru"}`,
+			inputEmail: "test@yandex.ru",
+			mockBehavior: func(s *mock_service.MockAppUser, email string) {
+				s.EXPECT().RestorePassword(email).Return(errors.New("user with this email does not exist"))
+			},
+			expectedStatusCode:  400,
+			expectedRequestBody: `{"message":"user with this email does not exist"}`,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			//Init dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+			auth := mock_service.NewMockAppUser(c)
+			testCase.mockBehavior(auth, testCase.inputEmail)
+			logger := logging.GetLogger()
+			services := &service.Service{AppUser: auth}
+			handler := NewHandler(logger, services)
+
+			//Init server
+			r := handler.InitRoutes()
+
+			//Test request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/users/restore", bytes.NewBufferString(testCase.inputBody))
+
+			//Execute the request
+			r.ServeHTTP(w, req)
+
+			//Assert
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
 
 }
