@@ -267,3 +267,27 @@ func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 	}
 	return &User, nil
 }
+
+// CheckEmail ...
+func (u *UserPostgres) CheckEmail(email string) error {
+	var exist bool
+	query := "SELECT EXISTS (select 1 from users where email = $1"
+	row := u.db.QueryRow(query, email)
+	if err := row.Scan(&exist); err != nil {
+		u.logger.Errorf("Error while scanning for issued email:%s", err)
+		return err
+	}
+	if !exist {
+		u.logger.Error("user with this email does not exist")
+		return fmt.Errorf("user with this email does not exist")
+	}
+	return nil
+}
+func (u *UserPostgres) RestorePassword(email, hash string) error {
+	query := "UPDATE users SET password = $1 WHERE email=$2"
+	_, err := u.db.Exec(query, hash, email)
+	if err != nil {
+		return err
+	}
+	return nil
+}

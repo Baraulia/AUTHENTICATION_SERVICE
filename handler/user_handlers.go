@@ -274,3 +274,40 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 		})
 	}
 }
+
+// restorePassword godoc
+// @Summary restorePassword
+// @Security ApiKeyAuth
+// @Description restore user password
+// @Tags User
+// @Accept  json
+// @Param input body model.RestorePassword true "Email"
+// @Success 204
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /restore [post]
+func (h *Handler) restorePassword(ctx *gin.Context) {
+	var input model.RestorePassword
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler restorePassword (binding JSON):%s", err)
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
+		return
+	}
+	validationErrors := ValidateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		ctx.JSON(http.StatusBadRequest, validationErrors)
+		return
+	}
+	err := h.service.AppUser.RestorePassword(input.Email)
+	if err != nil {
+		if err.Error() == "user with this email does not exist" {
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+	ctx.Status(http.StatusNoContent)
+}

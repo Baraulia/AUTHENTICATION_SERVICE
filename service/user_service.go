@@ -221,3 +221,25 @@ func (u *UserService) CheckRights(neededPerms []string, givenPerms string) error
 	}
 	return nil
 }
+
+func (u *UserService) RestorePassword(email string) error {
+	err := u.repo.CheckEmail(email)
+	if err != nil {
+		return err
+	}
+	password := GeneratePassword()
+	hash, err := u.HashPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		u.logger.Errorf("RestorePassword: can not generate hash from password:%s", err)
+		return fmt.Errorf("RestorePassword: can not generate hash from password:%w", err)
+	}
+	err = u.repo.AppUser.RestorePassword(email, hash)
+	if err != nil {
+		return err
+	}
+	go mail.SendEmail(u.logger, &model.Post{
+		Email:    email,
+		Password: password,
+	})
+	return nil
+}

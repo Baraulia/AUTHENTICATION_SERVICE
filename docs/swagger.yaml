@@ -65,6 +65,13 @@ definitions:
       role:
         type: string
     type: object
+  model.RestorePassword:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   model.UpdateUser:
     properties:
       email:
@@ -82,6 +89,34 @@ info:
   description: Authenticate Service for Food Delivery Application
   title: Authenticate Service
 paths:
+  /restore:
+    post:
+      consumes:
+      - application/json
+      description: restore user password
+      parameters:
+      - description: Email
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.RestorePassword'
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: restorePassword
+      tags:
+      - User
   /users/:
     get:
       consumes:
