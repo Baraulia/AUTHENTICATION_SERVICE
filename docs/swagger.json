@@ -294,6 +294,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "change user password",
                 "consumes": [
                     "application/json"
@@ -338,6 +343,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "delete user by ID",
                 "consumes": [
                     "application/json"

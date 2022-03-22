@@ -196,7 +196,15 @@ func (u *UserService) ParseToken(token string) (*authProto.UserRole, error) {
 	return u.grpcCli.GetUserWithRights(context.Background(), &authProto.AccessToken{AccessToken: token})
 }
 
-func (u *UserService) CheckRoleRights(neededPerms []string, neededRole string, givenPerms string, givenRole string) error {
+func (u *UserService) CheckRole(neededRoles []string, givenRole string) error {
+	neededRolesString := strings.Join(neededRoles, ",")
+	if !strings.Contains(neededRolesString, givenRole) {
+		return fmt.Errorf("not enough rights")
+	}
+	return nil
+}
+
+func (u *UserService) CheckRights(neededPerms []string, givenPerms string) error {
 	if neededPerms != nil {
 		ok := true
 		for _, perm := range neededPerms {
@@ -210,9 +218,6 @@ func (u *UserService) CheckRoleRights(neededPerms []string, neededRole string, g
 		if ok == true {
 			return nil
 		}
-	}
-	if neededRole != givenRole {
-		return fmt.Errorf("not enough rights")
 	}
 	return nil
 }

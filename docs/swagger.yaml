@@ -163,6 +163,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: deleteUserByID
       tags:
       - User
@@ -222,6 +224,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: updateUser
       tags:
       - User

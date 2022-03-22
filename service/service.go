@@ -22,7 +22,8 @@ type AppUser interface {
 	CheckPasswordHash(password string, hash string) bool
 	CheckInputRole(role string) error
 	ParseToken(token string) (*authProto.UserRole, error)
-	CheckRoleRights(neededPerms []string, neededRole string, givenPerms string, givenRole string) error
+	CheckRole(neededRoles []string, givenRole string) error
+	CheckRights(neededPerms []string, givenPerms string) error
 }
 
 type Service struct {

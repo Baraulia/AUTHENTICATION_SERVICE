@@ -28,11 +28,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	userNoAuth := router.Group("/users")
 	{
-		userNoAuth.PUT("/", h.updateUser)
 		userNoAuth.POST("/login", h.authUser)
 		userNoAuth.POST("/customer", h.createCustomer)
-		userNoAuth.DELETE("/:id", h.deleteUserByID)
-
 	}
 
 	userAuth := router.Group("/users")
@@ -41,7 +38,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		userAuth.GET("/:id", h.getUser)
 		userAuth.GET("/", h.getUsers)
 		userAuth.POST("/staff", h.createStaff)
+		userAuth.PUT("/", h.updateUser)
+		userAuth.DELETE("/:id", h.deleteUserByID)
 	}
-
 	return router
 }

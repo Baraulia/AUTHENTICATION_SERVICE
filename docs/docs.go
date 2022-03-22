@@ -304,6 +304,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "change user password",
                 "consumes": [
                     "application/json"
@@ -348,6 +353,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "delete user by ID",
                 "consumes": [
                     "application/json"
