@@ -13,6 +13,9 @@ import (
 
 // @title Authenticate Service
 // @description Authenticate Service for Food Delivery Application
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	logger := logging.GetLogger()

@@ -79,6 +79,34 @@ func (mr *MockAppUserMockRecorder) CheckPasswordHash(password, hash interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPasswordHash", reflect.TypeOf((*MockAppUser)(nil).CheckPasswordHash), password, hash)
 }
 
+// CheckRights mocks base method.
+func (m *MockAppUser) CheckRights(neededPerms []string, givenPerms string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckRights", neededPerms, givenPerms)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckRights indicates an expected call of CheckRights.
+func (mr *MockAppUserMockRecorder) CheckRights(neededPerms, givenPerms interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRights", reflect.TypeOf((*MockAppUser)(nil).CheckRights), neededPerms, givenPerms)
+}
+
+// CheckRole mocks base method.
+func (m *MockAppUser) CheckRole(neededRoles []string, givenRole string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckRole", neededRoles, givenRole)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckRole indicates an expected call of CheckRole.
+func (mr *MockAppUserMockRecorder) CheckRole(neededRoles, givenRole interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRole", reflect.TypeOf((*MockAppUser)(nil).CheckRole), neededRoles, givenRole)
+}
+
 // CreateCustomer mocks base method.
 func (m *MockAppUser) CreateCustomer(user *model.CreateCustomer) (*authProto.GeneratedTokens, int, error) {
 	m.ctrl.T.Helper()
@@ -169,6 +197,21 @@ func (m *MockAppUser) HashPassword(password string, rounds int) (string, error) 
 func (mr *MockAppUserMockRecorder) HashPassword(password, rounds interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HashPassword", reflect.TypeOf((*MockAppUser)(nil).HashPassword), password, rounds)
+}
+
+// ParseToken mocks base method.
+func (m *MockAppUser) ParseToken(token string) (*authProto.UserRole, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ParseToken", token)
+	ret0, _ := ret[0].(*authProto.UserRole)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ParseToken indicates an expected call of ParseToken.
+func (mr *MockAppUserMockRecorder) ParseToken(token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseToken", reflect.TypeOf((*MockAppUser)(nil).ParseToken), token)
 }
 
 // UpdateUser mocks base method.

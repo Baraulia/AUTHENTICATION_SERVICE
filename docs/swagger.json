@@ -8,6 +8,11 @@
     "paths": {
         "/users/": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get list of users",
                 "consumes": [
                     "application/json"
@@ -188,6 +193,11 @@
         },
         "/users/staff": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "create new restaurant or courier manager or courier",
                 "consumes": [
                     "application/json"
@@ -237,6 +247,11 @@
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get user by ID",
                 "consumes": [
                     "application/json"
@@ -279,6 +294,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "change user password",
                 "consumes": [
                     "application/json"
@@ -323,6 +343,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "delete user by ID",
                 "consumes": [
                     "application/json"
@@ -487,6 +512,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

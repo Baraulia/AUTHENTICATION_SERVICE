@@ -19,19 +19,36 @@ import (
 
 func TestHandler_getUser(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, id int)
-
+	type mockBehaviorCheck func(s *mock_service.MockAppUser, role string)
+	type mockBehaviorParseToken func(s *mock_service.MockAppUser, token string)
 	testTable := []struct {
-		name                string
-		input               string
-		id                  int
-		mockBehavior        mockBehavior
-		expectedStatusCode  int
-		expectedRequestBody string
+		name                   string
+		input                  string
+		id                     int
+		inputRole              string
+		inputToken             string
+		mockBehaviorParseToken mockBehaviorParseToken
+		mockBehaviorCheck      mockBehaviorCheck
+		mockBehavior           mockBehavior
+		expectedStatusCode     int
+		expectedRequestBody    string
 	}{
 		{
-			name:  "OK",
-			input: "1",
-			id:    1,
+			name:       "OK",
+			input:      "1",
+			id:         1,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, id int) {
 				s.EXPECT().GetUser(id).Return(&model.ResponseUser{
 					ID:        1,
@@ -44,16 +61,53 @@ func TestHandler_getUser(t *testing.T) {
 			expectedRequestBody: `{"id":1,"email":"test@yande.ru","created_at":"20220311","role":"Courier"}`,
 		},
 		{
-			name:                "invalid request",
-			input:               "a",
+			name:       "invalid token",
+			input:      "1",
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(nil, fmt.Errorf("invalid token"))
+			},
+			mockBehaviorCheck:   func(s *mock_service.MockAppUser, role string) {},
+			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
+			expectedStatusCode:  401,
+			expectedRequestBody: `{"message":"invalid token"}`,
+		},
+		{
+			name:       "invalid request",
+			input:      "a",
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 		{
-			name:  "non-existent id",
-			input: "1",
-			id:    1,
+			name:       "non-existent id",
+			input:      "1",
+			id:         1,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, id int) {
 				s.EXPECT().GetUser(id).Return(nil, fmt.Errorf("server error"))
 			},
@@ -68,6 +122,8 @@ func TestHandler_getUser(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			getUser := mock_service.NewMockAppUser(c)
+			testCase.mockBehaviorParseToken(getUser, testCase.inputToken)
+			testCase.mockBehaviorCheck(getUser, testCase.inputRole)
 			testCase.mockBehavior(getUser, testCase.id)
 			logger := logging.GetLogger()
 			services := &service.Service{AppUser: getUser}
@@ -80,6 +136,7 @@ func TestHandler_getUser(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest("GET", fmt.Sprintf("/users/%s", testCase.input), nil)
+			req.Header.Set("Authorization", "Bearer testToken")
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -94,16 +151,22 @@ func TestHandler_getUser(t *testing.T) {
 
 func TestHandler_getUsers(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters)
+	type mockBehaviorCheck func(s *mock_service.MockAppUser, role string)
+	type mockBehaviorParseToken func(s *mock_service.MockAppUser, token string)
 
 	testTable := []struct {
-		name                string
-		inputQuery          string
-		page                int
-		limit               int
-		inputFilter         *model.RequestFilters
-		mockBehavior        mockBehavior
-		expectedStatusCode  int
-		expectedRequestBody string
+		name                   string
+		inputQuery             string
+		page                   int
+		limit                  int
+		inputRole              string
+		inputToken             string
+		inputFilter            *model.RequestFilters
+		mockBehaviorParseToken mockBehaviorParseToken
+		mockBehaviorCheck      mockBehaviorCheck
+		mockBehavior           mockBehavior
+		expectedStatusCode     int
+		expectedRequestBody    string
 	}{
 		{
 			name:       "OK",
@@ -116,6 +179,18 @@ func TestHandler_getUsers(t *testing.T) {
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
 				Role:        "",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
@@ -145,6 +220,18 @@ func TestHandler_getUsers(t *testing.T) {
 				EndTime:     model.MyTime{},
 				Role:        "Courier",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -172,6 +259,18 @@ func TestHandler_getUsers(t *testing.T) {
 				StartTime:   model.MyTime{Time: time.Date(2022, 03, 11, 0, 0, 0, 0, time.UTC)},
 				EndTime:     model.MyTime{},
 				Role:        "",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
@@ -201,6 +300,18 @@ func TestHandler_getUsers(t *testing.T) {
 				EndTime:     model.MyTime{},
 				Role:        "",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return([]model.ResponseUser{
 					{ID: 1,
@@ -229,6 +340,18 @@ func TestHandler_getUsers(t *testing.T) {
 				EndTime:     model.MyTime{},
 				Role:        "",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"Invalid url query"}`,
@@ -244,6 +367,18 @@ func TestHandler_getUsers(t *testing.T) {
 				StartTime:   model.MyTime{},
 				EndTime:     model.MyTime{},
 				Role:        "",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehavior:        func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {},
 			expectedStatusCode:  400,
@@ -261,6 +396,18 @@ func TestHandler_getUsers(t *testing.T) {
 				EndTime:     model.MyTime{},
 				Role:        "",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, page int, limit int, filter *model.RequestFilters) {
 				s.EXPECT().GetUsers(page, limit, filter).Return(nil, 0, fmt.Errorf("server error"))
 			},
@@ -275,19 +422,21 @@ func TestHandler_getUsers(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			getUsers := mock_service.NewMockAppUser(c)
+			testCase.mockBehaviorParseToken(getUsers, testCase.inputToken)
+			testCase.mockBehaviorCheck(getUsers, testCase.inputRole)
 			testCase.mockBehavior(getUsers, testCase.page, testCase.limit, testCase.inputFilter)
 			logger := logging.GetLogger()
 			services := &service.Service{AppUser: getUsers}
 			handler := NewHandler(logger, services)
 
 			//Init server
-			r := gin.New()
-			r.GET("/users/", handler.getUsers)
+			r := handler.InitRoutes()
 
 			//Test request
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest("GET", fmt.Sprintf("/users/%s", testCase.inputQuery), nil)
+			req.Header.Set("Authorization", "Bearer testToken")
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -396,11 +545,11 @@ func TestHandler_createCustomer(t *testing.T) {
 
 			//Init server
 			r := gin.New()
-			r.POST("/users/customer", handler.createCustomer)
+			r.POST("/customer", handler.createCustomer)
 
 			//Test request
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("POST", "/users/customer", bytes.NewBufferString(testCase.inputBody))
+			req := httptest.NewRequest("POST", "/customer", bytes.NewBufferString(testCase.inputBody))
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -414,16 +563,22 @@ func TestHandler_createCustomer(t *testing.T) {
 }
 
 func TestHandler_createStaff(t *testing.T) {
+	type mockBehaviorCheck func(s *mock_service.MockAppUser, role string)
+	type mockBehaviorParseToken func(s *mock_service.MockAppUser, token string)
 	type mockBehavior func(s *mock_service.MockAppUser, user *model.CreateStaff)
 	type mockBehaviorCheckRole func(s *mock_service.MockAppUser, role string)
 	testTable := []struct {
-		name                  string
-		inputBody             string
-		inputUser             *model.CreateStaff
-		mockBehavior          mockBehavior
-		mockBehaviorCheckRole mockBehaviorCheckRole
-		expectedStatusCode    int
-		expectedRequestBody   string
+		name                   string
+		inputBody              string
+		inputUser              *model.CreateStaff
+		inputRole              string
+		inputToken             string
+		mockBehaviorParseToken mockBehaviorParseToken
+		mockBehaviorCheck      mockBehaviorCheck
+		mockBehavior           mockBehavior
+		mockBehaviorCheckRole  mockBehaviorCheckRole
+		expectedStatusCode     int
+		expectedRequestBody    string
 	}{
 		{
 			name:      "OK",
@@ -432,6 +587,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Email:    "test@yandex.ru",
 				Password: "HGYKnu!98Tg",
 				Role:     "Courier",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
@@ -449,6 +616,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Email: "test@yandex.ru",
 				Role:  "Courier",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
 			},
@@ -465,6 +644,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Email: "test@yandex.ru",
 				Role:  "Courier",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
 			expectedStatusCode:    400,
@@ -478,6 +669,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Password: "HGYKnu98Tg",
 				Role:     "Courier",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
 			expectedStatusCode:    400,
@@ -490,6 +693,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Email:    "test@yandex.ru",
 				Password: "HGYKn!u98Tg",
 				Role:     "Courier",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
@@ -508,6 +723,18 @@ func TestHandler_createStaff(t *testing.T) {
 				Password: "HGYKn!u98Tg",
 				Role:     "courier",
 			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(errors.New("incorrect role came from the request"))
 			},
@@ -520,6 +747,18 @@ func TestHandler_createStaff(t *testing.T) {
 			inputBody: `{"password":"HGYKn!u98Tg"}`,
 			inputUser: &model.CreateStaff{
 				Password: "HGYKn!u98Tg",
+			},
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
@@ -534,6 +773,8 @@ func TestHandler_createStaff(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			auth := mock_service.NewMockAppUser(c)
+			testCase.mockBehaviorParseToken(auth, testCase.inputToken)
+			testCase.mockBehaviorCheck(auth, testCase.inputRole)
 			testCase.mockBehaviorCheckRole(auth, testCase.inputUser.Role)
 			testCase.mockBehavior(auth, testCase.inputUser)
 			logger := logging.GetLogger()
@@ -541,12 +782,12 @@ func TestHandler_createStaff(t *testing.T) {
 			handler := NewHandler(logger, services)
 
 			//Init server
-			r := gin.New()
-			r.POST("/users/staff", handler.createStaff)
+			r := handler.InitRoutes()
 
 			//Test request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/users/staff", bytes.NewBufferString(testCase.inputBody))
+			req.Header.Set("Authorization", "Bearer testToken")
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -560,15 +801,21 @@ func TestHandler_createStaff(t *testing.T) {
 }
 
 func TestHandler_updateUser(t *testing.T) {
+	type mockBehaviorCheck func(s *mock_service.MockAppUser, role string)
+	type mockBehaviorParseToken func(s *mock_service.MockAppUser, token string)
 	type mockBehavior func(s *mock_service.MockAppUser, user model.UpdateUser)
 	testTable := []struct {
-		name                string
-		inputBody           string
-		inputUser           model.UpdateUser
-		id                  int
-		mockBehavior        mockBehavior
-		expectedStatusCode  int
-		expectedRequestBody string
+		name                   string
+		inputBody              string
+		inputUser              model.UpdateUser
+		id                     int
+		inputRole              string
+		inputToken             string
+		mockBehaviorParseToken mockBehaviorParseToken
+		mockBehaviorCheck      mockBehaviorCheck
+		mockBehavior           mockBehavior
+		expectedStatusCode     int
+		expectedRequestBody    string
 	}{
 		{
 			name:      "OK",
@@ -578,22 +825,58 @@ func TestHandler_updateUser(t *testing.T) {
 				OldPassword: "HGYKnu!98Tg",
 				NewPassword: "HGYKnu!!98Tg",
 			},
-			id: 1,
+			id:         1,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.UpdateUser) {
 				s.EXPECT().UpdateUser(&user).Return(nil)
 			},
 			expectedStatusCode: 204,
 		},
 		{
-			name:                "Empty one field",
-			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg"}`,
+			name:       "Empty one field",
+			inputBody:  `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg"}`,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager"}, role).Return(nil)
+			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"invalid request"}`,
 		},
 		{
-			name:                "Invalid new password",
-			inputBody:           `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu98Tg"}`,
+			name:       "Invalid new password",
+			inputBody:  `{"email":"test@yandex.ru", "old_password":"HGYKnu!98Tg", "new_password":"HGYKnu98Tg"}`,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager"}, role).Return(nil)
+			},
 			mockBehavior:        func(s *mock_service.MockAppUser, user model.UpdateUser) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"NewPassword":"passwordValidator: the password must contain at least one digit(0-9), one lowercase letter(a-z), one uppercase letter(A-Z), one special character (@,#,%,\u0026,!,$)"}`,
@@ -606,7 +889,19 @@ func TestHandler_updateUser(t *testing.T) {
 				OldPassword: "HGYKnu!98Tg",
 				NewPassword: "HGYKnu!!98Tg",
 			},
-			id: 1,
+			id:         1,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, user model.UpdateUser) {
 				s.EXPECT().UpdateUser(&user).Return(errors.New("server error"))
 			},
@@ -621,18 +916,20 @@ func TestHandler_updateUser(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			auth := mock_service.NewMockAppUser(c)
+			testCase.mockBehaviorParseToken(auth, testCase.inputToken)
+			testCase.mockBehaviorCheck(auth, testCase.inputRole)
 			testCase.mockBehavior(auth, testCase.inputUser)
 			logger := logging.GetLogger()
 			services := &service.Service{AppUser: auth}
 			handler := NewHandler(logger, services)
 
 			//Init server
-			r := gin.New()
-			r.PUT("/users/", handler.updateUser)
+			r := handler.InitRoutes()
 
 			//Test request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("PUT", "/users/", bytes.NewBufferString(testCase.inputBody))
+			req.Header.Set("Authorization", "Bearer testToken")
 
 			//Execute the request
 			r.ServeHTTP(w, req)
@@ -646,20 +943,38 @@ func TestHandler_updateUser(t *testing.T) {
 }
 
 func TestHandler_deleteUser(t *testing.T) {
+	type mockBehaviorCheck func(s *mock_service.MockAppUser, role string)
+	type mockBehaviorParseToken func(s *mock_service.MockAppUser, token string)
 	type mockBehavior func(s *mock_service.MockAppUser, id int)
 	testTable := []struct {
-		name                string
-		inputQuery          string
-		inputId             string
-		id                  int
-		mockBehavior        mockBehavior
-		expectedStatusCode  int
-		expectedRequestBody string
+		name                   string
+		inputQuery             string
+		inputId                string
+		id                     int
+		inputRole              string
+		inputToken             string
+		mockBehaviorParseToken mockBehaviorParseToken
+		mockBehaviorCheck      mockBehaviorCheck
+		mockBehavior           mockBehavior
+		expectedStatusCode     int
+		expectedRequestBody    string
 	}{
 		{
-			name:    "OK",
-			inputId: "1",
-			id:      1,
+			name:       "OK",
+			inputId:    "1",
+			id:         1,
+			inputRole:  "Courier",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Courier",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, id int) {
 				s.EXPECT().DeleteUserByID(id).Return(1, nil)
 			},
@@ -667,16 +982,40 @@ func TestHandler_deleteUser(t *testing.T) {
 			expectedRequestBody: `{"id":1}`,
 		},
 		{
-			name:                "Invalid parameter",
-			inputId:             "a",
+			name:       "Invalid parameter",
+			inputId:    "a",
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
+			},
 			mockBehavior:        func(s *mock_service.MockAppUser, id int) {},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"Invalid id"}`,
 		},
 		{
-			name:    "Server Failure",
-			inputId: "1",
-			id:      1,
+			name:       "Server Failure",
+			inputId:    "1",
+			id:         1,
+			inputRole:  "Superadmin",
+			inputToken: "testToken",
+			mockBehaviorParseToken: func(s *mock_service.MockAppUser, token string) {
+				s.EXPECT().ParseToken(token).Return(&authProto.UserRole{
+					UserId:      1,
+					Role:        "Superadmin",
+					Permissions: "",
+				}, nil)
+			},
+			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
+			},
 			mockBehavior: func(s *mock_service.MockAppUser, id int) {
 				s.EXPECT().DeleteUserByID(id).Return(0, errors.New("server error"))
 			},
@@ -691,18 +1030,20 @@ func TestHandler_deleteUser(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 			auth := mock_service.NewMockAppUser(c)
+			testCase.mockBehaviorParseToken(auth, testCase.inputToken)
+			testCase.mockBehaviorCheck(auth, testCase.inputRole)
 			testCase.mockBehavior(auth, testCase.id)
 			logger := logging.GetLogger()
 			services := &service.Service{AppUser: auth}
 			handler := NewHandler(logger, services)
 
 			//Init server
-			r := gin.New()
-			r.DELETE("/users/:id", handler.deleteUserByID)
+			r := handler.InitRoutes()
 
 			//Test request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("DELETE", fmt.Sprintf("/users/%s", testCase.inputId), nil)
+			req.Header.Set("Authorization", "Bearer testToken")
 
 			//Execute the request
 			r.ServeHTTP(w, req)

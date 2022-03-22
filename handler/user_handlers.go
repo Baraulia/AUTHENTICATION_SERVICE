@@ -9,6 +9,7 @@ import (
 
 // getUserByID godoc
 // @Summary getUser
+// @Security ApiKeyAuth
 // @Description get user by ID
 // @Tags User
 // @Accept  json
@@ -19,6 +20,12 @@ import (
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [get]
 func (h *Handler) getUser(ctx *gin.Context) {
+	necessaryRole := []string{"Superadmin"}
+	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler getUser:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil || varID <= 0 {
@@ -40,6 +47,7 @@ type listUsers struct {
 
 // getUsers godoc
 // @Summary getUsers
+// @Security ApiKeyAuth
 // @Description get list of users
 // @Tags User
 // @Accept  json
@@ -56,6 +64,12 @@ type listUsers struct {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/ [get]
 func (h *Handler) getUsers(ctx *gin.Context) {
+	necessaryRole := []string{"Superadmin"}
+	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler getUsers:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	var page = 0
 	var limit = 0
 	var filters model.RequestFilters
@@ -107,7 +121,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 func (h *Handler) createCustomer(ctx *gin.Context) {
 	var input model.CreateCustomer
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
+		h.logger.Warnf("Handler createCustomer (binding JSON):%s", err)
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
 		return
 	}
@@ -133,6 +147,7 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 
 // createStaff godoc
 // @Summary createStaff
+// @Security ApiKeyAuth
 // @Description create new restaurant or courier manager or courier
 // @Tags User
 // @Accept  json
@@ -144,6 +159,12 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/staff [post]
 func (h *Handler) createStaff(ctx *gin.Context) {
+	necessaryRole := []string{"Superadmin"}
+	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler createStaff:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	var input model.CreateStaff
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler createUser (binding JSON):%s", err)
@@ -179,6 +200,7 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 
 // updateUser godoc
 // @Summary updateUser
+// @Security ApiKeyAuth
 // @Description change user password
 // @Tags User
 // @Accept  json
@@ -190,6 +212,12 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [put]
 func (h *Handler) updateUser(ctx *gin.Context) {
+	necessaryRole := []string{"Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager"}
+	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler updateUser:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	var input model.UpdateUser
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		h.logger.Warnf("Handler updateUser (binding JSON):%s", err)
@@ -212,6 +240,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 
 // deleteUserByID godoc
 // @Summary deleteUserByID
+// @Security ApiKeyAuth
 // @Description delete user by ID
 // @Tags User
 // @Accept  json
@@ -222,6 +251,12 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/{id} [delete]
 func (h *Handler) deleteUserByID(ctx *gin.Context) {
+	necessaryRole := []string{"Superadmin", "Courier manager"}
+	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
+		h.logger.Warnf("Handler deleteUserByID:not enough rights")
+		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
+		return
+	}
 	paramID := ctx.Param("id")
 	varID, err := strconv.Atoi(paramID)
 	if err != nil || varID <= 0 {
@@ -229,7 +264,7 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid id"})
 		return
 	}
-	id, err := h.service.AppUser.DeleteUserByID(int(varID))
+	id, err := h.service.AppUser.DeleteUserByID(varID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return

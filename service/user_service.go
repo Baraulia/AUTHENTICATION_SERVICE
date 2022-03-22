@@ -191,3 +191,33 @@ func GeneratePassword() string {
 	}
 	return b.String()
 }
+
+func (u *UserService) ParseToken(token string) (*authProto.UserRole, error) {
+	return u.grpcCli.GetUserWithRights(context.Background(), &authProto.AccessToken{AccessToken: token})
+}
+
+func (u *UserService) CheckRole(neededRoles []string, givenRole string) error {
+	neededRolesString := strings.Join(neededRoles, ",")
+	if !strings.Contains(neededRolesString, givenRole) {
+		return fmt.Errorf("not enough rights")
+	}
+	return nil
+}
+
+func (u *UserService) CheckRights(neededPerms []string, givenPerms string) error {
+	if neededPerms != nil {
+		ok := true
+		for _, perm := range neededPerms {
+			if !strings.Contains(givenPerms, perm) {
+				ok = false
+				return fmt.Errorf("not enough rights")
+			} else {
+				continue
+			}
+		}
+		if ok == true {
+			return nil
+		}
+	}
+	return nil
+}
