@@ -271,7 +271,7 @@ func (u *UserPostgres) GetUserByEmail(email string) (*model.User, error) {
 // CheckEmail ...
 func (u *UserPostgres) CheckEmail(email string) error {
 	var exist bool
-	query := "SELECT EXISTS (select 1 from users where email = $1"
+	query := "SELECT EXISTS (select 1 from users where email = $1)"
 	row := u.db.QueryRow(query, email)
 	if err := row.Scan(&exist); err != nil {
 		u.logger.Errorf("Error while scanning for issued email:%s", err)
