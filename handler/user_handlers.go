@@ -277,7 +277,6 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 
 // restorePassword godoc
 // @Summary restorePassword
-// @Security ApiKeyAuth
 // @Description restore user password
 // @Tags User
 // @Accept  json

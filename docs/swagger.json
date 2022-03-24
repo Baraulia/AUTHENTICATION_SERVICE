@@ -8,11 +8,6 @@
     "paths": {
         "/restore": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "restore user password",
                 "consumes": [
                     "application/json"
@@ -550,6 +545,9 @@
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }

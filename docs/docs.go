@@ -18,11 +18,6 @@ const docTemplate = `{
     "paths": {
         "/restore": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "restore user password",
                 "consumes": [
                     "application/json"
@@ -560,6 +555,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }
