@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg"
 	"strconv"
 )
 
@@ -301,7 +303,7 @@ func (h *Handler) restorePassword(ctx *gin.Context) {
 	}
 	err := h.service.AppUser.RestorePassword(&input)
 	if err != nil {
-		if err.Error() == "user with this email does not exist" {
+		if errors.Is(err, pkg.ErrorEmailDoesNotExist) {
 			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
 			return
 		} else {

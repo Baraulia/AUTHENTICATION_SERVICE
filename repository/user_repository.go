@@ -5,6 +5,7 @@ import (
 	_ "database/sql"
 	"fmt"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"time"
 )
@@ -279,7 +280,7 @@ func (u *UserPostgres) CheckEmail(email string) error {
 	}
 	if !exist {
 		u.logger.Error("user with this email does not exist")
-		return fmt.Errorf("user with this email does not exist")
+		return pkg.ErrorEmailDoesNotExist
 	}
 	return nil
 }

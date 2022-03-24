@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	authProto "stlab.itechart-group.com/go/food_delivery/authentication_service/GRPC"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg/logging"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/service"
 	mock_service "stlab.itechart-group.com/go/food_delivery/authentication_service/service/mocks"
@@ -1103,7 +1104,7 @@ func TestHandler_restorePassword(t *testing.T) {
 			mockBehavior: func(s *mock_service.MockAppUser, email string) {
 				s.EXPECT().RestorePassword(&model.RestorePassword{
 					Email: email,
-				}).Return(errors.New("user with this email does not exist"))
+				}).Return(pkg.ErrorEmailDoesNotExist)
 			},
 			expectedStatusCode:  400,
 			expectedRequestBody: `{"message":"user with this email does not exist"}`,
@@ -1126,7 +1127,7 @@ func TestHandler_restorePassword(t *testing.T) {
 
 			//Test request
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("POST", "/users/restore", bytes.NewBufferString(testCase.inputBody))
+			req := httptest.NewRequest("POST", "/users/restorePassword", bytes.NewBufferString(testCase.inputBody))
 
 			//Execute the request
 			r.ServeHTTP(w, req)

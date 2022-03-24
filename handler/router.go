@@ -30,7 +30,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		userNoAuth.POST("/login", h.authUser)
 		userNoAuth.POST("/customer", h.createCustomer)
-		userNoAuth.POST("/restore", h.restorePassword)
+		userNoAuth.POST("/restorePassword", h.restorePassword)
 	}
 
 	userAuth := router.Group("/users")
