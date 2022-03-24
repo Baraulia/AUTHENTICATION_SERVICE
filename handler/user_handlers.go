@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"stlab.itechart-group.com/go/food_delivery/authentication_service/model"
+	"stlab.itechart-group.com/go/food_delivery/authentication_service/pkg"
 	"strconv"
 )
 
@@ -273,4 +275,41 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 			"id": id,
 		})
 	}
+}
+
+// restorePassword godoc
+// @Summary restorePassword
+// @Description restore user password
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Param input body model.RestorePassword true "Email"
+// @Success 204
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /users/restorePassword [post]
+func (h *Handler) restorePassword(ctx *gin.Context) {
+	var input model.RestorePassword
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		h.logger.Warnf("Handler restorePassword (binding JSON):%s", err)
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request"})
+		return
+	}
+	validationErrors := ValidateStruct(input)
+	if len(validationErrors) != 0 {
+		h.logger.Warnf("Incorrect data came from the request:%s", validationErrors)
+		ctx.JSON(http.StatusBadRequest, validationErrors)
+		return
+	}
+	err := h.service.AppUser.RestorePassword(&input)
+	if err != nil {
+		if errors.Is(err, pkg.ErrorEmailDoesNotExist) {
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+	ctx.Status(http.StatusNoContent)
 }

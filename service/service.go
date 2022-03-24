@@ -24,6 +24,7 @@ type AppUser interface {
 	ParseToken(token string) (*authProto.UserRole, error)
 	CheckRole(neededRoles []string, givenRole string) error
 	CheckRights(neededPerms []string, givenPerms string) error
+	RestorePassword(restore *model.RestorePassword) error
 }
 
 type Service struct {

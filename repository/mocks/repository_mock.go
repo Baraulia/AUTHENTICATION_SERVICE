@@ -34,6 +34,20 @@ func (m *MockAppUser) EXPECT() *MockAppUserMockRecorder {
 	return m.recorder
 }
 
+// CheckEmail mocks base method.
+func (m *MockAppUser) CheckEmail(email string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckEmail", email)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckEmail indicates an expected call of CheckEmail.
+func (mr *MockAppUserMockRecorder) CheckEmail(email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockAppUser)(nil).CheckEmail), email)
+}
+
 // CreateCustomer mocks base method.
 func (m *MockAppUser) CreateCustomer(User *model.CreateCustomer) (int, error) {
 	m.ctrl.T.Helper()
@@ -170,6 +184,20 @@ func (m *MockAppUser) GetUserPasswordByID(id int) (string, error) {
 func (mr *MockAppUserMockRecorder) GetUserPasswordByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPasswordByID", reflect.TypeOf((*MockAppUser)(nil).GetUserPasswordByID), id)
+}
+
+// RestorePassword mocks base method.
+func (m *MockAppUser) RestorePassword(restore *model.RestorePassword) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RestorePassword", restore)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RestorePassword indicates an expected call of RestorePassword.
+func (mr *MockAppUserMockRecorder) RestorePassword(restore interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestorePassword", reflect.TypeOf((*MockAppUser)(nil).RestorePassword), restore)
 }
 
 // UpdateUser mocks base method.
