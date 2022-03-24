@@ -201,7 +201,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/restore": {
+        "/users/restorePassword": {
             "post": {
                 "description": "restore user password",
                 "consumes": [

@@ -287,7 +287,7 @@ func (h *Handler) deleteUserByID(ctx *gin.Context) {
 // @Success 204
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 500 {object} model.ErrorResponse
-// @Router /users/restore [post]
+// @Router /users/restorePassword [post]
 func (h *Handler) restorePassword(ctx *gin.Context) {
 	var input model.RestorePassword
 	if err := ctx.ShouldBindJSON(&input); err != nil {
