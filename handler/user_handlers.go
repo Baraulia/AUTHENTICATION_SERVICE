@@ -161,7 +161,7 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /users/staff [post]
 func (h *Handler) createStaff(ctx *gin.Context) {
-	necessaryRole := []string{"Superadmin"}
+	necessaryRole := []string{"Superadmin", "Courier manager"}
 	if err := h.service.CheckRole(necessaryRole, ctx.GetString("role")); err != nil {
 		h.logger.Warnf("Handler createStaff:not enough rights")
 		ctx.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "not enough rights"})
