@@ -599,7 +599,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
@@ -627,7 +627,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
@@ -655,7 +655,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
@@ -680,7 +680,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
@@ -705,7 +705,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(nil)
@@ -734,7 +734,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {
 				s.EXPECT().CheckInputRole(role).Return(errors.New("incorrect role came from the request"))
@@ -759,7 +759,7 @@ func TestHandler_createStaff(t *testing.T) {
 				}, nil)
 			},
 			mockBehaviorCheck: func(s *mock_service.MockAppUser, role string) {
-				s.EXPECT().CheckRole([]string{"Superadmin"}, role).Return(nil)
+				s.EXPECT().CheckRole([]string{"Superadmin", "Courier manager"}, role).Return(nil)
 			},
 			mockBehaviorCheckRole: func(s *mock_service.MockAppUser, role string) {},
 			mockBehavior:          func(s *mock_service.MockAppUser, user *model.CreateStaff) {},
