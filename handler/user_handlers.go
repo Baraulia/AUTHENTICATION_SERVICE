@@ -12,7 +12,7 @@ import (
 // getUserByID godoc
 // @Summary getUser
 // @Security ApiKeyAuth
-// @Description get user by ID
+// @Description get user by ID (only for Superadmin)
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -50,7 +50,7 @@ type listUsers struct {
 // getUsers godoc
 // @Summary getUsers
 // @Security ApiKeyAuth
-// @Description get list of users
+// @Description get list of users (only for Superadmin)
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -150,7 +150,7 @@ func (h *Handler) createCustomer(ctx *gin.Context) {
 // createStaff godoc
 // @Summary createStaff
 // @Security ApiKeyAuth
-// @Description create new restaurant or courier manager or courier
+// @Description create new restaurant or courier manager or courier (only for Superadmin, Courier manager )
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -203,7 +203,7 @@ func (h *Handler) createStaff(ctx *gin.Context) {
 // updateUser godoc
 // @Summary updateUser
 // @Security ApiKeyAuth
-// @Description change user password
+// @Description change user password (only for "Superadmin", "Authorized Customer", "Courier", "Courier manager", "Restaurant manager")
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -243,7 +243,7 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 // deleteUserByID godoc
 // @Summary deleteUserByID
 // @Security ApiKeyAuth
-// @Description delete user by ID
+// @Description delete user by ID (only for "Superadmin", "Courier manager")
 // @Tags User
 // @Accept  json
 // @Produce  json
