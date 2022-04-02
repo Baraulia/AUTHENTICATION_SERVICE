@@ -23,7 +23,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get list of users",
+                "description": "get list of users (only for Superadmin)",
                 "consumes": [
                     "application/json"
                 ],
@@ -251,7 +251,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "create new restaurant or courier manager or courier",
+                "description": "create new restaurant or courier manager or courier (only for Superadmin, Courier manager )",
                 "consumes": [
                     "application/json"
                 ],
@@ -305,7 +305,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get user by ID",
+                "description": "get user by ID (only for Superadmin)",
                 "consumes": [
                     "application/json"
                 ],
@@ -352,7 +352,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "change user password",
+                "description": "change user password (only for \"Superadmin\", \"Authorized Customer\", \"Courier\", \"Courier manager\", \"Restaurant manager\")",
                 "consumes": [
                     "application/json"
                 ],
@@ -401,7 +401,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "delete user by ID",
+                "description": "delete user by ID (only for \"Superadmin\", \"Courier manager\")",
                 "consumes": [
                     "application/json"
                 ],
